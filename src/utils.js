@@ -6,7 +6,7 @@ export async function getJson(path) {
 }
 
 export async function getIndividualGeo(url) {
-    let response = await fetch(url);
+    let response = await fetch((import.meta.env.BASE_URL || "") + url);
     let json = await response.json();
     return json;
 }
