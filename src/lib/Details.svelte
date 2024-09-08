@@ -536,7 +536,7 @@
         female = gender.find((item) => item[0] === "F")[1];
     }
 
-    $: console.log(male, female);
+    // $: console.log(male, female);
 
     let details_width;
     let details_height;
@@ -592,9 +592,8 @@
     #details {
         color: black;
         position: fixed;
-        border-radius: 2px;
         right: -100%;
-        width: 500px;
+        width: 450px;
         height: calc(100%);
         transition: right 0.3s ease;
         background-color: rgba(80, 80, 80, 0.932);
@@ -617,7 +616,7 @@
 
     @media (max-width: 1200px) {
         #details {
-            width: 400px;
+            width: 450px;
         }
     }
 
