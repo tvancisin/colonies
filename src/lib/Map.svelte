@@ -68,7 +68,7 @@
         if (window.innerWidth <= 768) {
             map.flyTo({
                 center: [13, 5],
-                zoom: 1.5,
+                zoom: 2,
             });
         } else if (window.innerWidth <= 1000) {
             map.flyTo({
@@ -78,7 +78,7 @@
         } else {
             map.flyTo({
                 center: [13, 5],
-                zoom: 2,
+                zoom: 2.5,
             });
         }
     }
@@ -351,7 +351,7 @@
     }
 
     function flyToInitialPosition() {
-        map.flyTo({ center: [13, 5], zoom: 2 });
+        map.flyTo({ center: [13, 5], zoom: 2.5 });
     }
 
     export { flyToInitialPosition };

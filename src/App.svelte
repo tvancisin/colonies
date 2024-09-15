@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import * as d3 from "d3";
-  import { getJson, getGeo } from "./utils.js";
+  import { getJSON, getGeo } from "./utils.js";
   import Map from "./lib/Map.svelte";
   import Details from "./lib/Details.svelte";
   import Timeline from "./lib/Timeline.svelte";
@@ -73,21 +73,17 @@
   ];
 
   //load biographical data
-  let path = "./data/data.json";
+  let path = ["./data/birth_colonies.json", "./data/floruit_colonies.json"];
   let birth_data;
-  let births_per_country;
+  let floruit_data;
   let births_per_colony;
 
-  getJson(path).then((json) => {
-    let just_births = d3.groups(json, (d) => d.birth_location != null);
-    let colonies_births = d3.groups(just_births[0][1], (d) =>
-      colonies.includes(d.birth_location.country),
-    );
-
-    birth_data = colonies_births[1][1];
+  getJSON(path).then((json) => {
+    birth_data = json[0];
+    floruit_data = json[1];
 
     //add colonies field to bio location data
-    let colony_data = birth_data.map((item) => {
+    let birth_colony_division = birth_data.map((item) => {
       if (india_colonies.includes(item.birth_location.country)) {
         item.birth_location.colony = "India";
       } else if (america_colonies.includes(item.birth_location.country)) {
@@ -101,15 +97,12 @@
       } else if (african_colonies.includes(item.birth_location.country)) {
         item.birth_location.colony = "Africa";
       }
-
       return item;
     });
 
-    births_per_colony = d3.groups(colony_data, (d) => d.birth_location.colony);
-
-    births_per_country = d3.groups(
-      colonies_births[1][1],
-      (d) => d.birth_location.country,
+    births_per_colony = d3.groups(
+      birth_colony_division,
+      (d) => d.birth_location.colony,
     );
   });
 
@@ -141,6 +134,7 @@
 
 <main bind:clientWidth={width} bind:clientHeight={height}>
   {#if countries_json && shipping_json && birth_data}
+    <h1>Legacies of the Empire</h1>
     <Map
       {countries_json}
       {shipping_json}
@@ -163,6 +157,26 @@
     flex-direction: column;
     align-items: center;
     overflow: hidden;
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+  }
+
+  h1 {
+    border-radius: 2px;
+    position: absolute;
+    font-weight: 400;
+    padding: 5px;
+    top: -2px;
+    font-size: 2em;
+    margin: 0px;
+    text-align: center;
+    color: black;
+    background: white;
+    z-index: 1;
+    transition: top 0.3s ease;
+    box-shadow: 0 0 3px #5a5a5a;
   }
 
   /* Map {

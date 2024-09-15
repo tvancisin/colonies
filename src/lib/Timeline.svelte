@@ -13,7 +13,7 @@
     let containerWidth = 800; // To track the width of the container
     let margin = { top: 20, right: 30, bottom: 30, left: 40 };
     let svg;
-    let ticks = [1600, 1650, 1700, 1750, 1800, 1850, 1900]; // Custom ticks
+    let ticks = [1700, 1750, 1800, 1850, 1900]; // Custom ticks
 
     // Reactive block to update width when selectedProperties changes
     $: {
@@ -30,7 +30,7 @@
     }
 
     // Prepare the data
-    let allYears = Array.from({ length: 1900 - 1570 + 1 }, (_, i) => 1570 + i);
+    let allYears = Array.from({ length: 1900 - 1700 + 1 }, (_, i) => 1700 + i);
     $: grouped = d3
         .groups(data, (d) => {
             if (d.study && d.study.colleges && d.study.colleges.length > 0) {
@@ -57,7 +57,7 @@
         .scaleBand()
         .domain(allYears) // Use all years
         .range([margin.left, width - margin.right])
-        .padding(0.1);
+        .padding(0.2);
 
     // Create the Y scale for the counts (vertical axis)
     $: yScale = d3
