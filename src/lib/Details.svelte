@@ -3,6 +3,8 @@
     import * as d3 from "d3";
     import { career, filterData } from "../utils";
     import { selectedYearsStore } from "../years";
+    import { selectedGenderStore } from "../years";
+    import { selectedCareerStore } from "../years";
 
     const dispatch = createEventDispatcher();
 
@@ -21,25 +23,35 @@
     let gender, all, male, female, groups;
     let gy;
     let ticks = [10, 20, 30, 40, 50];
+    let change = 0;
 
     //SELECTED YEAR FILTER
     const unsubscribe = selectedYearsStore.subscribe((value) => {
         selectedYears = value;
     });
 
-    $: if (selectedYears.length != 0) {
+    $: if (selectedYears.length != 0 && selectedProperties != null) {
         //always reset data
         data = def_data;
         let filter_years = filterData(data, selectedYears[0], selectedYears[1]);
+
         //gender
         let filter_gender = d3.groups(filter_years, (d) => d.gender);
         if (filter_gender.length == 2) {
             female = filter_gender.find((item) => item[0] === "F")[1];
+            male = filter_gender.find((item) => item[0] === "M")[1];
         } else {
-            female = [];
+            if (!filter_gender.find((item) => item[0] === "M")) {
+                male = [];
+                female = filter_gender.find((item) => item[0] === "F")[1];
+            }
+            if (!filter_gender.find((item) => item[0] === "F")) {
+                female = [];
+                male = filter_gender.find((item) => item[0] === "M")[1];
+            }
         }
-        male = filter_gender.find((item) => item[0] === "M")[1];
         data = filter_years;
+
         //floruit
         groups = career(data);
     } else if (selectedYears.length == 0) {
@@ -116,25 +128,56 @@
         .style("font-weight", 500)
         .style("font-size", 10);
 
-    let change = 0;
     function refresh() {
-        console.log("here");
         change = 0;
         data = def_data;
+        let gender_pass = [def_data, "default"];
+        let floruit_pass = [def_data, "default"];
+        selectedGenderStore.set(gender_pass);
+        selectedCareerStore.set(floruit_pass);
     }
-    //filter by gender
+
+    //GENDER FILTERING
     $: if (change) {
         data = def_data;
         groups = def_groups;
         let gender_data = data.filter((item) => item.gender === change);
         data = gender_data;
         groups = career(data);
+        let gender_pass = [gender_data, "selection"];
+        selectedGenderStore.set(gender_pass);
     }
 
     function handle_click(g) {
         change = g;
     }
 
+    //CAREER FILTERING
+    let selected_career;
+    function handle_floruit_click(x) {
+        selected_career = groups[x.name];
+    }
+
+    $: if (selected_career) {
+        data = selected_career;
+        let floruit_pass = [selected_career, "selection"];
+        selectedCareerStore.set(floruit_pass);
+
+        let selected_gender = d3.groups(selected_career, (d) => d.gender);
+        if (selected_gender.length == 2) {
+            female = selected_gender.find((item) => item[0] === "F")[1];
+            male = selected_gender.find((item) => item[0] === "M")[1];
+        } else {
+            if (!selected_gender.find((item) => item[0] === "M")) {
+                male = [];
+                female = selected_gender.find((item) => item[0] === "F")[1];
+            }
+            if (!selected_gender.find((item) => item[0] === "F")) {
+                female = [];
+                male = selected_gender.find((item) => item[0] === "M")[1];
+            }
+        }
+    }
 </script>
 
 {#if filteredCountry[0][1]}
@@ -172,7 +215,7 @@
                                         gender_height_scale(female.length)}
                                     width={gender_width / 2}
                                     height={gender_height_scale(female.length)}
-                                    fill="black"
+                                    fill="#666666"
                                     on:click={() => handle_click("F")}
                                     on:keydown={(event) => {
                                         if (
@@ -192,7 +235,7 @@
                                     y={gender_height -
                                         gender_height_scale(female.length) -
                                         2}
-                                    font-size="11"
+                                    font-size="12"
                                     font-weight="500"
                                     >Female ({female.length})</text
                                 >
@@ -208,12 +251,11 @@
                             <svg width={gender_width} height={gender_height}>
                                 <rect
                                     x={gender_width / 4}
-                                    rx="1"
                                     y={gender_height -
                                         gender_height_scale(male.length)}
                                     width={gender_width / 2}
                                     height={gender_height_scale(male.length)}
-                                    fill="black"
+                                    fill="#666666"
                                     on:click={() => handle_click("M")}
                                     on:keydown={(event) => {
                                         if (
@@ -233,7 +275,7 @@
                                     y={gender_height -
                                         gender_height_scale(male.length) -
                                         2}
-                                    font-size="11"
+                                    font-size="12"
                                     font-weight="500"
                                     >Male ({male.length})
                                 </text>
@@ -262,18 +304,31 @@
                                 <rect
                                     x={xScaleCareer(group.name)}
                                     y={yScaleCareer(group.count)}
-                                    rx="1"
                                     width={xScaleCareer.bandwidth()}
                                     height={innerHeight -
                                         yScaleCareer(group.count)}
-                                    fill="black"
+                                    fill="#666666"
+                                    on:click={() => handle_floruit_click(group)}
+                                    on:keydown={(event) => {
+                                        if (
+                                            event.key === "Enter" ||
+                                            event.key === " "
+                                        ) {
+                                            event.preventDefault();
+                                            handle_floruit_click(group);
+                                        }
+                                    }}
+                                    tabindex="0"
+                                    role="button"
+                                    style="cursor: pointer;"
                                 ></rect>
                                 <text
                                     x={xScaleCareer(group.name) +
                                         xScaleCareer.bandwidth() / 2}
                                     y={yScaleCareer(group.count) - 2}
-                                    font-size="10"
+                                    font-size="11"
                                     text-anchor="start"
+                                    font-weight="500"
                                     transform={`rotate(-70, ${xScaleCareer(group.name) + xScaleCareer.bandwidth() / 2}, ${yScaleCareer(group.count)})`}
                                 >
                                     {group.name}
@@ -397,6 +452,7 @@
         display: flex;
         flex-direction: column;
         z-index: 11;
+        box-shadow: 0 0 5px #000000;
     }
 
     @media (max-width: 1450px) {
@@ -610,7 +666,7 @@
         padding: 5px 15px;
         color: black;
         font-size: 1em;
-        font-weight: 450;
+        font-weight: 550;
     }
 
     @media only screen and (max-width: 768px) {

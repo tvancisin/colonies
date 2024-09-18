@@ -233,7 +233,7 @@
   #legend {
     width: 205px;
     position: absolute;
-    bottom: 210px;
+    bottom: 170px;
     right: 0px;
     border-radius: 3px;
   }
@@ -262,7 +262,7 @@
     border-radius: 2px;
     position: absolute;
     left: 0px;
-    bottom: 200px;
+    bottom: 160px;
     font-weight: 500;
     background: rgba(0, 0, 0, 0.034);
     padding: 5px;

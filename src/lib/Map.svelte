@@ -1,6 +1,10 @@
 <script>
     import { onMount, createEventDispatcher } from "svelte";
-    import { selectedYearsStore } from "../years";
+    import {
+        selectedYearsStore,
+        selectedGenderStore,
+        selectedCareerStore,
+    } from "../years";
     import mapboxgl from "mapbox-gl";
     import * as d3 from "d3";
     import {
@@ -22,6 +26,8 @@
     let opacity_mapbox_expression;
     let hoveredPolygonId = null;
     let selectedYears = [];
+    let selectedGender;
+    let selectedCareer;
 
     //SELECTED YEAR FILTER
     const unsubscribe = selectedYearsStore.subscribe((value) => {
@@ -32,9 +38,6 @@
     function filter_circles(ids) {
         map.setFilter("population", ["in", ["get", "id"], ["literal", ids]]);
     }
-
-    $: console.log(clicked_country);
-    
 
     $: if (selectedYears.length != 0 && clicked_country != undefined) {
         let country = births_per_colony.filter(
@@ -51,7 +54,39 @@
         map.setFilter("population", null);
     }
 
-    // filter polygon opacity on selected years 
+    //SELECTED GENDER FILTER
+    const unsubsbscribe_gender = selectedGenderStore.subscribe((value) => {
+        selectedGender = value;
+    });
+
+    $: if (
+        selectedGender.length != 0 &&
+        clicked_country != undefined &&
+        selectedGender[1] == "selection"
+    ) {
+        let gender_id_array = selectedGender[0].map((d) => d.id);
+        filter_circles(gender_id_array);
+    } else if (selectedGender.length != 0 && selectedGender[1] == "default") {
+        map.setFilter("population", null);
+    }
+
+    //SELECTED CAREER FILTER
+    const unsubsbscribe_career = selectedCareerStore.subscribe((value) => {
+        selectedCareer = value;
+    });
+
+    $: if (
+        selectedCareer.length != 0 &&
+        clicked_country != undefined &&
+        selectedCareer[1] == "selection"
+    ) {
+        let career_id_array = selectedCareer[0].map((d) => d.id);
+        filter_circles(career_id_array);
+    } else if (selectedCareer.length != 0 && selectedCareer[1] == "default") {
+        map.setFilter("population", null);
+    }
+
+    // filter polygon opacity on selected years
     $: filteredData =
         selectedYears && selectedYears.length > 0
             ? filterData(birth_data, selectedYears[0], selectedYears[1])
@@ -82,7 +117,6 @@
             opacity_mapbox_expression,
         );
     }
-
 
     //MAP ZOOM ADJUSTMENT
     function adjustMapForWindowSize() {
@@ -118,7 +152,7 @@
             zoom: 2.5,
             maxZoom: 5,
             minZoom: 1.8,
-            logoPosition: 'top-right' // move logo to the top-right
+            logoPosition: "top-right", // move logo to the top-right
             // projection: "naturalEarth",
         });
     });
@@ -188,22 +222,22 @@
                     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
                 });
 
-                // map.addLayer({
-                //     id: "countries_outline",
-                //     type: "line",
-                //     source: "countries",
-                //     layout: {},
-                //     paint: {
-                //         "line-color": "black",
-                //         "line-width": [
-                //             "case",
-                //             ["boolean", ["feature-state", "hover"], false],
-                //             1,
-                //             0,
-                //         ],
-                //     },
-                //     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
-                // });
+                map.addLayer({
+                    id: "countries_outline",
+                    type: "line",
+                    source: "countries",
+                    layout: {},
+                    paint: {
+                        "line-color": "black",
+                        "line-width": [
+                            "case",
+                            ["boolean", ["feature-state", "hover"], false],
+                            1,
+                            0,
+                        ],
+                    },
+                    filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
+                });
 
                 //interactivity for no fatalities
                 map.on("mousemove", "countries_fill", (e) => {

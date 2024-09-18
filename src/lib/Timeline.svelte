@@ -1,6 +1,8 @@
 <script>
     import * as d3 from "d3";
     import { selectedYearsStore } from "../years";
+    import { selectedGenderStore } from "../years";
+    import { selectedCareerStore } from "../years";
 
     export let birth_data;
     export let selectedProperties;
@@ -8,12 +10,41 @@
 
     let data;
     let selected_years;
+    let selected_gender;
+    let selected_career;
     let width = 800; // Set initial width
-    let height = 200; // Set initial height
+    let height = 160; // Set initial height
     let containerWidth = 800; // To track the width of the container
     let margin = { top: 20, right: 30, bottom: 30, left: 40 };
     let svg;
-    let ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900]; // Custom ticks
+    let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900]; // Custom ticks
+    let y_ticks = [5, 10, 15]; // Custom ticks
+
+    //SELECTED GENDER FILTER
+    const unsubscribe = selectedGenderStore.subscribe((value) => {
+        selected_gender = value[0];
+    });
+
+    $: {
+        if (selected_gender) {
+            data = selected_gender;
+        } else {
+            data = birth_data;
+        }
+    }
+
+    //SELECTED CAREER FILTER
+    const unsubscribe_career = selectedCareerStore.subscribe((value) => {
+        selected_career = value[0];
+    });
+
+    $: {
+        if (selected_career) {
+            data = selected_career;
+        } else {
+            data = birth_data;
+        }
+    }
 
     // Reactive block to update width when selectedProperties changes
     $: {
@@ -102,8 +133,8 @@
     }
 
     // Create X axis with custom ticks
-    $: xAxis = d3.axisBottom(xScale).tickValues(ticks); // Use the custom ticks
-    $: yAxis = d3.axisLeft(yScale);
+    $: xAxis = d3.axisBottom(xScale).tickValues(x_ticks); // Use the custom ticks
+    $: yAxis = d3.axisLeft(yScale).tickValues(y_ticks);
 
     // Append the axes to the SVG
     $: {
@@ -114,7 +145,7 @@
                 .selectAll("text")
                 .style("font-family", "Montserrat")
                 .style("font-weight", 500)
-                .style("font-size", 12)
+                .style("font-size", 12);
 
             d3.select(svg)
                 .select(".y-axis")
@@ -122,7 +153,7 @@
                 .selectAll("text")
                 .style("font-family", "Montserrat")
                 .style("font-weight", 500)
-                .style("font-size", 12)
+                .style("font-size", 12);
         }
     }
 </script>
@@ -133,6 +164,7 @@
         {#each completeGrouped as d}
             <rect
                 x={xScale(d[0])}
+                rx=1
                 y={yScale(d[1])}
                 width={xScale.bandwidth()}
                 height={yScale(0) - yScale(d[1])}
@@ -157,8 +189,7 @@
         position: absolute;
         bottom: 0px;
         width: 100%;
-        height: 200px;
+        height: 160px;
         background: rgba(0, 0, 0, 0.034);
     }
-
 </style>
