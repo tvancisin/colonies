@@ -9,6 +9,8 @@
   let width, height, map;
   let mapRef;
   let selectedProperties = null;
+  let legend_height = 50;
+  let legend_width = 200;
   let colonies = [
     "US",
     "CA",
@@ -144,8 +146,57 @@
       bind:map
       on:polygonClick={handlePolygonClick}
     />
+    <div id="time_description">Students Entering University</div>
     <Timeline {birth_data} {selectedProperties} {births_per_colony} />
     <Details on:close={handleClose} {births_per_colony} {selectedProperties} />
+    <div id="legend">
+      <svg
+        height={legend_height}
+        width={legend_width}
+        viewBox="0 0 200 50"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <rect
+          id="legend_rectangle"
+          x="2.5%"
+          y="68%"
+          width="100%"
+          height="40%"
+          fill="url(#legend_gradient)"
+        />
+  
+        <defs>
+          <linearGradient id="legend_gradient">
+            <stop class="stop_one" offset="0%" />
+            <stop class="stop_two" offset="50%" />
+            <stop class="stop_three" offset="100%" />
+          </linearGradient>
+        </defs>
+  
+        <text
+          x="2.5%"
+          y="60%"
+          fill="black"
+          font-size="12"
+          font-weight="500"
+          text-anchor="start"
+        >
+          less births 
+        </text>
+  
+        <text
+          x="100%"
+          y="60%"
+          fill="black"
+          font-size="12"
+          font-weight="500"
+          text-anchor="end"
+        >
+          more births 
+        </text>
+      </svg>
+    </div>
+  
   {/if}
 </main>
 
@@ -177,6 +228,44 @@
     z-index: 1;
     transition: top 0.3s ease;
     box-shadow: 0 0 3px #5a5a5a;
+  }
+
+  #legend {
+    width: 205px;
+    position: absolute;
+    bottom: 210px;
+    right: 0px;
+    border-radius: 3px;
+  }
+
+  @media only screen and (max-width: 768px) {
+    #legend {
+      width: 123px;
+    }
+  }
+
+  #legend_rectangle {
+    fill: url(#legend_gradient);
+  }
+
+  .stop_one {
+    stop-color: #DBC2C1;
+  }
+  .stop_two {
+    stop-color: #934242;
+  }
+  .stop_three {
+    stop-color: #740b0b;
+  }
+
+  #time_description {
+    border-radius: 2px;
+    position: absolute;
+    left: 0px;
+    bottom: 200px;
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.034);
+    padding: 5px;
   }
 
   /* Map {

@@ -1,9 +1,13 @@
 <script>
     import { createEventDispatcher } from "svelte";
     import * as d3 from "d3";
-    import { career } from "../utils";
+    import { career, filterData } from "../utils";
+    import { selectedYearsStore } from "../years";
 
     const dispatch = createEventDispatcher();
+
+    export let births_per_colony;
+    export let selectedProperties;
 
     let details_width, details_height;
     let career_width, career_height;
@@ -11,38 +15,76 @@
         gender_width = 20;
     let def_data;
     let def_groups;
+    let def_male, def_female;
     let data;
+    let selectedYears = [];
+    let gender, all, male, female, groups;
+    let gy;
+    let ticks = [10, 20, 30, 40, 50];
 
-    export let births_per_colony;
-    export let selectedProperties;
+    //SELECTED YEAR FILTER
+    const unsubscribe = selectedYearsStore.subscribe((value) => {
+        selectedYears = value;
+    });
 
+    $: if (selectedYears.length != 0) {
+        //always reset data
+        data = def_data;
+        let filter_years = filterData(data, selectedYears[0], selectedYears[1]);
+        //gender
+        let filter_gender = d3.groups(filter_years, (d) => d.gender);
+        if (filter_gender.length == 2) {
+            female = filter_gender.find((item) => item[0] === "F")[1];
+        } else {
+            female = [];
+        }
+        male = filter_gender.find((item) => item[0] === "M")[1];
+        data = filter_years;
+        //floruit
+        groups = career(data);
+    } else if (selectedYears.length == 0) {
+        data = def_data;
+        //gender
+        male = def_male;
+        female = def_female;
+        //floruit
+        groups = def_groups;
+    }
+
+    // FILTER DATA TO SELECTED COUNTRY
     $: filteredCountry = births_per_colony.filter(
         (item) => item[0] == selectedProperties,
     );
-
-    let gender, all, male, female, groups;
 
     $: if (filteredCountry) {
         def_data = filteredCountry[0][1];
         data = filteredCountry[0][1];
         all = filteredCountry[0][1].length;
+        //gender
         gender = d3.groups(filteredCountry[0][1], (d) => d.gender);
         if (gender.length == 2) {
+            def_female = gender.find((item) => item[0] === "F")[1];
             female = gender.find((item) => item[0] === "F")[1];
         } else {
             female = [];
         }
+        def_male = gender.find((item) => item[0] === "M")[1];
         male = gender.find((item) => item[0] === "M")[1];
-
-        // divide data by floruit
+        //floruit
         def_groups = career(data);
         groups = career(data);
     }
 
     function closeDetails() {
         dispatch("close");
-        change = 0
+        change = 0;
     }
+
+    // Convert group data to array format
+    $: groupData = Object.keys(groups).map((key) => ({
+        name: key,
+        count: groups[key].length,
+    }));
 
     // Dimensions and margins of the graph
     const margin = { top: 20, right: 30, bottom: 10, left: 10 };
@@ -53,7 +95,7 @@
     $: xScaleCareer = d3
         .scaleBand()
         .domain(groupData.map((d) => d.name))
-        .range([0, innerWidth])
+        .range([10, innerWidth - 20])
         .padding(0.2);
 
     $: yScaleCareer = d3
@@ -67,11 +109,20 @@
         .range([0, gender_height - 10])
         .domain([0, 70]);
 
-    $: if (data) {
-        console.log("Data changed:", data);
-    }
+    $: d3.select(gy)
+        .call(d3.axisLeft(yScaleCareer).tickValues(ticks).tickSize(5))
+        .selectAll("text")
+        .style("font-family", "Montserrat")
+        .style("font-weight", 500)
+        .style("font-size", 10);
 
     let change = 0;
+    function refresh() {
+        console.log("here");
+        change = 0;
+        data = def_data;
+    }
+    //filter by gender
     $: if (change) {
         data = def_data;
         groups = def_groups;
@@ -84,13 +135,6 @@
         change = g;
     }
 
-    // Convert group data to array format
-    $: groupData = Object.keys(groups).map((key) => ({
-        name: key,
-        count: groups[key].length,
-    }));
-
-    $: console.log(groupData);
 </script>
 
 {#if filteredCountry[0][1]}
@@ -102,6 +146,9 @@
         <div id="peace_title_div">
             <button class="btn close" on:click={closeDetails}
                 ><i class="fa fa-close"></i></button
+            >
+            <button class="btn refresh" on:click={refresh}
+                ><i class="fa fa-refresh"></i></button
             >
             {#if selectedProperties}
                 <h3>{selectedProperties}</h3>
@@ -120,7 +167,7 @@
                             <svg width={gender_width} height={gender_height}>
                                 <rect
                                     x={gender_width / 4}
-                                    rx="2"
+                                    rx="1"
                                     y={gender_height -
                                         gender_height_scale(female.length)}
                                     width={gender_width / 2}
@@ -145,7 +192,8 @@
                                     y={gender_height -
                                         gender_height_scale(female.length) -
                                         2}
-                                    font-size="10"
+                                    font-size="11"
+                                    font-weight="500"
                                     >Female ({female.length})</text
                                 >
                             </svg>
@@ -160,7 +208,7 @@
                             <svg width={gender_width} height={gender_height}>
                                 <rect
                                     x={gender_width / 4}
-                                    rx="2"
+                                    rx="1"
                                     y={gender_height -
                                         gender_height_scale(male.length)}
                                     width={gender_width / 2}
@@ -185,7 +233,8 @@
                                     y={gender_height -
                                         gender_height_scale(male.length) -
                                         2}
-                                    font-size="10"
+                                    font-size="11"
+                                    font-weight="500"
                                     >Male ({male.length})
                                 </text>
                             </svg>
@@ -205,11 +254,15 @@
                         <g
                             transform={`translate(${margin.left},${margin.top})`}
                         >
+                            <g
+                                bind:this={gy}
+                                transform="translate({margin.left},0)"
+                            />
                             {#each groupData as group}
                                 <rect
                                     x={xScaleCareer(group.name)}
                                     y={yScaleCareer(group.count)}
-                                    rx="2"
+                                    rx="1"
                                     width={xScaleCareer.bandwidth()}
                                     height={innerHeight -
                                         yScaleCareer(group.count)}
@@ -423,6 +476,37 @@
     @media only screen and (max-width: 1024px) {
         .btn.close {
             font-size: 1.2em;
+        }
+    }
+
+    .btn.refresh {
+        position: absolute;
+        right: 30px;
+        top: 3px;
+        background: none;
+        color: white;
+        border: none;
+        padding: 2px 10px;
+        border-radius: 2px;
+        font-size: 1.2em;
+        cursor: pointer;
+        font-family: "Montserrat";
+        transition: border 0.3s ease;
+    }
+
+    .btn.refresh:hover {
+        color: red;
+    }
+
+    @media only screen and (max-width: 1450px) {
+        .btn.refresh {
+            font-size: 1.1em;
+        }
+    }
+
+    @media only screen and (max-width: 1024px) {
+        .btn.refresh {
+            font-size: 1em;
         }
     }
 

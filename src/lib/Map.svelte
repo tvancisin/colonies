@@ -8,27 +8,50 @@
         getOpacityExpression,
         opacity_generator,
     } from "../utils";
-
     const dispatch = createEventDispatcher();
 
-    let height;
-    let clicked_country;
-    let countryNames;
-    let opacity_mapbox_expression;
     export let map;
     export let countries_json;
     export let shipping_json;
     export let births_per_colony;
     export let birth_data;
-    let hoveredPolygonId = null;
 
-    //selected years from brushing
+    let height;
+    let clicked_country;
+    let countryNames = ["Britain"];
+    let opacity_mapbox_expression;
+    let hoveredPolygonId = null;
     let selectedYears = [];
+
+    //SELECTED YEAR FILTER
     const unsubscribe = selectedYearsStore.subscribe((value) => {
         selectedYears = value;
     });
 
-    // if years are selected, filter data by selected period, else use all data
+    //filter individual locations on selected years
+    function filter_circles(ids) {
+        map.setFilter("population", ["in", ["get", "id"], ["literal", ids]]);
+    }
+
+    $: console.log(clicked_country);
+    
+
+    $: if (selectedYears.length != 0 && clicked_country != undefined) {
+        let country = births_per_colony.filter(
+            (item) => item[0] == clicked_country,
+        );
+        let filtered_country = filterData(
+            country[0][1],
+            selectedYears[0],
+            selectedYears[1],
+        );
+        let indi_loc_array = filtered_country.map((d) => d.id);
+        filter_circles(indi_loc_array);
+    } else if (selectedYears.length == 0 && clicked_country) {
+        map.setFilter("population", null);
+    }
+
+    // filter polygon opacity on selected years 
     $: filteredData =
         selectedYears && selectedYears.length > 0
             ? filterData(birth_data, selectedYears[0], selectedYears[1])
@@ -53,17 +76,15 @@
             ["get", "ADMIN"],
             ["literal", countryNames],
         ]);
-        map.setPaintProperty("countries_fill", "fill-opacity", opacity_mapbox_expression);
+        map.setPaintProperty(
+            "countries_fill",
+            "fill-opacity",
+            opacity_mapbox_expression,
+        );
     }
 
 
-
-    // // make an array of colonies for filtering
-    // countryNames = births_per_colony
-    //     .filter((item) => item[0] !== undefined) // Ignore undefined values
-    //     .map((item) => item[0]); // Extract the country names
-    // countryNames.push("Britain");
-
+    //MAP ZOOM ADJUSTMENT
     function adjustMapForWindowSize() {
         if (window.innerWidth <= 768) {
             map.flyTo({
@@ -83,8 +104,6 @@
         }
     }
 
-    let opacity_regions = opacity_generator(births_per_colony);
-
     //INIT FUNCTION
     onMount(() => {
         mapboxgl.accessToken =
@@ -99,19 +118,12 @@
             zoom: 2.5,
             maxZoom: 5,
             minZoom: 1.8,
+            logoPosition: 'top-right' // move logo to the top-right
             // projection: "naturalEarth",
         });
     });
 
-    // $: if (map && countryNames && map.getSource("countries")) {
-    //     // Ensure the map and source are loaded before updating the filter
-    //     map.setFilter("countries-layer", [
-    //         "in",
-    //         ["get", "ADMIN"],
-    //         ["literal", countryNames],
-    //     ]);
-    // }
-
+    //DRAW POLYGONS, SHIPPPING LINES, INDIVIDUAL LOCATIONS
     $: if (countries_json && shipping_json && countryNames && map) {
         // Ensure this block runs only after the map has fully loaded
         map.on("load", () => {
@@ -157,18 +169,20 @@
                 });
 
                 //DRAW COUNTRY POLYGONS
+                //add source
                 map.addSource("countries", {
                     type: "geojson",
                     data: countries_json,
                     generateId: true, // Ensures all features have unique IDs
                 });
 
+                //add fill layer
                 map.addLayer({
                     id: "countries_fill",
                     type: "fill",
                     source: "countries",
                     paint: {
-                        "fill-color": "#171109", //color of moon Iapedus charcoal black
+                        "fill-color": " #740b0b", //color of moon Iapedus charcoal black
                         "fill-opacity": opacity_mapbox_expression, // Initial opacity
                     },
                     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
@@ -223,6 +237,12 @@
                 });
 
                 map.on("click", "countries_fill", (e) => {
+                    if (map.getSource("locations")) {
+                        console.log("here");
+
+                        map.removeLayer("population");
+                        map.removeSource("locations");
+                    }
                     clicked_country = e.features[0].properties.ADMIN;
                     zoomToCountry(clicked_country);
                     drawLocations(clicked_country);
@@ -233,7 +253,6 @@
                 adjustMapForWindowSize();
                 window.addEventListener("resize", adjustMapForWindowSize);
             } else {
-                console.log("here");
                 // If the source exists, update the data and filter
                 // map.getSource("countries").setData(countries_json);
                 // map.setFilter("countries-layer", [
@@ -246,6 +265,7 @@
         });
     }
 
+    //MOVING SHIPPING LANES
     function animateShipping() {
         var dashLength = 3;
         var gapLength = 1;
@@ -284,6 +304,7 @@
         }, 50);
     }
 
+    //DRAW INDIVIDUAL LOCATIONS WHEN COLONY CLICKED
     function drawLocations(country) {
         let filteredCountry = births_per_colony.filter(
             (item) => item[0] == country,
@@ -320,6 +341,8 @@
             data: geojson_data,
             generateId: true, //This ensures that all features have unique IDs
         });
+        console.log(geojson_data);
+
         //circles for agreements
         map.addLayer({
             id: "population",
@@ -328,12 +351,14 @@
             paint: {
                 "circle-opacity": 0.8,
                 "circle-stroke-width": 1.5,
-                "circle-radius": 4,
-                "circle-color": "yellow",
+                "circle-stroke-color": "yellow",
+                "circle-radius": 5,
+                "circle-color": "black",
             },
         });
     }
 
+    //ZOOM IN TO CLICKED COUNTRY
     function zoomToCountry(clicked_colony) {
         if (clicked_colony == "America") {
             map.flyTo({ center: [-88, 39], zoom: 4 });
@@ -350,6 +375,7 @@
         }
     }
 
+    //RESET DEFAULT ZOOM AND FLY TO INITIAL COORDINATES
     function flyToInitialPosition() {
         map.flyTo({ center: [13, 5], zoom: 2.5 });
     }

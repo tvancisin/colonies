@@ -13,7 +13,7 @@
     let containerWidth = 800; // To track the width of the container
     let margin = { top: 20, right: 30, bottom: 30, left: 40 };
     let svg;
-    let ticks = [1700, 1750, 1800, 1850, 1900]; // Custom ticks
+    let ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900]; // Custom ticks
 
     // Reactive block to update width when selectedProperties changes
     $: {
@@ -104,11 +104,25 @@
     // Create X axis with custom ticks
     $: xAxis = d3.axisBottom(xScale).tickValues(ticks); // Use the custom ticks
     $: yAxis = d3.axisLeft(yScale);
+
     // Append the axes to the SVG
     $: {
         if (svg) {
-            d3.select(svg).select(".x-axis").call(xAxis); // Call the x-axis
-            d3.select(svg).select(".y-axis").call(yAxis); // Call the y-axis
+            d3.select(svg)
+                .select(".x-axis")
+                .call(xAxis)
+                .selectAll("text")
+                .style("font-family", "Montserrat")
+                .style("font-weight", 500)
+                .style("font-size", 12)
+
+            d3.select(svg)
+                .select(".y-axis")
+                .call(yAxis)
+                .selectAll("text")
+                .style("font-family", "Montserrat")
+                .style("font-weight", 500)
+                .style("font-size", 12)
         }
     }
 </script>
@@ -146,4 +160,5 @@
         height: 200px;
         background: rgba(0, 0, 0, 0.034);
     }
+
 </style>
