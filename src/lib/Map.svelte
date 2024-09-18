@@ -122,17 +122,17 @@
     function adjustMapForWindowSize() {
         if (window.innerWidth <= 768) {
             map.flyTo({
-                center: [13, 5],
+                center: [13, 30],
                 zoom: 2,
             });
-        } else if (window.innerWidth <= 1000) {
+        } else if (window.innerWidth <= 1000 || window.innerHeight <=720) {
             map.flyTo({
-                center: [13, 5],
+                center: [13, 30],
                 zoom: 2,
             });
         } else {
             map.flyTo({
-                center: [13, 5],
+                center: [13, 30],
                 zoom: 2.5,
             });
         }
@@ -148,7 +148,7 @@
             attributionControl: false,
             container: "map",
             style: "mapbox://styles/tomasvancisin/cm0i5fpy4004b01qodg9g2awr",
-            center: [13, 5],
+            center: [13, 30],
             zoom: 2.5,
             maxZoom: 5,
             minZoom: 1.8,
@@ -411,7 +411,7 @@
 
     //RESET DEFAULT ZOOM AND FLY TO INITIAL COORDINATES
     function flyToInitialPosition() {
-        map.flyTo({ center: [13, 5], zoom: 2.5 });
+        map.flyTo({ center: [13, 30], zoom: 2.5 });
     }
 
     export { flyToInitialPosition };
