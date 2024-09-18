@@ -215,7 +215,7 @@
                                         gender_height_scale(female.length)}
                                     width={gender_width / 2}
                                     height={gender_height_scale(female.length)}
-                                    fill="#666666"
+                                    fill="#014D66"
                                     on:click={() => handle_click("F")}
                                     on:keydown={(event) => {
                                         if (
@@ -236,7 +236,7 @@
                                         gender_height_scale(female.length) -
                                         2}
                                     font-size="12"
-                                    font-weight="500"
+                                    font-weight="450"
                                     >Female ({female.length})</text
                                 >
                             </svg>
@@ -255,7 +255,7 @@
                                         gender_height_scale(male.length)}
                                     width={gender_width / 2}
                                     height={gender_height_scale(male.length)}
-                                    fill="#666666"
+                                    fill="#014D66"
                                     on:click={() => handle_click("M")}
                                     on:keydown={(event) => {
                                         if (
@@ -276,7 +276,7 @@
                                         gender_height_scale(male.length) -
                                         2}
                                     font-size="12"
-                                    font-weight="500"
+                                    font-weight="450"
                                     >Male ({male.length})
                                 </text>
                             </svg>
@@ -298,7 +298,7 @@
                         >
                             <g
                                 bind:this={gy}
-                                transform="translate({margin.left},0)"
+                                transform="translate({margin.left - 5},0)"
                             />
                             {#each groupData as group}
                                 <rect
@@ -307,7 +307,7 @@
                                     width={xScaleCareer.bandwidth()}
                                     height={innerHeight -
                                         yScaleCareer(group.count)}
-                                    fill="#666666"
+                                    fill="#014D66"
                                     on:click={() => handle_floruit_click(group)}
                                     on:keydown={(event) => {
                                         if (
@@ -328,7 +328,7 @@
                                     y={yScaleCareer(group.count) - 2}
                                     font-size="11"
                                     text-anchor="start"
-                                    font-weight="500"
+                                    font-weight="450"
                                     transform={`rotate(-70, ${xScaleCareer(group.name) + xScaleCareer.bandwidth() / 2}, ${yScaleCareer(group.count)})`}
                                 >
                                     {group.name}
