@@ -5,7 +5,9 @@
         selectedGenderStore,
         selectedCareerStore,
     } from "../years";
+    import { simplify } from '@turf/turf';
     import mapboxgl from "mapbox-gl";
+
     import * as d3 from "d3";
     import {
         filterData,
@@ -20,6 +22,7 @@
     export let births_per_colony;
     export let birth_data;
 
+
     let height;
     let clicked_country;
     let countryNames = ["Britain"];
@@ -28,6 +31,12 @@
     let selectedYears = [];
     let selectedGender;
     let selectedCareer;
+    let simple_geojson;
+
+    $: if (countries_json) {
+        simple_geojson = simplify(countries_json, { tolerance: 0.02, highQuality: true });
+
+    }
 
     //SELECTED YEAR FILTER
     const unsubscribe = selectedYearsStore.subscribe((value) => {
@@ -122,18 +131,18 @@
     function adjustMapForWindowSize() {
         if (window.innerWidth <= 768) {
             map.flyTo({
-                center: [13, 30],
-                zoom: 2,
+                center: [13, 10],
+                zoom: 1,
             });
-        } else if (window.innerWidth <= 1000 || window.innerHeight <=720) {
+        } else if (window.innerWidth <= 1300 || window.innerHeight <=720) {
             map.flyTo({
-                center: [13, 30],
-                zoom: 2,
+                center: [13, 10],
+                zoom: 1.6,
             });
         } else {
             map.flyTo({
-                center: [13, 30],
-                zoom: 2.5,
+                center: [13, 10],
+                zoom: 2,
             });
         }
     }
@@ -145,25 +154,25 @@
 
         // Initialize the Mapbox map
         map = new mapboxgl.Map({
-            attributionControl: false,
+            // attributionControl: false,
             container: "map",
             style: "mapbox://styles/tomasvancisin/cm0i5fpy4004b01qodg9g2awr",
-            center: [13, 30],
-            zoom: 2.5,
+            center: [13, 10],
+            zoom: 2,
             maxZoom: 5,
             minZoom: 1.8,
-            logoPosition: "top-right", // move logo to the top-right
-            // projection: "naturalEarth",
+            // logoPosition: "top-right", // move logo to the top-right
+            projection: "naturalEarth",
         });
     });
 
     //DRAW POLYGONS, SHIPPPING LINES, INDIVIDUAL LOCATIONS
-    $: if (countries_json && shipping_json && countryNames && map) {
+    $: if (simple_geojson && shipping_json && countryNames && map) {
         // Ensure this block runs only after the map has fully loaded
         map.on("load", () => {
             // Check if the source already exists
             if (!map.getSource("countries")) {
-                //DRAW SHIPPING ROUTES
+                // //DRAW SHIPPING ROUTES
                 map.addSource("shipping", {
                     type: "geojson",
                     data: shipping_json,
@@ -198,7 +207,7 @@
                             2,
                             1,
                         ],
-                        "line-dasharray": [0, 4, 3],
+                        "line-dasharray": [3, 0.5],
                     },
                 });
 
@@ -206,7 +215,7 @@
                 //add source
                 map.addSource("countries", {
                     type: "geojson",
-                    data: countries_json,
+                    data: simple_geojson,
                     generateId: true, // Ensures all features have unique IDs
                 });
 
@@ -283,7 +292,7 @@
                     dispatch("polygonClick", clicked_country);
                 });
 
-                animateShipping();
+                // animateShipping();
                 adjustMapForWindowSize();
                 window.addEventListener("resize", adjustMapForWindowSize);
             } else {
@@ -411,7 +420,7 @@
 
     //RESET DEFAULT ZOOM AND FLY TO INITIAL COORDINATES
     function flyToInitialPosition() {
-        map.flyTo({ center: [13, 30], zoom: 2.5 });
+        map.flyTo({ center: [13, 10], zoom: 2 });
     }
 
     export { flyToInitialPosition };

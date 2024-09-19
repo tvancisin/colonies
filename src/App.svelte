@@ -123,10 +123,12 @@
   function handlePolygonClick(event) {
     selectedProperties = event.detail;
     d3.select("#details").style("right", "0px");
+    d3.select("h1").style("top", "-50px");
   }
 
   function handleClose() {
     d3.select("#details").style("right", "-100%");
+    d3.select("h1").style("top", "-2px");
     selectedProperties = null;
     mapRef.flyToInitialPosition();
     map.removeLayer("population");
@@ -136,7 +138,7 @@
 
 <main bind:clientWidth={width} bind:clientHeight={height}>
   {#if countries_json && shipping_json && birth_data}
-    <h1>Legacies of the Empire</h1>
+    <h1>University of St Andrews Students in the Empire (1700-1897)</h1>
     <Map
       {countries_json}
       {shipping_json}
@@ -220,7 +222,7 @@
     font-weight: 400;
     padding: 5px;
     top: -2px;
-    font-size: 2em;
+    font-size: 1.8em;
     margin: 0px;
     text-align: center;
     color: black;
@@ -233,8 +235,8 @@
   #legend {
     width: 205px;
     position: absolute;
-    bottom: 170px;
-    right: 0px;
+    top: 0px;
+    left: 10px;
     border-radius: 3px;
   }
 
