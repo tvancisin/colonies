@@ -132,7 +132,7 @@
         if (window.innerWidth <= 768) {
             map.flyTo({
                 center: [13, 10],
-                zoom: 1,
+                zoom: 1.3,
             });
         } else if (window.innerWidth <= 1300 || window.innerHeight <=720) {
             map.flyTo({
@@ -160,7 +160,7 @@
             center: [13, 10],
             zoom: 2,
             maxZoom: 5,
-            minZoom: 1.8,
+            minZoom: 1.3,
             // logoPosition: "top-right", // move logo to the top-right
             projection: "naturalEarth",
         });
