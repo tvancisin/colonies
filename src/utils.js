@@ -74,7 +74,7 @@ export function opacity_generator(data) {
 }
 
 // Opacity scale
-const opacityScale = d3.scaleLinear().domain([0, 70]).range([0.2, 1]);
+const opacityScale = d3.scaleLinear().domain([0, 70]).range([0, 10]);
 
 // Function to build dynamic opacity expression
 export function getOpacityExpression(regions) {
@@ -82,7 +82,7 @@ export function getOpacityExpression(regions) {
     regions.forEach(([region, opacity]) => {
         expression.push(region, opacity);
     });
-    expression.push(1);
+    expression.push(0);
     return expression;
 }
 
@@ -716,4 +716,30 @@ export function career (career_data) {
     });
 
     return grps
+}
+
+let male, female;
+
+export function genderFilter (filter_gender) {
+
+        if (filter_gender.length == 0) {
+            male = []
+            female = []
+        }
+        else if (filter_gender.length == 2) {
+            female = filter_gender.find((item) => item[0] === "F")[1];
+            male = filter_gender.find((item) => item[0] === "M")[1];
+        } else {
+            if (!filter_gender.find((item) => item[0] === "M")) {
+                male = [];
+                female = filter_gender.find((item) => item[0] === "F")[1];
+            }
+            if (!filter_gender.find((item) => item[0] === "F")) {
+                female = [];
+                male = filter_gender.find((item) => item[0] === "M")[1];
+            }
+        }
+
+        return [female, male]
+
 }

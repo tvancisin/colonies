@@ -5,9 +5,9 @@
         selectedGenderStore,
         selectedCareerStore,
     } from "../years";
-    import { simplify } from '@turf/turf';
+    import { simplify } from "@turf/turf";
+    import * as turf from "@turf/turf";
     import mapboxgl from "mapbox-gl";
-
     import * as d3 from "d3";
     import {
         filterData,
@@ -19,23 +19,30 @@
     export let map;
     export let countries_json;
     export let shipping_json;
+    export let colonies_1680;
+    export let colonies_1750;
+    export let colonies_1820;
+    export let colonies_1885;
     export let births_per_colony;
     export let birth_data;
-
+    export let floruit_data;
+    export let colonies;
 
     let height;
     let clicked_country;
-    let countryNames = ["Britain"];
+    let countryNames;
     let opacity_mapbox_expression;
     let hoveredPolygonId = null;
-    let selectedYears = [];
+    let selectedYears = [1700, 1900];
     let selectedGender;
     let selectedCareer;
     let simple_geojson;
 
     $: if (countries_json) {
-        simple_geojson = simplify(countries_json, { tolerance: 0.02, highQuality: true });
-
+        simple_geojson = simplify(colonies_1885, {
+            tolerance: 0.01,
+            highQuality: true,
+        });
     }
 
     //SELECTED YEAR FILTER
@@ -48,19 +55,14 @@
         map.setFilter("population", ["in", ["get", "id"], ["literal", ids]]);
     }
 
-    $: if (selectedYears.length != 0 && clicked_country != undefined) {
-        let country = births_per_colony.filter(
-            (item) => item[0] == clicked_country,
-        );
+    $: if (map && selectedYears.length != 0 && map.getSource("locations")) {
         let filtered_country = filterData(
-            country[0][1],
+            birth_data,
             selectedYears[0],
             selectedYears[1],
         );
         let indi_loc_array = filtered_country.map((d) => d.id);
         filter_circles(indi_loc_array);
-    } else if (selectedYears.length == 0 && clicked_country) {
-        map.setFilter("population", null);
     }
 
     //SELECTED GENDER FILTER
@@ -95,7 +97,7 @@
         map.setFilter("population", null);
     }
 
-    // filter polygon opacity on selected years
+    //FILTER POLYGON OPACITY
     $: filteredData =
         selectedYears && selectedYears.length > 0
             ? filterData(birth_data, selectedYears[0], selectedYears[1])
@@ -115,16 +117,41 @@
         .map((item) => item[0]); // Extract the country names
 
     $: if (map && countryNames && map.getSource("countries")) {
-        map.setFilter("countries_fill", [
-            "in",
-            ["get", "ADMIN"],
-            ["literal", countryNames],
-        ]);
+        countryNames.push("Britain");
+        // map.setFilter("countries_fill", [
+        //     "in",
+        //     ["get", "ADMIN"],
+        //     ["literal", countryNames],
+        // ]);
+        // map.setPaintProperty(
+        //     "countries_fill",
+        //     "fill-opacity",
+        //     opacity_mapbox_expression,
+        // );
         map.setPaintProperty(
-            "countries_fill",
-            "fill-opacity",
+            "shipline",
+            "line-width",
             opacity_mapbox_expression,
         );
+    }
+
+    // CHANGE COLONIES GEOJSON FOR DIFFERENT PERIODS
+    $: if (selectedYears[1] < 1750) {
+        map.getSource("countries").setData(colonies_1680);
+    } else if (
+        selectedYears[1] >= 1750 &&
+        selectedYears[1] < 1820 &&
+        map.getSource("countries")
+    ) {
+        map.getSource("countries").setData(colonies_1750);
+    } else if (
+        selectedYears[1] >= 1820 &&
+        selectedYears[1] < 1885 &&
+        map.getSource("countries")
+    ) {
+        map.getSource("countries").setData(colonies_1820);
+    } else if (map && selectedYears[1] >= 1885 && map.getSource("countries")) {
+        map.getSource("countries").setData(colonies_1885);
     }
 
     //MAP ZOOM ADJUSTMENT
@@ -134,7 +161,7 @@
                 center: [13, 10],
                 zoom: 1.3,
             });
-        } else if (window.innerWidth <= 1300 || window.innerHeight <=720) {
+        } else if (window.innerWidth <= 1300 || window.innerHeight <= 720) {
             map.flyTo({
                 center: [13, 10],
                 zoom: 1.6,
@@ -154,25 +181,25 @@
 
         // Initialize the Mapbox map
         map = new mapboxgl.Map({
-            // attributionControl: false,
+            attributionControl: false,
             container: "map",
             style: "mapbox://styles/tomasvancisin/cm0i5fpy4004b01qodg9g2awr",
             center: [13, 10],
             zoom: 2,
-            maxZoom: 5,
+            maxZoom: 3.9,
             minZoom: 1.3,
-            // logoPosition: "top-right", // move logo to the top-right
+            logoPosition: "top-right", // move logo to the top-right
             projection: "naturalEarth",
         });
     });
 
     //DRAW POLYGONS, SHIPPPING LINES, INDIVIDUAL LOCATIONS
-    $: if (simple_geojson && shipping_json && countryNames && map) {
+    $: if (colonies_1885 && shipping_json && countryNames && map) {
         // Ensure this block runs only after the map has fully loaded
         map.on("load", () => {
             // Check if the source already exists
             if (!map.getSource("countries")) {
-                // //DRAW SHIPPING ROUTES
+                //DRAW SHIPPING ROUTES
                 map.addSource("shipping", {
                     type: "geojson",
                     data: shipping_json,
@@ -183,10 +210,6 @@
                     id: "shipline",
                     type: "line",
                     source: "shipping",
-                    // layout: {
-                    //   "line-join": "round",
-                    //   "line-cap": "round",
-                    // },
                     paint: {
                         "line-color": "black",
                         "line-opacity": 0.7,
@@ -194,20 +217,20 @@
                             "match",
                             ["get", "ADMIN"],
                             "India",
-                            4,
+                            9.1428571428571425,
                             "Australia",
-                            1,
+                            2.4285714285714284,
                             "Asia",
-                            1,
+                            0.5714285714285714,
                             "Africa",
-                            4,
+                            6.7142857142857135,
                             "Caribbean",
-                            2,
+                            3.857142857142857,
                             "America",
-                            2,
-                            1,
+                            7,
+                            0,
                         ],
-                        "line-dasharray": [3, 0.5],
+                        // "line-dasharray": [3, 0.5],
                     },
                 });
 
@@ -215,7 +238,7 @@
                 //add source
                 map.addSource("countries", {
                     type: "geojson",
-                    data: simple_geojson,
+                    data: colonies_1885,
                     generateId: true, // Ensures all features have unique IDs
                 });
 
@@ -225,11 +248,20 @@
                     type: "fill",
                     source: "countries",
                     paint: {
-                        "fill-color": " #740b0b", //color of moon Iapedus charcoal black
-                        "fill-opacity": opacity_mapbox_expression, // Initial opacity
+                        "fill-color": [
+                            "match",
+                            ["get", "ADMIN"],
+                            "Britain",
+                            "black",
+                            "black",
+                        ],
+                        // "fill-opacity": opacity_mapbox_expression, // Initial opacity
+                        "fill-opacity": 0.6,
                     },
                     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
                 });
+
+                countryNames.push("Britain");
 
                 map.addLayer({
                     id: "countries_outline",
@@ -248,7 +280,7 @@
                     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
                 });
 
-                //interactivity for no fatalities
+                // highlight polygon on hover
                 map.on("mousemove", "countries_fill", (e) => {
                     map.getCanvas().style.cursor = "pointer";
                     if (e.features.length > 0) {
@@ -266,8 +298,7 @@
                     }
                 });
 
-                // When the mouse leaves the state-fill layer, update the feature state of the
-                // previously hovered feature.
+                // on mouse leave, no highlight
                 map.on("mouseleave", "countries_fill", () => {
                     map.getCanvas().style.cursor = "";
                     if (hoveredPolygonId !== null) {
@@ -279,16 +310,15 @@
                     hoveredPolygonId = null;
                 });
 
-                map.on("click", "countries_fill", (e) => {
-                    if (map.getSource("locations")) {
-                        console.log("here");
+                drawLocations("birth");
 
-                        map.removeLayer("population");
-                        map.removeSource("locations");
-                    }
+                map.on("click", "countries_fill", (e) => {
+                    // if (map.getSource("locations")) {
+                    //     map.removeLayer("population");
+                    //     map.removeSource("locations");
+                    // }
                     clicked_country = e.features[0].properties.ADMIN;
                     zoomToCountry(clicked_country);
-                    drawLocations(clicked_country);
                     dispatch("polygonClick", clicked_country);
                 });
 
@@ -309,70 +339,97 @@
     }
 
     //MOVING SHIPPING LANES
-    function animateShipping() {
-        var dashLength = 3;
-        var gapLength = 1;
+    // function animateShipping() {
+    //     var dashLength = 3;
+    //     var gapLength = 1;
 
-        // We divide the animation up into 40 steps to make careful use of the finite space in
-        // LineAtlas
-        var steps = 20;
-        // A # of steps proportional to the dashLength are devoted to manipulating the dash
-        var dashSteps = (steps * dashLength) / (gapLength + dashLength);
-        // A # of steps proportional to the gapLength are devoted to manipulating the gap
-        var gapSteps = steps - dashSteps;
+    //     // We divide the animation up into 40 steps to make careful use of the finite space in
+    //     // LineAtlas
+    //     var steps = 20;
+    //     // A # of steps proportional to the dashLength are devoted to manipulating the dash
+    //     var dashSteps = (steps * dashLength) / (gapLength + dashLength);
+    //     // A # of steps proportional to the gapLength are devoted to manipulating the gap
+    //     var gapSteps = steps - dashSteps;
 
-        // The current step #
-        var step = 0;
+    //     // The current step #
+    //     var step = 0;
 
-        setInterval(function () {
-            step = step + 1;
-            if (step >= steps) step = 0;
+    //     setInterval(function () {
+    //         step = step + 1;
+    //         if (step >= steps) step = 0;
 
-            var t, a, b, c, d;
-            if (step < dashSteps) {
-                t = step / dashSteps;
-                a = (1 - t) * dashLength;
-                b = gapLength;
-                c = t * dashLength;
-                d = 0;
-            } else {
-                t = (step - dashSteps) / gapSteps;
-                a = 0;
-                b = (1 - t) * gapLength;
-                c = dashLength;
-                d = t * gapLength;
-            }
+    //         var t, a, b, c, d;
+    //         if (step < dashSteps) {
+    //             t = step / dashSteps;
+    //             a = (1 - t) * dashLength;
+    //             b = gapLength;
+    //             c = t * dashLength;
+    //             d = 0;
+    //         } else {
+    //             t = (step - dashSteps) / gapSteps;
+    //             a = 0;
+    //             b = (1 - t) * gapLength;
+    //             c = dashLength;
+    //             d = t * gapLength;
+    //         }
 
-            map.setPaintProperty("shipline", "line-dasharray", [a, b, c, d]);
-        }, 50);
-    }
+    //         map.setPaintProperty("shipline", "line-dasharray", [a, b, c, d]);
+    //     }, 50);
+    // }
 
     //DRAW INDIVIDUAL LOCATIONS WHEN COLONY CLICKED
-    function drawLocations(country) {
-        let filteredCountry = births_per_colony.filter(
-            (item) => item[0] == country,
-        );
-
-        //constructing geojson
+    function drawLocations(which) {
         let local_conflict_geojson = [];
-        filteredCountry[0][1].forEach(function (d) {
-            let to_push = {
-                type: "Feature",
-                properties: {
-                    id: d.id,
-                    forename: d.forename,
-                    surname: d.surname,
-                },
-                geometry: {
-                    type: "Point",
-                    coordinates: [
-                        d.birth_location.longitude,
-                        d.birth_location.latitude,
-                    ],
-                },
-            };
-            local_conflict_geojson.push(to_push);
-        });
+        if (which == "birth") {
+            //constructing geojson
+            birth_data.forEach(function (d) {
+                let to_push = {
+                    type: "Feature",
+                    properties: {
+                        id: d.id,
+                        forename: d.forename,
+                        surname: d.surname,
+                    },
+                    geometry: {
+                        type: "Point",
+                        coordinates: [
+                            d.birth_location.longitude,
+                            d.birth_location.latitude,
+                        ],
+                    },
+                };
+                local_conflict_geojson.push(to_push);
+            });
+        } else if (which == "floruit") {
+            floruit_data.forEach(function (person) {
+                // Iterate over each floruit entry
+                person.floruit.forEach(function (floruitEntry) {
+                    // Check if the country code is in the colonies array
+                    if (colonies.includes(floruitEntry.location.country)) {
+                        let to_push = {
+                            type: "Feature",
+                            properties: {
+                                id: person.id,
+                                forename: person.forename,
+                                surname: person.surname,
+                                occupation: floruitEntry.occupation, // Additional property for occupation
+                                from: floruitEntry.from, // Adding timeframe if needed
+                                to: floruitEntry.to,
+                            },
+                            geometry: {
+                                type: "Point",
+                                coordinates: [
+                                    floruitEntry.location.longitude,
+                                    floruitEntry.location.latitude,
+                                ],
+                            },
+                        };
+                        local_conflict_geojson.push(to_push);
+                    }
+                });
+            });
+        }
+        console.log(local_conflict_geojson);
 
         const geojson_data = {
             type: "FeatureCollection",
@@ -384,7 +441,6 @@
             data: geojson_data,
             generateId: true, //This ensures that all features have unique IDs
         });
-        console.log(geojson_data);
 
         //circles for agreements
         map.addLayer({
@@ -393,8 +449,8 @@
             source: "locations",
             paint: {
                 "circle-opacity": 0.8,
-                "circle-stroke-width": 1.5,
-                "circle-stroke-color": "yellow",
+                "circle-stroke-width": 1,
+                "circle-stroke-color": "white",
                 "circle-radius": 5,
                 "circle-color": "black",
             },
@@ -404,15 +460,15 @@
     //ZOOM IN TO CLICKED COUNTRY
     function zoomToCountry(clicked_colony) {
         if (clicked_colony == "America") {
-            map.flyTo({ center: [-88, 39], zoom: 4 });
+            map.flyTo({ center: [-70, 50], zoom: 3.5 });
         } else if (clicked_colony == "Caribbean") {
-            map.flyTo({ center: [-62, 18], zoom: 4 });
+            map.flyTo({ center: [-55, 10], zoom: 4 });
         } else if (clicked_colony == "Australia") {
-            map.flyTo({ center: [147, -33], zoom: 4 });
+            map.flyTo({ center: [153, -31], zoom: 4 });
         } else if (clicked_colony == "India") {
-            map.flyTo({ center: [88, 22], zoom: 4 });
+            map.flyTo({ center: [98, 20], zoom: 4 });
         } else if (clicked_colony == "Africa") {
-            map.flyTo({ center: [25, -23], zoom: 4 });
+            map.flyTo({ center: [40, -30], zoom: 4 });
         } else if (clicked_colony == "Asia") {
             map.flyTo({ center: [118, 6], zoom: 4 });
         }

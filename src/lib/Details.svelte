@@ -1,10 +1,12 @@
 <script>
     import { createEventDispatcher } from "svelte";
     import * as d3 from "d3";
-    import { career, filterData } from "../utils";
-    import { selectedYearsStore } from "../years";
-    import { selectedGenderStore } from "../years";
-    import { selectedCareerStore } from "../years";
+    import { career, filterData, genderFilter } from "../utils";
+    import {
+        selectedYearsStore,
+        selectedCareerStore,
+        selectedGenderStore,
+    } from "../years";
 
     const dispatch = createEventDispatcher();
 
@@ -12,7 +14,8 @@
     export let selectedProperties;
 
     let details_width, details_height;
-    let career_width, career_height;
+    let career_width = 100;
+    let career_height = 100;
     let gender_height = 10,
         gender_width = 20;
     let def_data;
@@ -35,22 +38,14 @@
         data = def_data;
         let filter_years = filterData(data, selectedYears[0], selectedYears[1]);
 
+        //update data 
+        data = filter_years;
+
         //gender
         let filter_gender = d3.groups(filter_years, (d) => d.gender);
-        if (filter_gender.length == 2) {
-            female = filter_gender.find((item) => item[0] === "F")[1];
-            male = filter_gender.find((item) => item[0] === "M")[1];
-        } else {
-            if (!filter_gender.find((item) => item[0] === "M")) {
-                male = [];
-                female = filter_gender.find((item) => item[0] === "F")[1];
-            }
-            if (!filter_gender.find((item) => item[0] === "F")) {
-                female = [];
-                male = filter_gender.find((item) => item[0] === "M")[1];
-            }
-        }
-        data = filter_years;
+        let both = genderFilter(filter_gender)
+        female = both[0]
+        male = both[1]
 
         //floruit
         groups = career(data);
@@ -69,7 +64,9 @@
     );
 
     $: if (filteredCountry) {
+        //set default data
         def_data = filteredCountry[0][1];
+        //set data to manipulate
         data = filteredCountry[0][1];
         all = filteredCountry[0][1].length;
         //gender
@@ -198,7 +195,7 @@
             {/if}
         </div>
         <div id="peace_content">
-            <div id="overview">
+            <!-- <div id="overview">
                 <h5>Gender</h5>
                 <div class="content-wrapper">
                     <div class="content-box">
@@ -283,8 +280,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
+            </div> -->
+<!-- 
             <div id="general">
                 <h5>Careers</h5>
                 <div
@@ -337,7 +334,14 @@
                         </g>
                     </svg>
                 </div>
+            </div> -->
+
+            <div id="general">
+                <h5>Visualization</h5>
+
+
             </div>
+
             <div id="peace_process">
                 <h5>List</h5>
                 <div class="scrollable-content">
@@ -439,7 +443,7 @@
         color: black;
         position: fixed;
         right: -100%;
-        width: 450px;
+        width: 40%;
         height: calc(100%);
         transition: right 0.3s ease;
         background-color: rgba(0, 0, 0, 0.932);
@@ -455,7 +459,7 @@
         box-shadow: 0 0 5px #000000;
     }
 
-    @media (max-width: 1450px) {
+    /* @media (max-width: 1450px) {
         #details {
             width: 450px;
         }
@@ -465,7 +469,7 @@
         #details {
             width: 450px;
         }
-    }
+    } */
 
     @media (max-width: 768px) {
         #details {
@@ -651,7 +655,7 @@
     }
 
     #general {
-        flex-grow: 1.5; /* Takes one unit of the available space */
+        flex-grow: 2; /* Takes one unit of the available space */
     }
 
     #peace_process {

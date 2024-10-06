@@ -111,13 +111,25 @@
   //load geojson countries
   let countries_json;
   let shipping_json;
+  let colonies_1680;
+  let colonies_1750;
+  let colonies_1820;
+  let colonies_1885;
   const json_paths = [
     "./data/colony_divisions.json",
     "./data/shipping_routes.json",
+    "./data/colonies_1680.json",
+    "./data/colonies_1750.json",
+    "./data/colonies_1820.json",
+    "./data/colonies_1885.json"
   ];
   getGeo(json_paths).then((geo) => {
     countries_json = geo[0];
     shipping_json = geo[1];
+    colonies_1680 = geo[2];
+    colonies_1750 = geo[3];
+    colonies_1820 = geo[4];
+    colonies_1885 = geo[5];
   });
 
   function handlePolygonClick(event) {
@@ -131,19 +143,23 @@
     d3.select("h1").style("top", "-2px");
     selectedProperties = null;
     mapRef.flyToInitialPosition();
-    map.removeLayer("population");
-    map.removeSource("locations");
   }
 </script>
 
 <main bind:clientWidth={width} bind:clientHeight={height}>
-  {#if countries_json && shipping_json && birth_data}
+  {#if countries_json && shipping_json && birth_data && floruit_data}
     <h1>University of St Andrews Students in the Empire (1700-1897)</h1>
     <Map
       {countries_json}
       {shipping_json}
+      {colonies_1680}
+      {colonies_1750}
+      {colonies_1820}
+      {colonies_1885}
       {births_per_colony}
       {birth_data}
+      {floruit_data}
+      {colonies}
       bind:this={mapRef}
       bind:map
       on:polygonClick={handlePolygonClick}
@@ -151,7 +167,7 @@
     <div id="time_description">Students Entering University</div>
     <Timeline {birth_data} {selectedProperties} {births_per_colony} />
     <Details on:close={handleClose} {births_per_colony} {selectedProperties} />
-    <div id="legend">
+    <!-- <div id="legend">
       <svg
         height={legend_height}
         width={legend_width}
@@ -197,7 +213,7 @@
           more births 
         </text>
       </svg>
-    </div>
+    </div> -->
   
   {/if}
 </main>
@@ -232,7 +248,7 @@
     box-shadow: 0 0 3px #5a5a5a;
   }
 
-  #legend {
+  /* #legend {
     width: 205px;
     position: absolute;
     top: 0px;
@@ -258,7 +274,7 @@
   }
   .stop_three {
     stop-color: #740b0b;
-  }
+  } */
 
   #time_description {
     border-radius: 2px;
