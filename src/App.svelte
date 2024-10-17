@@ -1,84 +1,34 @@
 <script>
-  import { onMount } from "svelte";
   import * as d3 from "d3";
-  import { getJSON, getGeo } from "./utils.js";
+  import {
+    getJSON,
+    getGeo,
+    colonies,
+    india_colonies,
+    african_colonies,
+    america_colonies,
+    australia_colonies,
+    asian_colonies,
+    caribbean_colonies,
+  } from "./utils.js";
   import Map from "./lib/Map.svelte";
   import Details from "./lib/Details.svelte";
   import Timeline from "./lib/Timeline.svelte";
 
   let width, height, map;
   let mapRef;
-  let selectedProperties = null;
+  let current_data;
+  let current_data_string;
+  let selected_country = null;
   let legend_height = 50;
   let legend_width = 200;
-  let colonies = [
-    "US",
-    "CA",
-    "ZA",
-    "SL",
-    "EG",
-    "ZM",
-    "MU",
-    "NG",
-    "AU",
-    "NZ",
-    "JM",
-    "AG",
-    "BB",
-    "GY",
-    "BS",
-    "TT",
-    "GD",
-    "DM",
-    "KN",
-    "VC",
-    "BZ",
-    "SG",
-    "MY",
-    "ID",
-    "CN",
-    "VU",
-    "MM",
-    "HK",
-    "WS",
-    "LB",
-    "IL",
-    "CY",
-    "MT",
-    "SY",
-    "TR",
-    "IR",
-    "AR",
-    "IN",
-    "LK",
-    "AF",
-    "PK",
-    "BD",
-  ];
-
-  const india_colonies = ["IN", "LK", "PK", "MM"];
-  const african_colonies = ["ZA", "SL", "EG", "ZM", "NG"];
-  const america_colonies = ["US", "CA"];
-  const australia_colonies = ["AU", "NZ"];
-  const asian_colonies = ["MY", "SG", "HK"];
-  const caribbean_colonies = [
-    "JM",
-    "AG",
-    "BB",
-    "GY",
-    "BS",
-    "TT",
-    "GD",
-    "DM",
-    "KN",
-    "VC",
-  ];
 
   //load biographical data
   let path = ["./data/birth_colonies.json", "./data/floruit_colonies.json"];
   let birth_data;
   let floruit_data;
   let births_per_colony;
+  let floruit_per_colony;
 
   getJSON(path).then((json) => {
     birth_data = json[0];
@@ -106,6 +56,49 @@
       birth_colony_division,
       (d) => d.birth_location.colony,
     );
+
+    floruit_data.forEach((person) => {
+      if (person.floruit && Array.isArray(person.floruit)) {
+        person.floruit.forEach((floruitItem) => {
+          const country = floruitItem.location?.country;
+
+          if (caribbean_colonies.includes(country)) {
+            floruitItem.location.colony = "Caribbean";
+          } else if (america_colonies.includes(country)) {
+            floruitItem.location.colony = "America";
+          } else if (india_colonies.includes(country)) {
+            floruitItem.location.colony = "India";
+          } else if (african_colonies.includes(country)) {
+            floruitItem.location.colony = "Africa";
+          } else if (australia_colonies.includes(country)) {
+            floruitItem.location.colony = "Australia";
+          } else if (asian_colonies.includes(country)) {
+            floruitItem.location.colony = "Asia";
+          }
+        });
+      }
+    });
+
+    // Function to flatten floruit objects and associate them with their person
+    function flattenFloruit(filteredData) {
+      return filteredData.flatMap((person) =>
+        person.floruit.map((floruitItem) => ({
+          ...person,
+          floruit: floruitItem, // Only include the current floruit item
+        })),
+      );
+    }
+
+    floruit_per_colony = d3.groups(
+      flattenFloruit(floruit_data),
+      (d) => d.floruit.location.colony,
+    );
+
+    console.log(floruit_per_colony);
+    
+
+    current_data = birth_data;
+    current_data_string = "birth";
   });
 
   //load geojson countries
@@ -121,7 +114,7 @@
     "./data/colonies_1680.json",
     "./data/colonies_1750.json",
     "./data/colonies_1820.json",
-    "./data/colonies_1885.json"
+    "./data/colonies_1885.json",
   ];
   getGeo(json_paths).then((geo) => {
     countries_json = geo[0];
@@ -133,7 +126,13 @@
   });
 
   function handlePolygonClick(event) {
-    selectedProperties = event.detail;
+    selected_country = event.detail;
+
+    // current_data = births_per_colony.find(item => item[0] === selected_country)?.[1];
+    // console.log(mydata);
+    // current_data = floruit_per_colony.find(item => item[0] === selected_country)?.[1];
+    
+
     d3.select("#details").style("right", "0px");
     d3.select("h1").style("top", "-50px");
   }
@@ -141,33 +140,60 @@
   function handleClose() {
     d3.select("#details").style("right", "-100%");
     d3.select("h1").style("top", "-2px");
-    selectedProperties = null;
+    selected_country = null;
     mapRef.flyToInitialPosition();
+  }
+
+  //set variables based on selection (birth or floruit)
+  function change_data(selected_data) {
+    if (selected_data == "birth") {
+      current_data = birth_data;
+      current_data_string = selected_data;
+    } else if (selected_data == "floruit") {
+      current_data = floruit_data;
+      current_data_string = selected_data;
+    }
   }
 </script>
 
 <main bind:clientWidth={width} bind:clientHeight={height}>
-  {#if countries_json && shipping_json && birth_data && floruit_data}
+  {#if countries_json && shipping_json && current_data}
     <h1>University of St Andrews Students in the Empire (1700-1897)</h1>
     <Map
+      {current_data}
+      {current_data_string}
       {countries_json}
       {shipping_json}
       {colonies_1680}
       {colonies_1750}
       {colonies_1820}
       {colonies_1885}
-      {births_per_colony}
-      {birth_data}
-      {floruit_data}
       {colonies}
       bind:this={mapRef}
       bind:map
       on:polygonClick={handlePolygonClick}
     />
+    <div id="buttons">
+      <button id="birth" on:click={() => change_data("birth")}>Birth</button>
+      <button id="floruit" on:click={() => change_data("floruit")}
+        >Career</button
+      >
+    </div>
     <div id="time_description">Students Entering University</div>
-    <Timeline {birth_data} {selectedProperties} {births_per_colony} />
-    <Details on:close={handleClose} {births_per_colony} {selectedProperties} />
-    <!-- <div id="legend">
+    <Timeline
+      {current_data}
+      {birth_data}
+      {floruit_data}
+      {selected_country}
+      {births_per_colony}
+    />
+    <Details
+      on:close={handleClose}
+      {births_per_colony}
+      {selected_country}
+      {current_data}
+    />
+    <div id="legend">
       <svg
         height={legend_height}
         width={legend_width}
@@ -176,45 +202,26 @@
       >
         <rect
           id="legend_rectangle"
-          x="2.5%"
-          y="68%"
-          width="100%"
-          height="40%"
-          fill="url(#legend_gradient)"
+          x="1%"
+          y="5%"
+          rx="3"
+          width="20%"
+          height="50%"
+          fill="black"
+          fill-opacity="0.7"
         />
-  
-        <defs>
-          <linearGradient id="legend_gradient">
-            <stop class="stop_one" offset="0%" />
-            <stop class="stop_two" offset="50%" />
-            <stop class="stop_three" offset="100%" />
-          </linearGradient>
-        </defs>
-  
         <text
-          x="2.5%"
-          y="60%"
+          x="25%"
+          y="40%"
           fill="black"
           font-size="12"
           font-weight="500"
           text-anchor="start"
         >
-          less births 
-        </text>
-  
-        <text
-          x="100%"
-          y="60%"
-          fill="black"
-          font-size="12"
-          font-weight="500"
-          text-anchor="end"
-        >
-          more births 
+          British Empire
         </text>
       </svg>
-    </div> -->
-  
+    </div>
   {/if}
 </main>
 
@@ -238,7 +245,7 @@
     font-weight: 400;
     padding: 5px;
     top: -2px;
-    font-size: 1.8em;
+    font-size: 1.5em;
     margin: 0px;
     text-align: center;
     color: black;
@@ -248,12 +255,11 @@
     box-shadow: 0 0 3px #5a5a5a;
   }
 
-  /* #legend {
+  #legend {
     width: 205px;
     position: absolute;
-    top: 0px;
-    left: 10px;
-    border-radius: 3px;
+    bottom: 170px;
+    left: 5px;
   }
 
   @media only screen and (max-width: 768px) {
@@ -261,20 +267,6 @@
       width: 123px;
     }
   }
-
-  #legend_rectangle {
-    fill: url(#legend_gradient);
-  }
-
-  .stop_one {
-    stop-color: #DBC2C1;
-  }
-  .stop_two {
-    stop-color: #934242;
-  }
-  .stop_three {
-    stop-color: #740b0b;
-  } */
 
   #time_description {
     border-radius: 2px;
@@ -286,8 +278,33 @@
     padding: 5px;
   }
 
-  /* Map {
-		flex: 1;
-		width: 100%;
-	} */
+  #buttons {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+  }
+
+  #birth,
+  #floruit {
+  background-color: white; /* Green */
+  border: none;
+  color: black;
+  padding: 5px 10px;
+  text-align: center;
+  font-family: "Montserrat";
+  font-weight: 450;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+#birth:hover,
+#floruit:hover {
+  background-color: #000000; /* Green */
+  color: white;
+}
+
 </style>

@@ -6,8 +6,10 @@
         selectedGenderStore,
     } from "../years";
 
+    export let current_data;
     export let birth_data;
-    export let selectedProperties;
+    export let floruit_data;
+    export let selected_country;
     export let births_per_colony;
 
     let data;
@@ -20,56 +22,26 @@
     let margin = { top: 20, right: 30, bottom: 30, left: 40 };
     let svg;
     let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900]; // Custom ticks
-    let y_ticks = [5, 10, 15]; // Custom ticks
+    let y_ticks = [5, 15]; // Custom ticks
     let selectedLineStart = null,
         selectedLineEnd = null,
         selectedYearStart = null,
         selectedYearEnd = null;
 
-    //SELECTED GENDER FILTER
-    const unsubscribe = selectedGenderStore.subscribe((value) => {
-        selected_gender = value[0];
-    });
-
-    $: {
-        if (selected_gender) {
-            data = selected_gender;
-        } else {
-            data = birth_data;
-        }
-    }
-
-    //SELECTED CAREER FILTER
-    const unsubscribe_career = selectedCareerStore.subscribe((value) => {
-        selected_career = value[0];
-    });
-
-    $: {
-        if (selected_career) {
-            data = selected_career;
-        } else {
-            data = birth_data;
-        }
-    }
-
-    // Reactive block to update width when selectedProperties changes
-    $: {
-        if (selectedProperties) {
-            width = containerWidth - innerWidth * 0.4; // Reduce the width by 450px when selectedProperties is not null
-            let selected_colony = births_per_colony.filter(
-                (group) => group[0] == selectedProperties,
-            );
-            data = selected_colony[0][1];
-        } else {
-            width = containerWidth; // Full width when selectedProperties is null
-            data = birth_data;
-        }
-    }
-
-    // Prepare the data
+    // // DATA PREPARATION TODO: simplify!
+    // //switching between birth and floruit data
+    // $: if (current_data) {
+    //     if (current_data == "birth") {
+    //         data = birth_data;
+    //     } else if (current_data == "floruit") {
+    //         data = floruit_data;
+    //     }
+    // }
+    //create array with all years. some may be empty 
     let allYears = Array.from({ length: 1900 - 1700 + 1 }, (_, i) => 1700 + i);
+    //group data by study years
     $: grouped = d3
-        .groups(data, (d) => {
+        .groups(current_data, (d) => {
             if (d.study && d.study.colleges && d.study.colleges.length > 0) {
                 return +d.study.colleges[0].from; // Convert to number
             } else if (
@@ -80,30 +52,71 @@
                 return +d.study.degrees[0].date.substring(0, 4);
             }
         })
-        // .filter((group) => group[0] !== undefined) // Remove cases where 'from' is undefined
+        .filter((group) => group[0] !== undefined) // Remove cases where 'from' is undefined
         .sort((a, b) => d3.ascending(a[0], b[0])); // Sort by 'from' year
-
+    
     $: groupedDataMap = new Map(grouped.map((d) => [d[0], d[1].length]));
+    //final dataset
     $: completeGrouped = allYears.map((year) => [
         year,
         groupedDataMap.get(year) || 0,
     ]); // Default value is 0 if year is not found
 
+    // //SELECTED GENDER FILTER
+    // const unsubscribe = selectedGenderStore.subscribe((value) => {
+    //     selected_gender = value[0];
+    // });
+
+    // $: {
+    //     if (selected_gender) {
+    //         data = selected_gender;
+    //     } else {
+    //         data = birth_data;
+    //     }
+    // }
+
+    // //SELECTED CAREER FILTER
+    // const unsubscribe_career = selectedCareerStore.subscribe((value) => {
+    //     selected_career = value[0];
+    // });
+
+    // $: {
+    //     if (selected_career) {
+    //         data = selected_career;
+    //     } else {
+    //         data = birth_data;
+    //     }
+    // }
+
+    // Reactive block to update width when selected_country changes
+    $: {
+        if (selected_country) {
+            width = containerWidth - innerWidth * 0.4; // Reduce the width by 450px when selectedProperties is not null
+            let selected_colony = births_per_colony.filter(
+                (group) => group[0] == selected_country,
+            );
+            data = selected_colony[0][1];
+        } else {
+            width = containerWidth; // Full width when selected_country is null
+            data = birth_data;
+        }
+    }
+
+    //SCALES FOR TIMELINE
     // Create the X scale for the years (horizontal axis)
     $: xScale = d3
         .scaleBand()
         .domain(allYears) // Use all years
         .range([margin.left, width - margin.right])
         .padding(0.2);
-
     // Create the Y scale for the counts (vertical axis)
     $: yScale = d3
         .scaleLinear()
-        .domain([0, 15]) // The max number of elements
+        .domain([0, 20]) // The max number of elements
         .nice() // Adds some padding to the top of the Y axis
         .range([height - margin.bottom, margin.top]);
 
-    // Create the brush
+    //BRUSHING
     $: brush = d3
         .brushX()
         .handleSize(10)

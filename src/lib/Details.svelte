@@ -1,17 +1,24 @@
 <script>
     import { createEventDispatcher } from "svelte";
     import * as d3 from "d3";
-    import { career, filterData, genderFilter } from "../utils";
+    import {
+        career,
+        filterData,
+        genderFilter,
+        constructNodesAndLinks,
+    } from "../utils";
     import {
         selectedYearsStore,
         selectedCareerStore,
         selectedGenderStore,
     } from "../years";
+    import Network from "./Network.svelte";
 
     const dispatch = createEventDispatcher();
 
     export let births_per_colony;
-    export let selectedProperties;
+    export let selected_country;
+    export let current_data;
 
     let details_width, details_height;
     let career_width = 100;
@@ -33,22 +40,27 @@
         selectedYears = value;
     });
 
-    $: if (selectedYears.length != 0 && selectedProperties != null) {
+    $: if (selectedYears.length != 0 && selected_country != null && current_data) {
         //always reset data
         data = def_data;
         let filter_years = filterData(data, selectedYears[0], selectedYears[1]);
 
-        //update data 
+        //update data
         data = filter_years;
 
-        //gender
-        let filter_gender = d3.groups(filter_years, (d) => d.gender);
-        let both = genderFilter(filter_gender)
-        female = both[0]
-        male = both[1]
+        // //gender
+        // let filter_gender = d3.groups(filter_years, (d) => d.gender);
+        // let both = genderFilter(filter_gender);
+        // female = both[0];
+        // male = both[1];
 
-        //floruit
-        groups = career(data);
+        // //floruit
+        // groups = career(data);
+
+        //data for network
+        node_link = constructNodesAndLinks(data);
+
+
     } else if (selectedYears.length == 0) {
         data = def_data;
         //gender
@@ -60,28 +72,31 @@
 
     // FILTER DATA TO SELECTED COUNTRY
     $: filteredCountry = births_per_colony.filter(
-        (item) => item[0] == selectedProperties,
+        (item) => item[0] == selected_country,
     );
 
+    let node_link;
     $: if (filteredCountry) {
         //set default data
         def_data = filteredCountry[0][1];
         //set data to manipulate
         data = filteredCountry[0][1];
-        all = filteredCountry[0][1].length;
-        //gender
-        gender = d3.groups(filteredCountry[0][1], (d) => d.gender);
-        if (gender.length == 2) {
-            def_female = gender.find((item) => item[0] === "F")[1];
-            female = gender.find((item) => item[0] === "F")[1];
-        } else {
-            female = [];
-        }
-        def_male = gender.find((item) => item[0] === "M")[1];
-        male = gender.find((item) => item[0] === "M")[1];
-        //floruit
-        def_groups = career(data);
-        groups = career(data);
+        // //gender
+        // gender = d3.groups(filteredCountry[0][1], (d) => d.gender);
+        // if (gender.length == 2) {
+        //     def_female = gender.find((item) => item[0] === "F")[1];
+        //     female = gender.find((item) => item[0] === "F")[1];
+        // } else {
+        //     female = [];
+        // }
+        // def_male = gender.find((item) => item[0] === "M")[1];
+        // male = gender.find((item) => item[0] === "M")[1];
+        // //floruit
+        // def_groups = career(data);
+        // groups = career(data);
+
+        //data for network
+        node_link = constructNodesAndLinks(data);
     }
 
     function closeDetails() {
@@ -90,22 +105,22 @@
     }
 
     // Convert group data to array format
-    $: groupData = Object.keys(groups).map((key) => ({
-        name: key,
-        count: groups[key].length,
-    }));
+    // $: groupData = Object.keys(groups).map((key) => ({
+    //     name: key,
+    //     count: groups[key].length,
+    // }));
 
     // Dimensions and margins of the graph
     const margin = { top: 20, right: 30, bottom: 10, left: 10 };
     $: innerWidth = career_width - margin.left - margin.right;
     $: innerHeight = career_height - margin.top - margin.bottom;
 
-    // Create scales
-    $: xScaleCareer = d3
-        .scaleBand()
-        .domain(groupData.map((d) => d.name))
-        .range([10, innerWidth - 20])
-        .padding(0.2);
+    // // Create scales
+    // $: xScaleCareer = d3
+    //     .scaleBand()
+    //     .domain(groupData.map((d) => d.name))
+    //     .range([10, innerWidth - 20])
+    //     .padding(0.2);
 
     $: yScaleCareer = d3
         .scaleLinear()
@@ -190,8 +205,8 @@
             <button class="btn refresh" on:click={refresh}
                 ><i class="fa fa-refresh"></i></button
             >
-            {#if selectedProperties}
-                <h3>{selectedProperties}</h3>
+            {#if selected_country}
+                <h3>{selected_country}</h3>
             {/if}
         </div>
         <div id="peace_content">
@@ -281,7 +296,7 @@
                     </div>
                 </div>
             </div> -->
-<!-- 
+            <!-- 
             <div id="general">
                 <h5>Careers</h5>
                 <div
@@ -337,13 +352,18 @@
             </div> -->
 
             <div id="general">
-                <h5>Visualization</h5>
-
-
+                <!-- <h5>Visualization</h5> -->
+                <div
+                    id="career_wrapper"
+                    bind:clientWidth={career_width}
+                    bind:clientHeight={career_height}
+                >
+                    <Network {node_link} {career_width} {career_height}/>     
+                </div>
             </div>
 
             <div id="peace_process">
-                <h5>List</h5>
+                <!-- <h5>List</h5> -->
                 <div class="scrollable-content">
                     {#each data as d}
                         <!-- Basic information -->
@@ -728,7 +748,7 @@
     #career_wrapper {
         flex-grow: 1;
         overflow-y: auto;
-        padding: 2px 15px;
+        padding: 2px;
         background: none;
         box-sizing: border-box;
         font-weight: 450;
