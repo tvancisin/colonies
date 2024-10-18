@@ -402,6 +402,8 @@
 
     //DRAW INDIVIDUAL LOCATIONS WHEN COLONY CLICKED
     function drawLocations(data, which) {
+        console.log(data, which);
+        
         let local_conflict_geojson = [];
         if (which == "birth") {
             //constructing geojson

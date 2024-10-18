@@ -17,8 +17,10 @@
     const dispatch = createEventDispatcher();
 
     export let births_per_colony;
+    export let floruit_per_colony;
     export let selected_country;
     export let current_data;
+    export let current_data_string;
 
     let details_width, details_height;
     let career_width = 100;
@@ -40,7 +42,11 @@
         selectedYears = value;
     });
 
-    $: if (selectedYears.length != 0 && selected_country != null && current_data) {
+    $: if (
+        selectedYears.length != 0 &&
+        selected_country != null &&
+        current_data
+    ) {
         //always reset data
         data = def_data;
         let filter_years = filterData(data, selectedYears[0], selectedYears[1]);
@@ -59,8 +65,6 @@
 
         //data for network
         node_link = constructNodesAndLinks(data);
-
-
     } else if (selectedYears.length == 0) {
         data = def_data;
         //gender
@@ -70,11 +74,10 @@
         groups = def_groups;
     }
 
-    // FILTER DATA TO SELECTED COUNTRY
-    $: filteredCountry = births_per_colony.filter(
-        (item) => item[0] == selected_country,
-    );
-
+    $: filteredCountry = (
+        current_data_string === "birth" ? births_per_colony : floruit_per_colony
+    ).filter((item) => item[0] == selected_country);
+    
     let node_link;
     $: if (filteredCountry) {
         //set default data
@@ -358,102 +361,10 @@
                     bind:clientWidth={career_width}
                     bind:clientHeight={career_height}
                 >
-                    <Network {node_link} {career_width} {career_height}/>     
+                    <Network {node_link} {career_width} {career_height} />
                 </div>
             </div>
 
-            <div id="peace_process">
-                <!-- <h5>List</h5> -->
-                <div class="scrollable-content">
-                    {#each data as d}
-                        <!-- Basic information -->
-                        <p><strong>Name:</strong> {d.forename} {d.surname}</p>
-
-                        <!-- Birth Information -->
-                        <p>
-                            <strong>Birth Location:</strong>
-                            {d.birth_location.original_name}
-                        </p>
-                        <p>
-                            <strong>Birth Date:</strong>
-                            {d.birth_date || "Unknown"}
-                        </p>
-
-                        <!-- Death Information -->
-                        <p>
-                            <strong>Death Date:</strong>
-                            {d.death_date || "Unknown"}
-                        </p>
-                        {#if d.death_location}
-                            <p>
-                                <strong>Death Location:</strong>
-                                {d.death_location.original_name || "Unknown"}
-                            </p>
-                        {/if}
-
-                        <!-- Family Information -->
-                        {#if d.father}
-                            <p>
-                                <strong>Father:</strong>
-                                {d.father.forename}
-                                {d.father.surname}
-                            </p>
-                        {/if}
-                        {#if d.mother}
-                            <p>
-                                <strong>Mother:</strong>
-                                {d.mother.forename}
-                                {d.mother.surname}
-                            </p>
-                        {/if}
-
-                        <!-- Study Information -->
-                        {#if d.study}
-                            {#if d.study.colleges && d.study.colleges.length > 0}
-                                <p><strong>Colleges:</strong></p>
-                                {#each d.study.colleges as college}
-                                    <p>{college.name} (From: {college.from})</p>
-                                {/each}
-                            {/if}
-                            {#if d.study.degrees && d.study.degrees.length > 0}
-                                <p><strong>Degrees:</strong></p>
-                                {#each d.study.degrees as degree}
-                                    <p>{degree.name} (Date: {degree.date})</p>
-                                {/each}
-                            {/if}
-                        {/if}
-
-                        <!-- Floruit (Occupations) -->
-                        {#if d.floruit && d.floruit.length > 0}
-                            <p><strong>Floruit:</strong></p>
-                            {#each d.floruit as floruit}
-                                <p>
-                                    {floruit.occupation} at {floruit.location
-                                        .original_name}
-                                    (From: {floruit.from} To: {floruit.to})
-                                </p>
-                            {/each}
-                        {/if}
-
-                        <!-- References -->
-                        {#if d.references && d.references.length > 0}
-                            <p><strong>References:</strong></p>
-                            {#each d.references as reference}
-                                <p>{reference}</p>
-                            {/each}
-                        {/if}
-
-                        <!-- ID -->
-                        {#if d.id}
-                            <p><strong>ID:</strong></p>
-                            <p>{d.id}</p>
-                        {/if}
-
-                        <!-- Separator between records -->
-                        <hr />
-                    {/each}
-                </div>
-            </div>
         </div>
     </div>
 {/if}

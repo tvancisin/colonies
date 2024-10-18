@@ -57,6 +57,15 @@
       (d) => d.birth_location.colony,
     );
 
+    floruit_data.forEach(function (person) {
+      // If floruit is not an array, convert it into one
+      if (!Array.isArray(person.floruit)) {
+        person.floruit = [person.floruit];
+      }
+    });
+
+    console.log(floruit_data);
+
     floruit_data.forEach((person) => {
       if (person.floruit && Array.isArray(person.floruit)) {
         person.floruit.forEach((floruitItem) => {
@@ -79,23 +88,20 @@
       }
     });
 
-    // Function to flatten floruit objects and associate them with their person
     function flattenFloruit(filteredData) {
       return filteredData.flatMap((person) =>
         person.floruit.map((floruitItem) => ({
-          ...person,
-          floruit: floruitItem, // Only include the current floruit item
+          ...person, // Create a shallow copy of the person
+          current_floruit: { ...floruitItem }, // Add a new property for the current floruit item
         })),
       );
     }
 
+    // Grouping floruit entries by colony name using the new current_floruit property
     floruit_per_colony = d3.groups(
-      flattenFloruit(floruit_data),
-      (d) => d.floruit.location.colony,
+      flattenFloruit(floruit_data), // Flatten the floruit entries
+      (d) => d.current_floruit.location.colony, // Group by colony name using the new current_floruit property
     );
-
-    console.log(floruit_per_colony);
-    
 
     current_data = birth_data;
     current_data_string = "birth";
@@ -127,17 +133,33 @@
 
   function handlePolygonClick(event) {
     selected_country = event.detail;
+    if (current_data_string == "birth") {
+      current_data = births_per_colony.find(
+        (item) => item[0] === selected_country,
+      )?.[1];
+    } else if (current_data_string == "floruit") {
+      console.log(floruit_per_colony);
 
-    // current_data = births_per_colony.find(item => item[0] === selected_country)?.[1];
+      current_data = floruit_per_colony.find(
+        (item) => item[0] === selected_country,
+      )?.[1];
+    }
+
     // console.log(mydata);
     // current_data = floruit_per_colony.find(item => item[0] === selected_country)?.[1];
-    
 
     d3.select("#details").style("right", "0px");
     d3.select("h1").style("top", "-50px");
   }
 
   function handleClose() {
+    //reset data on details close
+    if (current_data_string == "birth") {
+      current_data = birth_data;
+    } else if (current_data_string == "floruit") {
+      current_data = floruit_data;
+    }
+
     d3.select("#details").style("right", "-100%");
     d3.select("h1").style("top", "-2px");
     selected_country = null;
@@ -190,8 +212,10 @@
     <Details
       on:close={handleClose}
       {births_per_colony}
+      {floruit_per_colony}
       {selected_country}
       {current_data}
+      {current_data_string}
     />
     <div id="legend">
       <svg
@@ -286,25 +310,24 @@
 
   #birth,
   #floruit {
-  background-color: white; /* Green */
-  border: none;
-  color: black;
-  padding: 5px 10px;
-  text-align: center;
-  font-family: "Montserrat";
-  font-weight: 450;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 14px;
-  margin: 4px 2px;
-  transition-duration: 0.4s;
-  cursor: pointer;
-}
+    background-color: white; /* Green */
+    border: none;
+    color: black;
+    padding: 5px 10px;
+    text-align: center;
+    font-family: "Montserrat";
+    font-weight: 450;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+  }
 
-#birth:hover,
-#floruit:hover {
-  background-color: #000000; /* Green */
-  color: white;
-}
-
+  #birth:hover,
+  #floruit:hover {
+    background-color: #000000; /* Green */
+    color: white;
+  }
 </style>
