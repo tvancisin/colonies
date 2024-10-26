@@ -77,9 +77,10 @@
     $: filteredCountry = (
         current_data_string === "birth" ? births_per_colony : floruit_per_colony
     ).filter((item) => item[0] == selected_country);
-    
+
     let node_link;
     $: if (filteredCountry) {
+
         //set default data
         def_data = filteredCountry[0][1];
         //set data to manipulate
@@ -364,7 +365,80 @@
                     <Network {node_link} {career_width} {career_height} />
                 </div>
             </div>
-
+            <div id="peace_process">
+                <!-- <div class="scrollable-content">
+                    {#each data as d}
+                        <p><strong>Name:</strong> {d.forename} {d.surname}</p>
+                        <p>
+                            <strong>Birth Location:</strong>
+                            {d.birth_location.original_name}
+                        </p>
+                        <p>
+                            <strong>Birth Date:</strong>
+                            {d.birth_date || "Unknown"}
+                        </p>
+                        <p>
+                            <strong>Death Date:</strong>
+                            {d.death_date || "Unknown"}
+                        </p>
+                        {#if d.death_location}
+                            <p>
+                                <strong>Death Location:</strong>
+                                {d.death_location.original_name || "Unknown"}
+                            </p>
+                        {/if}
+                        {#if d.father}
+                            <p>
+                                <strong>Father:</strong>
+                                {d.father.forename}
+                                {d.father.surname}
+                            </p>
+                        {/if}
+                        {#if d.mother}
+                            <p>
+                                <strong>Mother:</strong>
+                                {d.mother.forename}
+                                {d.mother.surname}
+                            </p>
+                        {/if}
+                        {#if d.study}
+                            {#if d.study.colleges && d.study.colleges.length > 0}
+                                <p><strong>Colleges:</strong></p>
+                                {#each d.study.colleges as college}
+                                    <p>{college.name} (From: {college.from})</p>
+                                {/each}
+                            {/if}
+                            {#if d.study.degrees && d.study.degrees.length > 0}
+                                <p><strong>Degrees:</strong></p>
+                                {#each d.study.degrees as degree}
+                                    <p>{degree.name} (Date: {degree.date})</p>
+                                {/each}
+                            {/if}
+                        {/if}
+                        {#if d.floruit && d.floruit.length > 0}
+                            <p><strong>Floruit:</strong></p>
+                            {#each d.floruit as floruit}
+                                <p>
+                                    {floruit.occupation} at {floruit.location
+                                        .original_name}
+                                    (From: {floruit.from} To: {floruit.to})
+                                </p>
+                            {/each}
+                        {/if}
+                        {#if d.references && d.references.length > 0}
+                            <p><strong>References:</strong></p>
+                            {#each d.references as reference}
+                                <p>{reference}</p>
+                            {/each}
+                        {/if}
+                        {#if d.id}
+                            <p><strong>ID:</strong></p>
+                            <p>{d.id}</p>
+                        {/if}
+                        <hr />
+                    {/each}
+                </div> -->
+            </div>
         </div>
     </div>
 {/if}
@@ -419,7 +493,7 @@
         margin: auto;
         font-size: 1.3redem;
         padding: 5px;
-        font-weight: 450;
+        font-weight: 300;
     }
 
     @media only screen and (max-width: 1450px) {
@@ -586,11 +660,11 @@
     }
 
     #general {
-        flex-grow: 2; /* Takes one unit of the available space */
+        flex-grow: 1; /* Takes one unit of the available space */
     }
 
     #peace_process {
-        flex-grow: 3; /* Takes three units of the available space each */
+        flex-grow: 1; /* Takes three units of the available space each */
     }
 
     h5 {

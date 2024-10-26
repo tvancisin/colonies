@@ -92,13 +92,15 @@
     $: {
         if (selected_country) {
             width = containerWidth - innerWidth * 0.4; // Reduce the width by 450px when selectedProperties is not null
-            let selected_colony = births_per_colony.filter(
-                (group) => group[0] == selected_country,
-            );
-            data = selected_colony[0][1];
+            d3.select("#timeline").style("width", "100%")
+            // let selected_colony = births_per_colony.filter(
+            //     (group) => group[0] == selected_country,
+            // );
+            // data = selected_colony[0][1];
         } else {
             width = containerWidth; // Full width when selected_country is null
-            data = birth_data;
+            d3.select("#timeline").style("width", "85%")
+            // data = birth_data;
         }
     }
 
@@ -297,8 +299,9 @@
 <style>
     #timeline {
         position: absolute;
+        border-radius: 5px;
         bottom: 0px;
-        width: 100%;
+        width: 85%;
         height: 160px;
         background: rgba(0, 0, 0, 0.034);
     }

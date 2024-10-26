@@ -32,16 +32,16 @@
         .stop();
 
     $: {
-        for (let i = 0, n = 120; i < n; ++i) {
+        for (let i = 0, n = 100; i < n; ++i) {
             simulation.tick();
         }
     }
 
     function diff_group(data) {
         if (data.group == "person") {
-            return "orange";
-        } else {
             return "#333333";
+        } else {
+            return "#F27721";
         }
     }
 
@@ -52,7 +52,7 @@
 
 <svg {width} {height}>
     {#each links as link}
-        <g stroke="#999" stroke-opacity="0.6">
+        <g stroke="#999" stroke-opacity="0.6" stroke-width="0.4">
             <line
                 x1={link.source.x}
                 y1={link.source.y}

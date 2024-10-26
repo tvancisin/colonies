@@ -64,8 +64,6 @@
       }
     });
 
-    console.log(floruit_data);
-
     floruit_data.forEach((person) => {
       if (person.floruit && Array.isArray(person.floruit)) {
         person.floruit.forEach((floruitItem) => {
@@ -88,20 +86,43 @@
       }
     });
 
-    function flattenFloruit(filteredData) {
-      return filteredData.flatMap((person) =>
-        person.floruit.map((floruitItem) => ({
-          ...person, // Create a shallow copy of the person
-          current_floruit: { ...floruitItem }, // Add a new property for the current floruit item
-        })),
-      );
+    function groupByColony(data) {
+      const groupedByColony = {};
+
+      data.forEach((item) => {
+        if (item.floruit) {
+          item.floruit.forEach((floruitEntry) => {
+            const colony = floruitEntry.location.colony || "unknown";
+
+            // Initialize the colony group if it doesn't exist
+            if (!groupedByColony[colony]) {
+              groupedByColony[colony] = {
+                items: [],
+                ids: new Set(),
+              };
+            }
+
+            // Only add the item if it hasn't been added already
+            if (!groupedByColony[colony].ids.has(item.id)) {
+              groupedByColony[colony].items.push(item);
+              groupedByColony[colony].ids.add(item.id); // Mark the item as added
+            }
+          });
+        }
+      });
+
+      // Prepare the output structure
+      const outputArray = Object.keys(groupedByColony).map((colony) => {
+        return [
+          colony === "unknown" ? undefined : colony,
+          groupedByColony[colony].items,
+        ];
+      });
+
+      return outputArray;
     }
 
-    // Grouping floruit entries by colony name using the new current_floruit property
-    floruit_per_colony = d3.groups(
-      flattenFloruit(floruit_data), // Flatten the floruit entries
-      (d) => d.current_floruit.location.colony, // Group by colony name using the new current_floruit property
-    );
+    floruit_per_colony = groupByColony(floruit_data);
 
     current_data = birth_data;
     current_data_string = "birth";
@@ -138,12 +159,11 @@
         (item) => item[0] === selected_country,
       )?.[1];
     } else if (current_data_string == "floruit") {
-      console.log(floruit_per_colony);
-
       current_data = floruit_per_colony.find(
         (item) => item[0] === selected_country,
       )?.[1];
     }
+    d3.select("#time_description").style("left", "0%");
 
     // console.log(mydata);
     // current_data = floruit_per_colony.find(item => item[0] === selected_country)?.[1];
@@ -160,6 +180,7 @@
       current_data = floruit_data;
     }
 
+    d3.select("#time_description").style("left", "8.5%");
     d3.select("#details").style("right", "-100%");
     d3.select("h1").style("top", "-2px");
     selected_country = null;
@@ -169,9 +190,17 @@
   //set variables based on selection (birth or floruit)
   function change_data(selected_data) {
     if (selected_data == "birth") {
+      d3.select("#floruit").style("background-color", "white");
+      d3.select("#floruit").style("color", "black");
+      d3.select("#birth").style("background-color", "black");
+      d3.select("#birth").style("color", "white");
       current_data = birth_data;
       current_data_string = selected_data;
     } else if (selected_data == "floruit") {
+      d3.select("#floruit").style("background-color", "black");
+      d3.select("#floruit").style("color", "white");
+      d3.select("#birth").style("background-color", "white");
+      d3.select("#birth").style("color", "black");
       current_data = floruit_data;
       current_data_string = selected_data;
     }
@@ -179,7 +208,7 @@
 </script>
 
 <main bind:clientWidth={width} bind:clientHeight={height}>
-  {#if countries_json && shipping_json && current_data}
+  {#if countries_json && shipping_json && current_data && births_per_colony && floruit_per_colony}
     <h1>University of St Andrews Students in the Empire (1700-1897)</h1>
     <Map
       {current_data}
@@ -269,7 +298,7 @@
     font-weight: 400;
     padding: 5px;
     top: -2px;
-    font-size: 1.5em;
+    font-size: 1.3em;
     margin: 0px;
     text-align: center;
     color: black;
@@ -280,10 +309,12 @@
   }
 
   #legend {
-    width: 205px;
+    width: 150px;
+    height: 100px;
+    border-radius: 3px;
     position: absolute;
-    bottom: 170px;
-    left: 5px;
+    top: 5px;
+    right: 5px;
   }
 
   @media only screen and (max-width: 768px) {
@@ -295,9 +326,9 @@
   #time_description {
     border-radius: 2px;
     position: absolute;
-    left: 0px;
+    left: 8.5%;
     bottom: 160px;
-    font-weight: 500;
+    font-weight: 450;
     background: rgba(0, 0, 0, 0.034);
     padding: 5px;
   }
@@ -316,18 +347,25 @@
     padding: 5px 10px;
     text-align: center;
     font-family: "Montserrat";
-    font-weight: 450;
+    font-weight: 400;
     text-decoration: none;
     display: inline-block;
     font-size: 14px;
     margin: 4px 2px;
+    border-radius: 3px;
     transition-duration: 0.4s;
     cursor: pointer;
+    box-shadow: 0 0 2px #000000;
+  }
+
+  #birth {
+    background-color: #000000;
+    color: white;
   }
 
   #birth:hover,
   #floruit:hover {
-    background-color: #000000; /* Green */
+    background-color: #000000;
     color: white;
   }
 </style>

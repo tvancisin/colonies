@@ -57,10 +57,10 @@
         selectedYears = value;
     });
 
-    //filter individual locations on selected years
-    function filter_circles(ids) {
-        map.setFilter("population", ["in", ["get", "id"], ["literal", ids]]);
-    }
+    // //filter individual locations on selected years
+    // function filter_circles(ids) {
+    //     map.setFilter("population", ["in", ["get", "id"], ["literal", ids]]);
+    // }
 
     $: if (map && selectedYears.length != 0 && map.getSource("locations")) {
         let filtered_country = filterData(
@@ -68,8 +68,7 @@
             selectedYears[0],
             selectedYears[1],
         );
-        let indi_loc_array = filtered_country.map((d) => d.id);
-        filter_circles(indi_loc_array);
+        drawLocations(filtered_country, current_data_string);
     }
 
     //SELECTED GENDER FILTER
@@ -129,7 +128,6 @@
                   flattenFloruit(filteredData),
                   (d) => d.floruit.location.colony,
               );
-
 
     $: filtered_opacity = opacity_generator(filtered_grouped_colonies);
 
@@ -211,7 +209,7 @@
             zoom: 2,
             maxZoom: 8,
             minZoom: 1.3,
-            logoPosition: "top-right", // move logo to the top-right
+            // logoPosition: "top-right", // move logo to the top-right
             projection: "naturalEarth",
         });
     });
@@ -234,7 +232,7 @@
                     type: "line",
                     source: "shipping",
                     paint: {
-                        "line-color": "black",
+                        "line-color": "gray",
                         "line-opacity": 0.7,
                         "line-width": [
                             "match",
@@ -250,7 +248,7 @@
                             "Caribbean",
                             1.54,
                             "America",
-                            2.80,
+                            2.8,
                             0,
                         ],
                         // "line-dasharray": [3, 0.5],
@@ -275,8 +273,8 @@
                             "match",
                             ["get", "ADMIN"],
                             "Britain",
-                            "black",
-                            "black",
+                            "gray",
+                            "gray",
                         ],
                         // "fill-opacity": opacity_mapbox_expression, // Initial opacity
                         "fill-opacity": 0.7,
@@ -400,59 +398,143 @@
     //     }, 50);
     // }
 
+    // function groupByColony(data) {
+    //     const groupedByColony = {};
+
+    //     data.forEach((item) => {
+    //         if (item.floruit) {
+    //             item.floruit.forEach((floruitEntry) => {
+    //                 // Only proceed if floruitEntry.location.colony exists
+    //                 if (floruitEntry.location.colony) {
+    //                     const colony =
+    //                         floruitEntry.location.official_name ||
+    //                         floruitEntry.location.original_name; // Group by colony
+
+    //                     // Initialize the colony group if it doesn't exist
+    //                     if (!groupedByColony[colony]) {
+    //                         groupedByColony[colony] = {
+    //                             items: [],
+    //                             ids: new Set(),
+    //                         };
+    //                     }
+
+    //                     // Only add the item if it hasn't been added already
+    //                     if (!groupedByColony[colony].ids.has(item.id)) {
+    //                         groupedByColony[colony].items.push(item);
+    //                         groupedByColony[colony].ids.add(item.id); // Mark the item as added
+    //                     }
+    //                 }
+    //             });
+    //         }
+    //     });
+
+    //     // Prepare the output structure
+    //     const outputArray = Object.keys(groupedByColony).map((colony) => {
+    //         return [colony, groupedByColony[colony].items];
+    //     });
+
+    //     return outputArray;
+    // }
+
+    function groupByColony(data) {
+        const groupedByColony = {};
+
+        data.forEach((item) => {
+            if (item.floruit) {
+                item.floruit.forEach((floruitEntry) => {
+                    // Only proceed if floruitEntry.location.colony exists
+                    if (floruitEntry.location.colony) {
+                        const colony =
+                            floruitEntry.location.official_name ||
+                            floruitEntry.location.original_name; // Group by colony
+
+                        const latitude = floruitEntry.location.latitude;
+                        const longitude = floruitEntry.location.longitude;
+
+                        // Initialize the colony group if it doesn't exist
+                        if (!groupedByColony[colony]) {
+                            groupedByColony[colony] = {
+                                items: [],
+                                ids: new Set(),
+                                coordinates: null, // Add coordinates field, initially null
+                            };
+                        }
+
+                        // Only add the item if it hasn't been added already
+                        if (!groupedByColony[colony].ids.has(item.id)) {
+                            groupedByColony[colony].items.push(item);
+                            groupedByColony[colony].ids.add(item.id); // Mark the item as added
+                        }
+
+                        // Add the coordinates if they haven't been added yet
+                        if (!groupedByColony[colony].coordinates) {
+                            groupedByColony[colony].coordinates = [
+                                latitude,
+                                longitude,
+                            ];
+                        }
+                    }
+                });
+            }
+        });
+
+        // Prepare the output structure, including the coordinates
+        const outputArray = Object.keys(groupedByColony).map((colony) => {
+            return [
+                colony,
+                groupedByColony[colony].items,
+                groupedByColony[colony].coordinates,
+            ];
+        });
+
+        return outputArray;
+    }
+
     //DRAW INDIVIDUAL LOCATIONS WHEN COLONY CLICKED
     function drawLocations(data, which) {
-        console.log(data, which);
-        
+        // console.log(data, which);
         let local_conflict_geojson = [];
         if (which == "birth") {
-            //constructing geojson
-            data.forEach(function (d) {
+            let group_by_location = d3.groups(data, (d) => {
+                return (
+                    d.birth_location.official_name ||
+                    d.birth_location.original_name
+                );
+            });
+            group_by_location.forEach(function (d) {
                 let to_push = {
                     type: "Feature",
                     properties: {
-                        id: d.id,
-                        forename: d.forename,
-                        surname: d.surname,
-                        birth: d.birth_location.original_name,
+                        id: d[0],
+                        people_array: d[1],
+                        no_of_ppl: d[1].length,
                     },
                     geometry: {
                         type: "Point",
                         coordinates: [
-                            d.birth_location.longitude,
-                            d.birth_location.latitude,
+                            d[1][0].birth_location.longitude,
+                            d[1][0].birth_location.latitude,
                         ],
                     },
                 };
                 local_conflict_geojson.push(to_push);
             });
         } else if (which == "floruit") {
-            data.forEach(function (person) {
-                // Iterate over each floruit entry
-                person.floruit.forEach(function (floruitEntry) {
-                    // Check if the country code is in the colonies array
-                    if (colonies.includes(floruitEntry.location.country)) {
-                        let to_push = {
-                            type: "Feature",
-                            properties: {
-                                id: person.id,
-                                forename: person.forename,
-                                surname: person.surname,
-                                occupation: floruitEntry.occupation, // Additional property for occupation
-                                from: floruitEntry.from, // Adding timeframe if needed
-                                to: floruitEntry.to,
-                            },
-                            geometry: {
-                                type: "Point",
-                                coordinates: [
-                                    floruitEntry.location.longitude,
-                                    floruitEntry.location.latitude,
-                                ],
-                            },
-                        };
-                        local_conflict_geojson.push(to_push);
-                    }
-                });
+            let group_by_location = groupByColony(data);
+            group_by_location.forEach(function (d) {
+                let to_push = {
+                    type: "Feature",
+                    properties: {
+                        id: d[0],
+                        people_array: d[1],
+                        no_of_ppl: d[1].length,
+                    },
+                    geometry: {
+                        type: "Point",
+                        coordinates: [d[2][1], d[2][0]],
+                    },
+                };
+                local_conflict_geojson.push(to_push);
             });
         }
 
@@ -461,75 +543,87 @@
             features: local_conflict_geojson,
         };
 
-        map.addSource("locations", {
-            type: "geojson",
-            data: geojson_data,
-            generateId: true, //This ensures that all features have unique IDs
-        });
+        // If source exists, update it
+        if (map.getSource("locations")) {
+            map.getSource("locations").setData(geojson_data);
+        } else {
+            // If source doesn't exist, add it and the layer
+            map.addSource("locations", {
+                type: "geojson",
+                data: geojson_data,
+                generateId: true, // Ensures that all features have unique IDs
+            });
 
-        //circles for agreements
-        map.addLayer({
-            id: "population",
-            type: "circle",
-            source: "locations",
-            paint: {
-                "circle-opacity": 0.8,
-                "circle-stroke-width": 1,
-                "circle-stroke-color": "black",
-                "circle-radius": 5,
-                "circle-color": "orange",
-            },
-        });
-
-        let fatal_popup = new mapboxgl.Popup({
-            closeButton: false,
-            closeOnClick: false,
-        });
-
-        function handleMouseMove(e) {
-            let forename = e.features[0].properties.forename;
-            let surname = e.features[0].properties.surname;
-            let birth = e.features[0].properties.birth;
-
-            map.getCanvas().style.cursor = "pointer";
-            if (e.features.length > 0) {
-                if (hoveredPolygonIdFatal !== null) {
-                    map.setFeatureState(
-                        { source: "locations", id: hoveredPolygonIdFatal },
-                        { hover: false },
-                    );
-                }
-                hoveredPolygonIdFatal = e.features[0].id;
-                map.setFeatureState(
-                    { source: "locations", id: hoveredPolygonIdFatal },
-                    { hover: true },
-                );
-
-                fatal_popup
-                    .setLngLat(e.lngLat)
-                    .setHTML(
-                        `<div style="color:black;  font-family:Montserrat; font-weight: 500; 
-              line-height:1.2">${forename + " " + surname + `<br>` + birth}</div>`,
-                    )
-                    .addTo(map);
-            }
+            // Add the circle layer
+            map.addLayer({
+                id: "population",
+                type: "circle",
+                source: "locations",
+                paint: {
+                    "circle-opacity": 0.5,
+                    "circle-radius": [
+                        "interpolate",
+                        ["linear"],
+                        ["get", "no_of_ppl"],
+                        1,
+                        3, // Radius for 1 person
+                        10,
+                        10, // Radius for 10 people (adjust as needed)
+                    ],
+                    "circle-color": "black",
+                },
+            });
         }
 
-        map.on("mousemove", "population", handleMouseMove);
+        // let fatal_popup = new mapboxgl.Popup({
+        //     closeButton: false,
+        //     closeOnClick: false,
+        // });
 
-        // When the mouse leaves the state-fill layer, update the feature state of the
-        // previously hovered feature.
-        map.on("mouseleave", `population`, () => {
-            map.getCanvas().style.cursor = "";
-            if (hoveredPolygonIdFatal !== null) {
-                map.setFeatureState(
-                    { source: "locations", id: hoveredPolygonIdFatal },
-                    { hover: false },
-                );
-            }
-            hoveredPolygonIdFatal = null;
-            fatal_popup.remove();
-        });
+        // function handleMouseMove(e) {
+        //     let forename = e.features[0].properties.forename;
+        //     let surname = e.features[0].properties.surname;
+        //     let birth = e.features[0].properties.birth;
+
+        //     map.getCanvas().style.cursor = "pointer";
+        //     if (e.features.length > 0) {
+        //         if (hoveredPolygonIdFatal !== null) {
+        //             map.setFeatureState(
+        //                 { source: "locations", id: hoveredPolygonIdFatal },
+        //                 { hover: false },
+        //             );
+        //         }
+        //         hoveredPolygonIdFatal = e.features[0].id;
+        //         map.setFeatureState(
+        //             { source: "locations", id: hoveredPolygonIdFatal },
+        //             { hover: true },
+        //         );
+
+        //         fatal_popup
+        //             .setLngLat(e.lngLat)
+        //             .setHTML(
+        //                 `<div style="color:black;  font-family:Montserrat; font-weight: 500;
+        //       line-height:1.2">${forename + " " + surname + `<br>` + birth}</div>`,
+        //             )
+        //             .addTo(map);
+        //     }
+        // }
+
+        // map.on("mousemove", "population", handleMouseMove);
+
+        // // When the mouse leaves the state-fill layer, update the feature state of the
+        // // previously hovered feature.
+        // map.on("mouseleave", `population`, () => {
+        //     map.getCanvas().style.cursor = "";
+        //     if (hoveredPolygonIdFatal !== null) {
+        //         map.setFeatureState(
+        //             { source: "locations", id: hoveredPolygonIdFatal },
+        //             { hover: false },
+        //         );
+        //     }
+        //     hoveredPolygonIdFatal = null;
+        //     fatal_popup.remove();
+        // });
     }
 
     //ZOOM IN TO CLICKED COUNTRY
