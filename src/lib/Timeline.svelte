@@ -22,7 +22,9 @@
     let containerWidth = 800;
     let margin = { top: 20, right: 30, bottom: 30, left: 40 };
     let svg;
-    let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900, 1925, 1950]; // Custom ticks
+    let x_ticks = [
+        1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900, 1925, 1950,
+    ]; // Custom ticks
     let y_ticks = [5, 15]; // Custom ticks
     let selectedLineStart = null,
         selectedLineEnd = null,
@@ -30,7 +32,7 @@
         selectedYearEnd = null;
 
     //create array with all years. some may be empty
-    let allYears = Array.from({ length: 1970 - 1700 + 1 }, (_, i) => 1700 + i);
+    let allYears = Array.from({ length: 1970 - 1650 + 1 }, (_, i) => 1650 + i);
     //group data by study years
     $: grouped = d3
         .groups(current_data, (d) => {
@@ -84,14 +86,14 @@
     $: {
         if (selected_country) {
             width = containerWidth - innerWidth * 0.4; // Reduce the width by 450px when selectedProperties is not null
-            d3.select("#timeline").style("width", "100%");
+            d3.selectAll("#timeline, #year_detail").style("width", "100%");
             // let selected_colony = births_per_colony.filter(
             //     (group) => group[0] == selected_country,
             // );
             // data = selected_colony[0][1];
         } else {
             width = containerWidth; // Full width when selected_country is null
-            d3.select("#timeline").style("width", "85%");
+            d3.selectAll("#timeline, #year_detail").style("width", "85%");
             // data = birth_data;
         }
     }
@@ -103,7 +105,7 @@
         .domain(allYears) // Use all years
         .range([margin.left, width - margin.right])
         .padding(0.2);
-        
+
     // Create the Y scale for the counts (vertical axis)
     $: yScale = d3
         .scaleLinear()
@@ -233,14 +235,15 @@
         }
     }
 
-    let one_year_position = 100;
     let one_year;
     $: if (selected_years[0] == selected_years[1]) {
+        //filter data to by selected years
         one_year = filterData(
             current_data,
             selected_years[0],
             selected_years[1],
         );
+
         one_year.forEach((d) => {
             if (d.birth_date) {
                 if (d.birth_date.length > 4) {
@@ -259,7 +262,7 @@
                     d.death_date = +d.death_date;
                 }
             } else {
-                d.death_date = selected_years[0] + 40;
+                d.death_date = selected_years[0] + 30;
             }
 
             if (d.floruit) {
@@ -283,38 +286,28 @@
                 ];
             }
         });
-        console.log(one_year);
-
         d3.select("#year_detail").style("visibility", "visible");
-        let full_width = window.innerWidth;
-        let time_width = width;
-        let gap = (full_width - time_width) / 2 - 70;
-        one_year_position = selectedLineStart + gap;
     } else {
         d3.select("#year_detail").style("visibility", "hidden");
-    }
-
-    function check(d) {
-        console.log(d);
-        return 2.5;
     }
 </script>
 
 <div id="year_detail">
     {#if one_year}
-        <svg {width} height="90px">
+        <svg {width} height="110px">
             {#each one_year as year, i}
                 <line
                     x1={xScale(year.birth_date)}
-                    y1={85 - i * 5}
+                    y1={105 - i * 5}
                     x2={xScale(year.death_date)}
-                    y2={85 - i * 5}
+                    y2={105 - i * 5}
                     stroke="black"
                     stroke-width="1"
+                    stroke-dasharray="0"
                 />
                 <circle
                     cx={xScale(year.birth_date)}
-                    cy={85 - i * 5}
+                    cy={105 - i * 5}
                     r="2.5"
                     fill="white"
                     stroke="black"
@@ -322,15 +315,15 @@
                 />
                 <circle
                     cx={xScale(year.death_date)}
-                    cy={85 - i * 5}
+                    cy={105 - i * 5}
                     r="2.5"
                     fill="black"
                     stroke="black"
                     stroke-width="0.5"
                 />
                 <circle
-                    cx={xScale(selected_years[0])}
-                    cy={85 - i * 5}
+                    cx={xScale(selected_years[0]) + xScale.bandwidth() / 2}
+                    cy={105 - i * 5}
                     r="2.5"
                     fill="#00539B"
                     stroke="black"
@@ -339,11 +332,11 @@
                 {#each year.floruit as flor}
                     <circle
                         cx={xScale(flor.from)}
-                        cy={85 - i * 5}
-                        r={check(flor)}
+                        cy={105 - i * 5}
+                        r="2.5"
                         fill="red"
-                    stroke="black"
-                    stroke-width="0.5"
+                        stroke="black"
+                        stroke-width="0.5"
                     />
                 {/each}
             {/each}
@@ -442,8 +435,12 @@
         position: absolute;
         visibility: hidden;
         width: 85%;
-        height: 90px;
+        height: 110px;
         /* background-color: rgba(255, 0, 0, 0.264); */
         bottom: 160px;
+    }
+
+    line {
+        shape-rendering: crispEdges;
     }
 </style>

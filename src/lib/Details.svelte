@@ -80,7 +80,6 @@
 
     let node_link;
     $: if (filteredCountry) {
-
         //set default data
         def_data = filteredCountry[0][1];
         //set data to manipulate
@@ -366,13 +365,15 @@
                 </div>
             </div>
             <div id="peace_process">
-                <!-- <div class="scrollable-content">
+                <div class="scrollable-content">
                     {#each data as d}
                         <p><strong>Name:</strong> {d.forename} {d.surname}</p>
-                        <p>
-                            <strong>Birth Location:</strong>
-                            {d.birth_location.original_name}
-                        </p>
+                        {#if d.birth_location}
+                            <p>
+                                <strong>Birth Location:</strong>
+                                {d.birth_location.original_name}
+                            </p>
+                        {/if}
                         <p>
                             <strong>Birth Date:</strong>
                             {d.birth_date || "Unknown"}
@@ -437,7 +438,7 @@
                         {/if}
                         <hr />
                     {/each}
-                </div> -->
+                </div>
             </div>
         </div>
     </div>
