@@ -5,6 +5,7 @@
         selectedCareerStore,
         selectedGenderStore,
     } from "../years";
+    import { filterData } from "../utils";
 
     export let current_data;
     export let birth_data;
@@ -13,7 +14,7 @@
     export let births_per_colony;
 
     let data;
-    let selected_years;
+    let selected_years = [1700, 1900];
     let selected_gender;
     let selected_career;
     let width = 800;
@@ -21,24 +22,15 @@
     let containerWidth = 800;
     let margin = { top: 20, right: 30, bottom: 30, left: 40 };
     let svg;
-    let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900]; // Custom ticks
+    let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900, 1925, 1950]; // Custom ticks
     let y_ticks = [5, 15]; // Custom ticks
     let selectedLineStart = null,
         selectedLineEnd = null,
         selectedYearStart = null,
         selectedYearEnd = null;
 
-    // // DATA PREPARATION TODO: simplify!
-    // //switching between birth and floruit data
-    // $: if (current_data) {
-    //     if (current_data == "birth") {
-    //         data = birth_data;
-    //     } else if (current_data == "floruit") {
-    //         data = floruit_data;
-    //     }
-    // }
-    //create array with all years. some may be empty 
-    let allYears = Array.from({ length: 1900 - 1700 + 1 }, (_, i) => 1700 + i);
+    //create array with all years. some may be empty
+    let allYears = Array.from({ length: 1970 - 1700 + 1 }, (_, i) => 1700 + i);
     //group data by study years
     $: grouped = d3
         .groups(current_data, (d) => {
@@ -54,7 +46,7 @@
         })
         .filter((group) => group[0] !== undefined) // Remove cases where 'from' is undefined
         .sort((a, b) => d3.ascending(a[0], b[0])); // Sort by 'from' year
-    
+
     $: groupedDataMap = new Map(grouped.map((d) => [d[0], d[1].length]));
     //final dataset
     $: completeGrouped = allYears.map((year) => [
@@ -92,14 +84,14 @@
     $: {
         if (selected_country) {
             width = containerWidth - innerWidth * 0.4; // Reduce the width by 450px when selectedProperties is not null
-            d3.select("#timeline").style("width", "100%")
+            d3.select("#timeline").style("width", "100%");
             // let selected_colony = births_per_colony.filter(
             //     (group) => group[0] == selected_country,
             // );
             // data = selected_colony[0][1];
         } else {
             width = containerWidth; // Full width when selected_country is null
-            d3.select("#timeline").style("width", "85%")
+            d3.select("#timeline").style("width", "85%");
             // data = birth_data;
         }
     }
@@ -111,6 +103,7 @@
         .domain(allYears) // Use all years
         .range([margin.left, width - margin.right])
         .padding(0.2);
+        
     // Create the Y scale for the counts (vertical axis)
     $: yScale = d3
         .scaleLinear()
@@ -133,6 +126,8 @@
             max = d3.max(domain);
         return [bandScale(min), bandScale(max) + bandScale.bandwidth()];
     };
+
+    let previousSelectedYears = { start: null, end: null };
 
     function brushed(event) {
         // Check if the event is valid (either brush or click event)
@@ -181,9 +176,26 @@
         selectedYearStart = all_selected_years[0];
         selectedLineEnd = x1;
         selectedYearEnd = all_selected_years[all_selected_years.length - 1];
-        //selected two years
-        selected_years = [selectedYearStart, selectedYearEnd];
-        selectedYearsStore.set(selected_years);
+
+        // Check if both selectedYearStart and selectedYearEnd have changed
+        if (
+            previousSelectedYears.start !== null &&
+            previousSelectedYears.end !== null &&
+            (selectedYearStart !== previousSelectedYears.start ||
+                selectedYearEnd !== previousSelectedYears.end)
+        ) {
+            // console.log(`selectedYearStart or selectedYearEnd has changed:
+            // from (${previousSelectedYears.start}, ${previousSelectedYears.end})
+            // to (${selectedYearStart}, ${selectedYearEnd})`);
+            //selected two years
+            selected_years = [selectedYearStart, selectedYearEnd];
+
+            selectedYearsStore.set(selected_years);
+        }
+
+        // Update the previous values for the next function call
+        previousSelectedYears.start = selectedYearStart;
+        previousSelectedYears.end = selectedYearEnd;
     }
 
     $: {
@@ -220,8 +232,124 @@
                 .style("font-size", 12);
         }
     }
+
+    let one_year_position = 100;
+    let one_year;
+    $: if (selected_years[0] == selected_years[1]) {
+        one_year = filterData(
+            current_data,
+            selected_years[0],
+            selected_years[1],
+        );
+        one_year.forEach((d) => {
+            if (d.birth_date) {
+                if (d.birth_date.length > 4) {
+                    d.birth_date = +d.birth_date.slice(0, 4);
+                } else {
+                    d.birth_date = +d.birth_date;
+                }
+            } else {
+                d.birth_date = selected_years[0] - 10;
+            }
+
+            if (d.death_date) {
+                if (d.death_date.length > 4) {
+                    d.death_date = +d.death_date.slice(0, 4);
+                } else {
+                    d.death_date = +d.death_date;
+                }
+            } else {
+                d.death_date = selected_years[0] + 40;
+            }
+
+            if (d.floruit) {
+                d.floruit.forEach((x) => {
+                    if (x.from) {
+                        if (x.from.length > 4) {
+                            x.from = +x.from.slice(0, 4);
+                        } else {
+                            x.from = +x.from;
+                        }
+                    } else {
+                        x.from = selected_years[0] + 10;
+                    }
+                });
+            } else {
+                d.floruit = [
+                    {
+                        occupation: "uknown",
+                        from: selected_years[0] + 10,
+                    },
+                ];
+            }
+        });
+        console.log(one_year);
+
+        d3.select("#year_detail").style("visibility", "visible");
+        let full_width = window.innerWidth;
+        let time_width = width;
+        let gap = (full_width - time_width) / 2 - 70;
+        one_year_position = selectedLineStart + gap;
+    } else {
+        d3.select("#year_detail").style("visibility", "hidden");
+    }
+
+    function check(d) {
+        console.log(d);
+        return 2.5;
+    }
 </script>
 
+<div id="year_detail">
+    {#if one_year}
+        <svg {width} height="90px">
+            {#each one_year as year, i}
+                <line
+                    x1={xScale(year.birth_date)}
+                    y1={85 - i * 5}
+                    x2={xScale(year.death_date)}
+                    y2={85 - i * 5}
+                    stroke="black"
+                    stroke-width="1"
+                />
+                <circle
+                    cx={xScale(year.birth_date)}
+                    cy={85 - i * 5}
+                    r="2.5"
+                    fill="white"
+                    stroke="black"
+                    stroke-width="0.5"
+                />
+                <circle
+                    cx={xScale(year.death_date)}
+                    cy={85 - i * 5}
+                    r="2.5"
+                    fill="black"
+                    stroke="black"
+                    stroke-width="0.5"
+                />
+                <circle
+                    cx={xScale(selected_years[0])}
+                    cy={85 - i * 5}
+                    r="2.5"
+                    fill="#00539B"
+                    stroke="black"
+                    stroke-width="0.5"
+                />
+                {#each year.floruit as flor}
+                    <circle
+                        cx={xScale(flor.from)}
+                        cy={85 - i * 5}
+                        r={check(flor)}
+                        fill="red"
+                    stroke="black"
+                    stroke-width="0.5"
+                    />
+                {/each}
+            {/each}
+        </svg>
+    {/if}
+</div>
 <div id="timeline" bind:clientWidth={containerWidth} bind:clientHeight={height}>
     <svg {width} {height} bind:this={svg}>
         <!-- Bars -->
@@ -308,5 +436,14 @@
 
     :global(.brush .selection) {
         stroke: none;
+    }
+
+    #year_detail {
+        position: absolute;
+        visibility: hidden;
+        width: 85%;
+        height: 90px;
+        /* background-color: rgba(255, 0, 0, 0.264); */
+        bottom: 160px;
     }
 </style>

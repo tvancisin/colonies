@@ -230,7 +230,7 @@
         >Career</button
       >
     </div>
-    <div id="time_description">Students Entering University</div>
+    <!-- <div id="time_description">Students Entering University/birth dates/first careers</div> -->
     <Timeline
       {current_data}
       {birth_data}

@@ -37,6 +37,7 @@
     let simple_geojson;
     let hoveredPolygonIdFatal = null;
 
+
     //redrawing locations if current_data changes
     $: if (current_data && map && map.getSource("locations")) {
         map.removeLayer("population");
