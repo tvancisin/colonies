@@ -168,6 +168,8 @@
     // console.log(mydata);
     // current_data = floruit_per_colony.find(item => item[0] === selected_country)?.[1];
 
+    console.log("here");
+    
     d3.select("#details").style("right", "0px");
     d3.select("h1").style("top", "-50px");
   }
@@ -179,7 +181,6 @@
     } else if (current_data_string == "floruit") {
       current_data = floruit_data;
     }
-
     d3.select("#time_description").style("left", "8.5%");
     d3.select("#details").style("right", "-100%");
     d3.select("h1").style("top", "-2px");
@@ -243,7 +244,6 @@
       {births_per_colony}
       {floruit_per_colony}
       {selected_country}
-      {current_data}
       {current_data_string}
     />
     <div id="legend">

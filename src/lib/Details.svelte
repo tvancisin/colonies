@@ -19,14 +19,13 @@
     export let births_per_colony;
     export let floruit_per_colony;
     export let selected_country;
-    export let current_data;
     export let current_data_string;
 
     let details_width, details_height;
     let career_width = 100;
     let career_height = 100;
-    let gender_height = 10,
-        gender_width = 20;
+    let gender_height = 10;
+    let gender_width = 20;
     let def_data;
     let def_groups;
     let def_male, def_female;
@@ -37,412 +36,154 @@
     let ticks = [10, 20, 30, 40, 50];
     let change = 0;
 
-    //SELECTED YEAR FILTER
+    //selected years from store
     const unsubscribe = selectedYearsStore.subscribe((value) => {
         selectedYears = value;
     });
 
-    $: if (
-        selectedYears.length != 0 &&
-        selected_country != null &&
-        current_data
-    ) {
-        //always reset data
-        data = def_data;
-        let filter_years = filterData(data, selectedYears[0], selectedYears[1]);
-
-        //update data
-        data = filter_years;
-
-        // //gender
-        // let filter_gender = d3.groups(filter_years, (d) => d.gender);
-        // let both = genderFilter(filter_gender);
-        // female = both[0];
-        // male = both[1];
-
-        // //floruit
-        // groups = career(data);
-
-        //data for network
-        node_link = constructNodesAndLinks(data);
-    } else if (selectedYears.length == 0) {
-        data = def_data;
-        //gender
-        male = def_male;
-        female = def_female;
-        //floruit
-        groups = def_groups;
-    }
-
+    //INITIAL DATA & FILTER BY SELECTED COUNTRY
     $: filteredCountry = (
         current_data_string === "birth" ? births_per_colony : floruit_per_colony
     ).filter((item) => item[0] == selected_country);
+    //default data
+    $: def_data = filteredCountry[0][1];
+    //set data to manipulate
+    $: data = filteredCountry[0][1];
+    //data for network
+    $: node_link = constructNodesAndLinks(data);
 
-    let node_link;
-    $: if (filteredCountry) {
-        //set default data
-        def_data = filteredCountry[0][1];
-        //set data to manipulate
-        data = filteredCountry[0][1];
-        // //gender
-        // gender = d3.groups(filteredCountry[0][1], (d) => d.gender);
-        // if (gender.length == 2) {
-        //     def_female = gender.find((item) => item[0] === "F")[1];
-        //     female = gender.find((item) => item[0] === "F")[1];
-        // } else {
-        //     female = [];
-        // }
-        // def_male = gender.find((item) => item[0] === "M")[1];
-        // male = gender.find((item) => item[0] === "M")[1];
-        // //floruit
-        // def_groups = career(data);
-        // groups = career(data);
-
+    //SELECTED YEAR FILTER
+    $: if (selectedYears.length != 0) {
+        //always reset data
+        data = def_data;
+        //filter data to selected years
+        let filter_years = filterData(data, selectedYears[0], selectedYears[1]);
+        //update data
+        data = filter_years;
         //data for network
         node_link = constructNodesAndLinks(data);
+    } else if (selectedYears.length == 0) {
+        //always reset data
+        data = def_data;
     }
+
+    $: console.log(selected_country);
 
     function closeDetails() {
         dispatch("close");
-        change = 0;
+        // change = 0;
     }
 
-    // Convert group data to array format
-    // $: groupData = Object.keys(groups).map((key) => ({
-    //     name: key,
-    //     count: groups[key].length,
-    // }));
-
-    // Dimensions and margins of the graph
-    const margin = { top: 20, right: 30, bottom: 10, left: 10 };
-    $: innerWidth = career_width - margin.left - margin.right;
-    $: innerHeight = career_height - margin.top - margin.bottom;
-
-    // // Create scales
-    // $: xScaleCareer = d3
-    //     .scaleBand()
-    //     .domain(groupData.map((d) => d.name))
-    //     .range([10, innerWidth - 20])
-    //     .padding(0.2);
-
-    $: yScaleCareer = d3
-        .scaleLinear()
-        .domain([0, 55])
-        .nice()
-        .range([innerHeight, 0]);
-
-    $: gender_height_scale = d3
-        .scaleLinear()
-        .range([0, gender_height - 10])
-        .domain([0, 70]);
-
-    $: d3.select(gy)
-        .call(d3.axisLeft(yScaleCareer).tickValues(ticks).tickSize(5))
-        .selectAll("text")
-        .style("font-family", "Montserrat")
-        .style("font-weight", 500)
-        .style("font-size", 10);
-
-    function refresh() {
-        change = 0;
-        data = def_data;
-        let gender_pass = [def_data, "default"];
-        let floruit_pass = [def_data, "default"];
-        selectedGenderStore.set(gender_pass);
-        selectedCareerStore.set(floruit_pass);
-    }
-
-    //GENDER FILTERING
-    $: if (change) {
-        data = def_data;
-        groups = def_groups;
-        let gender_data = data.filter((item) => item.gender === change);
-        data = gender_data;
-        groups = career(data);
-        let gender_pass = [gender_data, "selection"];
-        selectedGenderStore.set(gender_pass);
-    }
-
-    function handle_click(g) {
-        change = g;
-    }
-
-    //CAREER FILTERING
-    let selected_career;
-    function handle_floruit_click(x) {
-        selected_career = groups[x.name];
-    }
-
-    $: if (selected_career) {
-        data = selected_career;
-        let floruit_pass = [selected_career, "selection"];
-        selectedCareerStore.set(floruit_pass);
-
-        let selected_gender = d3.groups(selected_career, (d) => d.gender);
-        if (selected_gender.length == 2) {
-            female = selected_gender.find((item) => item[0] === "F")[1];
-            male = selected_gender.find((item) => item[0] === "M")[1];
-        } else {
-            if (!selected_gender.find((item) => item[0] === "M")) {
-                male = [];
-                female = selected_gender.find((item) => item[0] === "F")[1];
-            }
-            if (!selected_gender.find((item) => item[0] === "F")) {
-                female = [];
-                male = selected_gender.find((item) => item[0] === "M")[1];
-            }
-        }
-    }
+    // function refresh() {
+    //     // change = 0;
+    //     data = def_data;
+    //     // let gender_pass = [def_data, "default"];
+    //     // let floruit_pass = [def_data, "default"];
+    //     // selectedGenderStore.set(gender_pass);
+    //     // selectedCareerStore.set(floruit_pass);
+    // }
 </script>
 
-{#if filteredCountry[0][1]}
-    <div
-        id="details"
-        bind:clientWidth={details_width}
-        bind:clientHeight={details_height}
-    >
-        <div id="peace_title_div">
-            <button class="btn close" on:click={closeDetails}
-                ><i class="fa fa-close"></i></button
-            >
-            <button class="btn refresh" on:click={refresh}
-                ><i class="fa fa-refresh"></i></button
-            >
-            {#if selected_country}
-                <h3>{selected_country}</h3>
-            {/if}
-        </div>
-        <div id="peace_content">
-            <!-- <div id="overview">
-                <h5>Gender</h5>
-                <div class="content-wrapper">
-                    <div class="content-box">
-                        <div
-                            class="row"
-                            bind:clientWidth={gender_width}
-                            bind:clientHeight={gender_height}
-                        >
-                            <svg width={gender_width} height={gender_height}>
-                                <rect
-                                    x={gender_width / 4}
-                                    rx="1"
-                                    y={gender_height -
-                                        gender_height_scale(female.length)}
-                                    width={gender_width / 2}
-                                    height={gender_height_scale(female.length)}
-                                    fill="#014D66"
-                                    on:click={() => handle_click("F")}
-                                    on:keydown={(event) => {
-                                        if (
-                                            event.key === "Enter" ||
-                                            event.key === " "
-                                        ) {
-                                            event.preventDefault();
-                                            handle_click("F");
-                                        }
-                                    }}
-                                    tabindex="0"
-                                    role="button"
-                                    style="cursor: pointer;"
-                                ></rect>
-                                <text
-                                    x={gender_width / 4}
-                                    y={gender_height -
-                                        gender_height_scale(female.length) -
-                                        2}
-                                    font-size="12"
-                                    font-weight="450"
-                                    >Female ({female.length})</text
-                                >
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="content-box">
-                        <div
-                            class="row"
-                            bind:clientWidth={gender_width}
-                            bind:clientHeight={gender_height}
-                        >
-                            <svg width={gender_width} height={gender_height}>
-                                <rect
-                                    x={gender_width / 4}
-                                    y={gender_height -
-                                        gender_height_scale(male.length)}
-                                    width={gender_width / 2}
-                                    height={gender_height_scale(male.length)}
-                                    fill="#014D66"
-                                    on:click={() => handle_click("M")}
-                                    on:keydown={(event) => {
-                                        if (
-                                            event.key === "Enter" ||
-                                            event.key === " "
-                                        ) {
-                                            event.preventDefault();
-                                            handle_click("F");
-                                        }
-                                    }}
-                                    tabindex="0"
-                                    role="button"
-                                    style="cursor: pointer;"
-                                ></rect>
-                                <text
-                                    x={gender_width / 4}
-                                    y={gender_height -
-                                        gender_height_scale(male.length) -
-                                        2}
-                                    font-size="12"
-                                    font-weight="450"
-                                    >Male ({male.length})
-                                </text>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-            <!-- 
-            <div id="general">
-                <h5>Careers</h5>
-                <div
-                    id="career_wrapper"
-                    bind:clientWidth={career_width}
-                    bind:clientHeight={career_height}
-                >
-                    <svg width={career_width} height={career_height}>
-                        <g
-                            transform={`translate(${margin.left},${margin.top})`}
-                        >
-                            <g
-                                bind:this={gy}
-                                transform="translate({margin.left - 5},0)"
-                            />
-                            {#each groupData as group}
-                                <rect
-                                    x={xScaleCareer(group.name)}
-                                    y={yScaleCareer(group.count)}
-                                    width={xScaleCareer.bandwidth()}
-                                    height={innerHeight -
-                                        yScaleCareer(group.count)}
-                                    fill="#014D66"
-                                    on:click={() => handle_floruit_click(group)}
-                                    on:keydown={(event) => {
-                                        if (
-                                            event.key === "Enter" ||
-                                            event.key === " "
-                                        ) {
-                                            event.preventDefault();
-                                            handle_floruit_click(group);
-                                        }
-                                    }}
-                                    tabindex="0"
-                                    role="button"
-                                    style="cursor: pointer;"
-                                ></rect>
-                                <text
-                                    x={xScaleCareer(group.name) +
-                                        xScaleCareer.bandwidth() / 2}
-                                    y={yScaleCareer(group.count) - 2}
-                                    font-size="11"
-                                    text-anchor="start"
-                                    font-weight="450"
-                                    transform={`rotate(-70, ${xScaleCareer(group.name) + xScaleCareer.bandwidth() / 2}, ${yScaleCareer(group.count)})`}
-                                >
-                                    {group.name}
-                                </text>
-                            {/each}
-                        </g>
-                    </svg>
-                </div>
-            </div> -->
-
-            <div id="general">
-                <!-- <h5>Visualization</h5> -->
-                <div
-                    id="career_wrapper"
-                    bind:clientWidth={career_width}
-                    bind:clientHeight={career_height}
-                >
-                    <Network {node_link} {career_width} {career_height} />
-                </div>
-            </div>
-            <div id="peace_process">
-                <div class="scrollable-content">
-                    {#each data as d}
-                        <p><strong>Name:</strong> {d.forename} {d.surname}</p>
-                        {#if d.birth_location}
-                            <p>
-                                <strong>Birth Location:</strong>
-                                {d.birth_location.original_name}
-                            </p>
-                        {/if}
-                        <p>
-                            <strong>Birth Date:</strong>
-                            {d.birth_date || "Unknown"}
-                        </p>
-                        <p>
-                            <strong>Death Date:</strong>
-                            {d.death_date || "Unknown"}
-                        </p>
-                        {#if d.death_location}
-                            <p>
-                                <strong>Death Location:</strong>
-                                {d.death_location.original_name || "Unknown"}
-                            </p>
-                        {/if}
-                        {#if d.father}
-                            <p>
-                                <strong>Father:</strong>
-                                {d.father.forename}
-                                {d.father.surname}
-                            </p>
-                        {/if}
-                        {#if d.mother}
-                            <p>
-                                <strong>Mother:</strong>
-                                {d.mother.forename}
-                                {d.mother.surname}
-                            </p>
-                        {/if}
-                        {#if d.study}
-                            {#if d.study.colleges && d.study.colleges.length > 0}
-                                <p><strong>Colleges:</strong></p>
-                                {#each d.study.colleges as college}
-                                    <p>{college.name} (From: {college.from})</p>
-                                {/each}
-                            {/if}
-                            {#if d.study.degrees && d.study.degrees.length > 0}
-                                <p><strong>Degrees:</strong></p>
-                                {#each d.study.degrees as degree}
-                                    <p>{degree.name} (Date: {degree.date})</p>
-                                {/each}
-                            {/if}
-                        {/if}
-                        {#if d.floruit && d.floruit.length > 0}
-                            <p><strong>Floruit:</strong></p>
-                            {#each d.floruit as floruit}
-                                <p>
-                                    {floruit.occupation} at {floruit.location
-                                        .original_name}
-                                    (From: {floruit.from} To: {floruit.to})
-                                </p>
-                            {/each}
-                        {/if}
-                        {#if d.references && d.references.length > 0}
-                            <p><strong>References:</strong></p>
-                            {#each d.references as reference}
-                                <p>{reference}</p>
-                            {/each}
-                        {/if}
-                        {#if d.id}
-                            <p><strong>ID:</strong></p>
-                            <p>{d.id}</p>
-                        {/if}
-                        <hr />
-                    {/each}
-                </div>
-            </div>
-        </div>
+<div
+    id="details"
+    bind:clientWidth={details_width}
+    bind:clientHeight={details_height}
+>
+    <div id="peace_title_div">
+        <button class="btn close" on:click={closeDetails}
+            ><i class="fa fa-close"></i></button
+        >
+        <!-- <button class="btn refresh" on:click={refresh}
+            ><i class="fa fa-refresh"></i></button
+        > -->
+        {#if selected_country}
+            <h3>{selected_country}</h3>
+        {/if}
     </div>
-{/if}
+    <div id="peace_content">
+        <div id="general">
+            <div
+                id="career_wrapper"
+                bind:clientWidth={career_width}
+                bind:clientHeight={career_height}
+            >
+                <Network {node_link} {career_width} {career_height} />
+            </div>
+        </div>
+        <div id="peace_process">
+            <div class="scrollable-content">
+                {#each data as d}
+                    <p><strong>Name:</strong> {d.forename} {d.surname}</p>
+        
+                    <p><strong>Birth Location:</strong> {d.birth_location?.original_name || "Unknown"}</p>
+        
+                    <p><strong>Birth Date:</strong> {d.birth_date || "Unknown"}</p>
+        
+                    <p><strong>Death Date:</strong> {d.death_date || "Unknown"}</p>
+        
+                    <p><strong>Death Location:</strong> {d.death_location?.original_name || "Unknown"}</p>
+        
+                    <p><strong>Father:</strong> {(d.father?.forename || "")} {(d.father?.surname || "Unknown")}</p>
+        
+                    <p><strong>Mother:</strong> {(d.mother?.forename || "")} {(d.mother?.surname || "Unknown")}</p>
+        
+                    <!-- Colleges -->
+                    <p><strong>Colleges:</strong>
+                        {#if d.study?.colleges?.length > 0}
+                            {#each d.study.colleges as college, index}
+                                {#if index > 0}<br>{/if}
+                                {college.name || "Unknown"} (From: {college.from || "Unknown"})
+                            {/each}
+                        {:else} None
+                        {/if}
+                    </p>
+        
+                    <!-- Degrees -->
+                    <p><strong>Degrees:</strong>
+                        {#if d.study?.degrees?.length > 0}
+                            {#each d.study.degrees as degree, index}
+                                {#if index > 0}<br>{/if}
+                                {degree.name || "Unknown"} (Date: {degree.date || "Unknown"})
+                            {/each}
+                        {:else} None
+                        {/if}
+                    </p>
+        
+                    <!-- Floruit -->
+                    <p><strong>Floruit:</strong>
+                        {#if d.floruit?.length > 0}
+                            {#each d.floruit as floruit, index}
+                                {#if index > 0}<br>{/if}
+                                {floruit.occupation || "Unknown"} at 
+                                {floruit.location?.original_name || "Unknown Location"}
+                                (From: {floruit.from || "Unknown"} To: {floruit.to || "Unknown"})
+                            {/each}
+                        {:else} None
+                        {/if}
+                    </p>
+        
+                    <!-- References -->
+                    <p><strong>References:</strong>
+                        {#if d.references?.length > 0}
+                            {#each d.references as reference, index}
+                                {#if index > 0}<br>{/if}
+                                {reference || "Unknown"}
+                            {/each}
+                        {:else} None
+                        {/if}
+                    </p>
+        
+                    <p><strong>ID:</strong> {d.id || "Unknown"}</p>
+        
+                    <hr />
+                {/each}
+            </div>
+        </div>
+        
+        
+        
+    </div>
+</div>
 
 <style>
     #details {
@@ -452,7 +193,7 @@
         width: 40%;
         height: calc(100%);
         transition: right 0.3s ease;
-        background-color: rgba(0, 0, 0, 0.932);
+        background-color: rgb(0, 0, 0);
         overflow: hidden;
         z-index: 5;
         font-family: "Montserrat", sans-serif;

@@ -24,8 +24,8 @@
     let svg;
     let x_ticks = [
         1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900, 1925, 1950,
-    ]; // Custom ticks
-    let y_ticks = [5, 15]; // Custom ticks
+    ];
+    let y_ticks = [5, 15];
     let selectedLineStart = null,
         selectedLineEnd = null,
         selectedYearStart = null,
@@ -33,6 +33,7 @@
 
     //create array with all years. some may be empty
     let allYears = Array.from({ length: 1970 - 1650 + 1 }, (_, i) => 1650 + i);
+
     //group data by study years
     $: grouped = d3
         .groups(current_data, (d) => {
@@ -50,51 +51,21 @@
         .sort((a, b) => d3.ascending(a[0], b[0])); // Sort by 'from' year
 
     $: groupedDataMap = new Map(grouped.map((d) => [d[0], d[1].length]));
+
     //final dataset
     $: completeGrouped = allYears.map((year) => [
         year,
         groupedDataMap.get(year) || 0,
     ]); // Default value is 0 if year is not found
 
-    // //SELECTED GENDER FILTER
-    // const unsubscribe = selectedGenderStore.subscribe((value) => {
-    //     selected_gender = value[0];
-    // });
-
-    // $: {
-    //     if (selected_gender) {
-    //         data = selected_gender;
-    //     } else {
-    //         data = birth_data;
-    //     }
-    // }
-
-    // //SELECTED CAREER FILTER
-    // const unsubscribe_career = selectedCareerStore.subscribe((value) => {
-    //     selected_career = value[0];
-    // });
-
-    // $: {
-    //     if (selected_career) {
-    //         data = selected_career;
-    //     } else {
-    //         data = birth_data;
-    //     }
-    // }
-
     // Reactive block to update width when selected_country changes
     $: {
         if (selected_country) {
-            width = containerWidth - innerWidth * 0.4; // Reduce the width by 450px when selectedProperties is not null
+            width = containerWidth - innerWidth * 0.4;
             d3.selectAll("#timeline, #year_detail").style("width", "100%");
-            // let selected_colony = births_per_colony.filter(
-            //     (group) => group[0] == selected_country,
-            // );
-            // data = selected_colony[0][1];
         } else {
             width = containerWidth; // Full width when selected_country is null
             d3.selectAll("#timeline, #year_detail").style("width", "85%");
-            // data = birth_data;
         }
     }
 
@@ -237,12 +208,13 @@
 
     let one_year;
     $: if (selected_years[0] == selected_years[1]) {
-        //filter data to by selected years
+        //filter data to selected years
         one_year = filterData(
             current_data,
             selected_years[0],
             selected_years[1],
         );
+        console.log(one_year);
 
         one_year.forEach((d) => {
             if (d.birth_date) {
@@ -251,8 +223,6 @@
                 } else {
                     d.birth_date = +d.birth_date;
                 }
-            } else {
-                d.birth_date = selected_years[0] - 10;
             }
 
             if (d.death_date) {
@@ -261,8 +231,6 @@
                 } else {
                     d.death_date = +d.death_date;
                 }
-            } else {
-                d.death_date = selected_years[0] + 30;
             }
 
             if (d.floruit) {
@@ -277,13 +245,6 @@
                         x.from = selected_years[0] + 10;
                     }
                 });
-            } else {
-                d.floruit = [
-                    {
-                        occupation: "uknown",
-                        from: selected_years[0] + 10,
-                    },
-                ];
             }
         });
         d3.select("#year_detail").style("visibility", "visible");
@@ -296,49 +257,79 @@
     {#if one_year}
         <svg {width} height="110px">
             {#each one_year as year, i}
-                <line
-                    x1={xScale(year.birth_date)}
-                    y1={105 - i * 5}
-                    x2={xScale(year.death_date)}
-                    y2={105 - i * 5}
-                    stroke="black"
-                    stroke-width="1"
-                    stroke-dasharray="0"
-                />
-                <circle
-                    cx={xScale(year.birth_date)}
-                    cy={105 - i * 5}
-                    r="2.5"
-                    fill="white"
-                    stroke="black"
-                    stroke-width="0.5"
-                />
-                <circle
-                    cx={xScale(year.death_date)}
-                    cy={105 - i * 5}
-                    r="2.5"
+                <rect
+                    x={year.birth_date
+                        ? xScale(year.birth_date)
+                        : xScale(selected_years[0]) - 10}
+                    y={104.5 - i * 5}
+                    width={year.death_date
+                        ? xScale(year.death_date) -
+                          (year.birth_date
+                              ? xScale(year.birth_date)
+                              : xScale(selected_years[0]) - 10)
+                        : xScale(selected_years[0]) +
+                          10 -
+                          (year.birth_date
+                              ? xScale(year.birth_date)
+                              : xScale(selected_years[0]) - 10)}
+                    height="1"
                     fill="black"
-                    stroke="black"
-                    stroke-width="0.5"
                 />
+                {#if year.birth_date}
+                    <circle
+                        cx={xScale(year.birth_date)}
+                        cy={104.5 - i * 5}
+                        r="2"
+                        fill="white"
+                        stroke="black"
+                        stroke-width="0.5"
+                    />
+                {:else}
+                    <rect
+                        x={xScale(selected_years[0]) - 15}
+                        y={104.5 - i * 5}
+                        width="5"
+                        height="1"
+                        fill="gray"
+                    />
+                {/if}
+
+                {#if year.death_date}
+                    <circle
+                        cx={xScale(year.death_date)}
+                        cy={104.5 - i * 5}
+                        r="2"
+                        fill="black"
+                        stroke="black"
+                        stroke-width="0.5"
+                    />
+                {:else}
+                    <rect
+                        x={xScale(selected_years[0]) + 10}
+                        y={104.5 - i * 5}
+                        width="5"
+                        height="1"
+                        fill="gray"
+                    />
+                {/if}
                 <circle
                     cx={xScale(selected_years[0]) + xScale.bandwidth() / 2}
-                    cy={105 - i * 5}
-                    r="2.5"
+                    cy={104.5 - i * 5}
+                    r="2"
                     fill="#00539B"
                     stroke="black"
                     stroke-width="0.5"
                 />
-                {#each year.floruit as flor}
+                <!-- {#each year.floruit as flor}
                     <circle
                         cx={xScale(flor.from)}
                         cy={105 - i * 5}
-                        r="2.5"
+                        r="2"
                         fill="red"
                         stroke="black"
                         stroke-width="0.5"
                     />
-                {/each}
+                {/each} -->
             {/each}
         </svg>
     {/if}
@@ -438,9 +429,5 @@
         height: 110px;
         /* background-color: rgba(255, 0, 0, 0.264); */
         bottom: 160px;
-    }
-
-    line {
-        shape-rendering: crispEdges;
     }
 </style>

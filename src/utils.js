@@ -63,17 +63,29 @@ export function filterData(data, startYear, endYear) {
 }
 
 // Opacity scale
-const opacityScale = d3.scaleLinear().domain([0, 350]).range([0, 15]);
+const widthScale = d3.scaleLinear().domain([0, 350]).range([0, 15]);
 
-export function opacity_generator(data) {
-    let filter_undefined = data.filter((d) => d[0] !== undefined);
-    let regionsWithOpacity = filter_undefined.map((region) => {
-        let regionName = region[0]; // Get the region name
-        let count = region[1].length; // Get the length of the array (e.g., 58)
-        let opacity = opacityScale(count); // Use the scale to calculate opacity
-        return [regionName, opacity]; // Return the region name and calculated opacity
-    });
-    return regionsWithOpacity;
+export function width_generator(data) {
+    if (data.length == 0) {
+        return [
+            ['Africa', 0],
+            ['India', 0],
+            ['America', 0],
+            ['Australia', 0],
+            ['Caribbean', 0],
+            ['Asia', 0]
+        ]
+    }
+    else {
+        let filter_undefined = data.filter((d) => d[0] !== undefined);
+        let regionsWithWidth = filter_undefined.map((region) => {
+            let regionName = region[0]; // Get the region name
+            let count = region[1].length; // Get the length of the array (e.g., 58)
+            let opacity = widthScale(count); // Use the scale to calculate opacity
+            return [regionName, opacity]; // Return the region name and calculated opacity
+        });
+        return regionsWithWidth;
+    }
 }
 
 
@@ -1356,14 +1368,14 @@ export let colonies = [
     "AF",
     "PK",
     "BD",
-  ];
+];
 
-  export const india_colonies = ["IN", "LK", "PK", "MM"];
-  export const african_colonies = ["ZA", "SL", "EG", "ZM", "NG"];
-  export const america_colonies = ["US", "CA"];
-  export const australia_colonies = ["AU", "NZ"];
-  export const asian_colonies = ["MY", "SG", "HK"];
-  export const caribbean_colonies = [
+export const india_colonies = ["IN", "LK", "PK", "MM"];
+export const african_colonies = ["ZA", "SL", "EG", "ZM", "NG"];
+export const america_colonies = ["US", "CA"];
+export const australia_colonies = ["AU", "NZ"];
+export const asian_colonies = ["MY", "SG", "HK"];
+export const caribbean_colonies = [
     "JM",
     "AG",
     "BB",
@@ -1374,4 +1386,4 @@ export let colonies = [
     "DM",
     "KN",
     "VC",
-  ];
+];
