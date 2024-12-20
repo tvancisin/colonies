@@ -2,7 +2,6 @@
     import { createEventDispatcher } from "svelte";
     import * as d3 from "d3";
     import {
-        career,
         filterData,
         genderFilter,
         constructNodesAndLinks,
@@ -67,8 +66,6 @@
         data = def_data;
     }
 
-    $: console.log(selected_country);
-
     function closeDetails() {
         dispatch("close");
         // change = 0;
@@ -114,74 +111,103 @@
             <div class="scrollable-content">
                 {#each data as d}
                     <p><strong>Name:</strong> {d.forename} {d.surname}</p>
-        
-                    <p><strong>Birth Location:</strong> {d.birth_location?.original_name || "Unknown"}</p>
-        
-                    <p><strong>Birth Date:</strong> {d.birth_date || "Unknown"}</p>
-        
-                    <p><strong>Death Date:</strong> {d.death_date || "Unknown"}</p>
-        
-                    <p><strong>Death Location:</strong> {d.death_location?.original_name || "Unknown"}</p>
-        
-                    <p><strong>Father:</strong> {(d.father?.forename || "")} {(d.father?.surname || "Unknown")}</p>
-        
-                    <p><strong>Mother:</strong> {(d.mother?.forename || "")} {(d.mother?.surname || "Unknown")}</p>
-        
+
+                    <p>
+                        <strong>Birth Location:</strong>
+                        {d.birth_location?.original_name || "Unknown"}
+                    </p>
+
+                    <p>
+                        <strong>Birth Date:</strong>
+                        {d.birth_date || "Unknown"}
+                    </p>
+
+                    <p>
+                        <strong>Death Date:</strong>
+                        {d.death_date || "Unknown"}
+                    </p>
+
+                    <p>
+                        <strong>Death Location:</strong>
+                        {d.death_location?.original_name || "Unknown"}
+                    </p>
+
+                    <p>
+                        <strong>Father:</strong>
+                        {d.father?.forename || ""}
+                        {d.father?.surname || "Unknown"}
+                    </p>
+
+                    <p>
+                        <strong>Mother:</strong>
+                        {d.mother?.forename || ""}
+                        {d.mother?.surname || "Unknown"}
+                    </p>
+
                     <!-- Colleges -->
-                    <p><strong>Colleges:</strong>
+                    <p>
+                        <strong>Colleges:</strong>
                         {#if d.study?.colleges?.length > 0}
                             {#each d.study.colleges as college, index}
-                                {#if index > 0}<br>{/if}
-                                {college.name || "Unknown"} (From: {college.from || "Unknown"})
+                                {#if index > 0}<br />{/if}
+                                {college.name || "Unknown"} (From: {college.from ||
+                                    "Unknown"})
                             {/each}
-                        {:else} None
+                        {:else}
+                            None
                         {/if}
                     </p>
-        
+
                     <!-- Degrees -->
-                    <p><strong>Degrees:</strong>
+                    <p>
+                        <strong>Degrees:</strong>
                         {#if d.study?.degrees?.length > 0}
                             {#each d.study.degrees as degree, index}
-                                {#if index > 0}<br>{/if}
-                                {degree.name || "Unknown"} (Date: {degree.date || "Unknown"})
+                                {#if index > 0}<br />{/if}
+                                {degree.name || "Unknown"} (Date: {degree.date ||
+                                    "Unknown"})
                             {/each}
-                        {:else} None
+                        {:else}
+                            None
                         {/if}
                     </p>
-        
+
                     <!-- Floruit -->
-                    <p><strong>Floruit:</strong>
+                    <p>
+                        <strong>Floruit:</strong>
                         {#if d.floruit?.length > 0}
                             {#each d.floruit as floruit, index}
-                                {#if index > 0}<br>{/if}
-                                {floruit.occupation || "Unknown"} at 
-                                {floruit.location?.original_name || "Unknown Location"}
-                                (From: {floruit.from || "Unknown"} To: {floruit.to || "Unknown"})
+                                {#if index > 0}<br />{/if}
+                                {floruit.occupation || "Unknown"} at
+                                {floruit.location?.original_name ||
+                                    "Unknown Location"}
+                                (From: {floruit.from || "Unknown"} To: {floruit.to ||
+                                    "Unknown"})
                             {/each}
-                        {:else} None
+                        {:else}
+                            None
                         {/if}
                     </p>
-        
+
                     <!-- References -->
-                    <p><strong>References:</strong>
+                    <p>
+                        <strong>References:</strong>
                         {#if d.references?.length > 0}
                             {#each d.references as reference, index}
-                                {#if index > 0}<br>{/if}
+                                {#if index > 0}<br />{/if}
                                 {reference || "Unknown"}
                             {/each}
-                        {:else} None
+                        {:else}
+                            None
                         {/if}
                     </p>
-        
+
                     <p><strong>ID:</strong> {d.id || "Unknown"}</p>
-        
+
                     <hr />
                 {/each}
             </div>
         </div>
-        
-        
-        
     </div>
 </div>
 
@@ -235,7 +261,7 @@
         margin: auto;
         font-size: 1.3redem;
         padding: 5px;
-        font-weight: 300;
+        font-weight: 500;
     }
 
     @media only screen and (max-width: 1450px) {
@@ -283,37 +309,6 @@
     @media only screen and (max-width: 1024px) {
         .btn.close {
             font-size: 1.2em;
-        }
-    }
-
-    .btn.refresh {
-        position: absolute;
-        right: 30px;
-        top: 3px;
-        background: none;
-        color: white;
-        border: none;
-        padding: 2px 10px;
-        border-radius: 2px;
-        font-size: 1.2em;
-        cursor: pointer;
-        font-family: "Montserrat";
-        transition: border 0.3s ease;
-    }
-
-    .btn.refresh:hover {
-        color: red;
-    }
-
-    @media only screen and (max-width: 1450px) {
-        .btn.refresh {
-            font-size: 1.1em;
-        }
-    }
-
-    @media only screen and (max-width: 1024px) {
-        .btn.refresh {
-            font-size: 1em;
         }
     }
 

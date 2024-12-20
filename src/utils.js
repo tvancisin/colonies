@@ -1159,7 +1159,7 @@ export function career(career_data) {
             }
 
             // Handle cases where occupation is a valid string
-            const occupation = f.occupation; // normalize case for comparison
+            const occupation = f.occupation;
 
             // Assign to the appropriate group
             if (medicine.includes(occupation)) {
@@ -1387,3 +1387,40 @@ export const caribbean_colonies = [
     "KN",
     "VC",
 ];
+
+
+export function groupByColony(data) {
+    const groupedByColony = {};
+
+    data.forEach((item) => {
+        if (item.floruit) {
+            item.floruit.forEach((floruitEntry) => {
+                const colony = floruitEntry.location.colony || "unknown";
+
+                // Initialize the colony group if it doesn't exist
+                if (!groupedByColony[colony]) {
+                    groupedByColony[colony] = {
+                        items: [],
+                        ids: new Set(),
+                    };
+                }
+
+                // Only add the item if it hasn't been added already
+                if (!groupedByColony[colony].ids.has(item.id)) {
+                    groupedByColony[colony].items.push(item);
+                    groupedByColony[colony].ids.add(item.id); // Mark the item as added
+                }
+            });
+        }
+    });
+
+    // Prepare the output structure
+    const outputArray = Object.keys(groupedByColony).map((colony) => {
+        return [
+            colony === "unknown" ? undefined : colony,
+            groupedByColony[colony].items,
+        ];
+    });
+
+    return outputArray;
+}

@@ -1,30 +1,29 @@
 <script>
     import { onMount, createEventDispatcher } from "svelte";
-    import {
-        selectedYearsStore,
-        selectedGenderStore,
-        selectedCareerStore,
-    } from "../years";
-    import { simplify } from "@turf/turf";
     import mapboxgl from "mapbox-gl";
     import * as d3 from "d3";
     import {
         filterData,
         getOpacityExpression,
         width_generator,
+        career,
     } from "../utils";
+    import {
+        selectedYearsStore,
+        selectedGenderStore,
+        selectedCareerStore,
+    } from "../years";
     const dispatch = createEventDispatcher();
 
-    export let current_data;
+    export let current_data; // data from App.svelte
     export let current_data_string;
     export let map;
-    export let countries_json;
     export let shipping_json;
     export let colonies_1680;
     export let colonies_1750;
     export let colonies_1820;
     export let colonies_1885;
-    export let colonies;
+    export let selected_country;
 
     let height;
     let clicked_country;
@@ -32,41 +31,51 @@
     let opacity_mapbox_expression;
     let hoveredPolygonId = null;
     let selectedYears = [1700, 1900];
-    let selectedGender;
     let selectedCareer;
-    let simple_geojson;
-    let hoveredPolygonIdFatal = null;
 
-    //redrawing locations if current_data changes
+    // redrawing locations if current_data changes [used on exit also]
     $: if (current_data && map && map.getSource("locations")) {
         map.removeLayer("population");
         map.removeSource("locations");
         drawLocations(current_data, current_data_string);
     }
 
-    // $: if (countries_json) {
-    //     simple_geojson = simplify(colonies_1885, {
-    //         tolerance: 0.01,
-    //         highQuality: true,
-    //     });
-    // }
-
-    //SELECTED YEAR FILTER
+    ////SELECTED YEAR FILTER
     //catch new selected years
     const unsubscribe = selectedYearsStore.subscribe((value) => {
         selectedYears = value;
     });
 
-    $: if (map && selectedYears.length != 0 && map.getSource("locations")) {
+    //redrawing locations if selected years change
+    $: if (selectedYears.length != 0) {
         let filtered_country = filterData(
             current_data,
             selectedYears[0],
             selectedYears[1],
         );
+        // update map locations
         drawLocations(filtered_country, current_data_string);
     }
 
-    //WIDTH OF SHIPPING LINES
+    ////SELECTED CAREER FILTER
+    //catch new selected career
+    const career_unsubscribe = selectedCareerStore.subscribe((value) => {
+        selectedCareer = value;
+    });
+
+    $: if (selectedCareer.length != 0 && selected_country !== null) {
+        // construct career groups based on clicked country
+        let career_groups = career(current_data);
+        // only get people with selected career
+        let fin_career = career_groups[selectedCareer].filter(
+            (item, index, self) =>
+                index === self.findIndex((t) => t.id === item.id),
+        );
+        // update map locations
+        drawLocations(fin_career, current_data_string);
+    }
+
+    ////WIDTH OF SHIPPING LINES
     //restrict to the selected years
     $: filteredData =
         selectedYears && selectedYears.length > 0
@@ -93,15 +102,15 @@
               );
 
     $: filtered_opacity = width_generator(filtered_grouped_colonies);
-
     $: opacity_mapbox_expression = getOpacityExpression(filtered_opacity);
-
     $: countryNames = filtered_opacity
         .filter((item) => item[0] !== undefined) // Ignore undefined values
         .map((item) => item[0]); // Extract the country names
 
+    //shipping line width
     $: if (map && countryNames && map.getSource("countries")) {
         countryNames.push("Britain");
+        //opacity of colonies
         // map.setFilter("countries_fill", [
         //     "in",
         //     ["get", "ADMIN"],
@@ -120,7 +129,7 @@
         );
     }
 
-    // CHANGE COLONIES GEOJSON FOR DIFFERENT PERIODS
+    ////CHANGE COLONIES GEOJSON FOR DIFFERENT PERIODS
     $: if (selectedYears[1] < 1750) {
         map.getSource("countries").setData(colonies_1680);
     } else if (
@@ -139,7 +148,7 @@
         map.getSource("countries").setData(colonies_1885);
     }
 
-    //MAP ZOOM ADJUSTMENT
+    ////MAP ZOOM ADJUSTMENT
     function adjustMapForWindowSize() {
         if (window.innerWidth <= 768) {
             map.flyTo({
@@ -159,10 +168,10 @@
         }
     }
 
-    //INIT FUNCTION
+    ////INIT FUNCTION
     onMount(() => {
         mapboxgl.accessToken =
-            "pk.eyJ1IjoidG9tYXN2YW5jaXNpbiIsImEiOiJjajF6M3VieDQwMDB2MzNxbXlpc3BzaW02In0.ZgGNabXd7yu15BHiN62GCQ";
+            "pk.eyJ1IjoidG9tYXN2YW5jaXNpbiIsImEiOiJjbTN1OXUzODUwZTEwMnFxdHd5NzA3cmNuIn0.vz2M0cTMfPvLAQ-wKMKbQA";
 
         // Initialize the Mapbox map
         map = new mapboxgl.Map({
@@ -452,7 +461,7 @@
                         ["linear"],
                         ["get", "no_of_ppl"],
                         1,
-                        3, // Radius for 1 person
+                        2, // Radius for 1 person
                         10,
                         10, // Radius for 10 people (adjust as needed)
                     ],

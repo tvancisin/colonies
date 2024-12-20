@@ -1,5 +1,4 @@
 <script>
-  import * as d3 from "d3";
   import {
     getJSON,
     getGeo,
@@ -10,10 +9,17 @@
     australia_colonies,
     asian_colonies,
     caribbean_colonies,
+    groupByColony,
   } from "./utils.js";
+  import * as d3 from "d3";
   import Map from "./lib/Map.svelte";
   import Details from "./lib/Details.svelte";
   import Timeline from "./lib/Timeline.svelte";
+  import {
+    selectedYearsStore,
+    selectedCareerStore,
+    selectedGenderStore,
+  } from "./years";
 
   let width, height, map;
   let mapRef;
@@ -64,6 +70,7 @@
       }
     });
 
+    //add colonies field to bio location data
     floruit_data.forEach((person) => {
       if (person.floruit && Array.isArray(person.floruit)) {
         person.floruit.forEach((floruitItem) => {
@@ -85,42 +92,6 @@
         });
       }
     });
-
-    function groupByColony(data) {
-      const groupedByColony = {};
-
-      data.forEach((item) => {
-        if (item.floruit) {
-          item.floruit.forEach((floruitEntry) => {
-            const colony = floruitEntry.location.colony || "unknown";
-
-            // Initialize the colony group if it doesn't exist
-            if (!groupedByColony[colony]) {
-              groupedByColony[colony] = {
-                items: [],
-                ids: new Set(),
-              };
-            }
-
-            // Only add the item if it hasn't been added already
-            if (!groupedByColony[colony].ids.has(item.id)) {
-              groupedByColony[colony].items.push(item);
-              groupedByColony[colony].ids.add(item.id); // Mark the item as added
-            }
-          });
-        }
-      });
-
-      // Prepare the output structure
-      const outputArray = Object.keys(groupedByColony).map((colony) => {
-        return [
-          colony === "unknown" ? undefined : colony,
-          groupedByColony[colony].items,
-        ];
-      });
-
-      return outputArray;
-    }
 
     floruit_per_colony = groupByColony(floruit_data);
 
@@ -154,24 +125,27 @@
 
   function handlePolygonClick(event) {
     selected_country = event.detail;
+    let new_data;
+
     if (current_data_string == "birth") {
-      current_data = births_per_colony.find(
+      new_data = births_per_colony.find(
         (item) => item[0] === selected_country,
       )?.[1];
     } else if (current_data_string == "floruit") {
-      current_data = floruit_per_colony.find(
+      new_data = floruit_per_colony.find(
         (item) => item[0] === selected_country,
       )?.[1];
     }
+
+    if (new_data !== current_data) {
+      // Only update if value changes
+      current_data = new_data;
+    }
+
     d3.select("#time_description").style("left", "0%");
-
-    // console.log(mydata);
-    // current_data = floruit_per_colony.find(item => item[0] === selected_country)?.[1];
-
-    console.log("here");
-    
     d3.select("#details").style("right", "0px");
     d3.select("h1").style("top", "-50px");
+    d3.select("#buttons").style("top", "-50px");
   }
 
   function handleClose() {
@@ -184,13 +158,16 @@
     d3.select("#time_description").style("left", "8.5%");
     d3.select("#details").style("right", "-100%");
     d3.select("h1").style("top", "-2px");
+    d3.select("#buttons").style("top", "-2px");
     selected_country = null;
+    selectedCareerStore.set([]);
     mapRef.flyToInitialPosition();
   }
 
   //set variables based on selection (birth or floruit)
   function change_data(selected_data) {
     if (selected_data == "birth") {
+      d3.select("#header").text("Student Births in the Colonies (1700-1897)")
       d3.select("#floruit").style("background-color", "white");
       d3.select("#floruit").style("color", "black");
       d3.select("#birth").style("background-color", "black");
@@ -198,6 +175,7 @@
       current_data = birth_data;
       current_data_string = selected_data;
     } else if (selected_data == "floruit") {
+      d3.select("#header").text("Student Careers in the Colonies (1700-1897)")
       d3.select("#floruit").style("background-color", "black");
       d3.select("#floruit").style("color", "white");
       d3.select("#birth").style("background-color", "white");
@@ -210,17 +188,16 @@
 
 <main bind:clientWidth={width} bind:clientHeight={height}>
   {#if countries_json && shipping_json && current_data && births_per_colony && floruit_per_colony}
-    <h1>University of St Andrews Students in the Empire (1700-1897)</h1>
+    <h1 id="header">Student Births in the Colonies (1700-1897)</h1>
     <Map
       {current_data}
       {current_data_string}
-      {countries_json}
       {shipping_json}
       {colonies_1680}
       {colonies_1750}
       {colonies_1820}
       {colonies_1885}
-      {colonies}
+      {selected_country}
       bind:this={mapRef}
       bind:map
       on:polygonClick={handlePolygonClick}
@@ -231,13 +208,10 @@
         >Career</button
       >
     </div>
-    <!-- <div id="time_description">Students Entering University/birth dates/first careers</div> -->
+    <div id="time_description">Students Entering University</div>
     <Timeline
       {current_data}
-      {birth_data}
-      {floruit_data}
       {selected_country}
-      {births_per_colony}
     />
     <Details
       on:close={handleClose}
@@ -246,7 +220,8 @@
       {selected_country}
       {current_data_string}
     />
-    <div id="legend">
+    <img id="uni_logo" src="uni_black.png">
+    <!-- <div id="legend">
       <svg
         height={legend_height}
         width={legend_width}
@@ -257,11 +232,10 @@
           id="legend_rectangle"
           x="1%"
           y="5%"
-          rx="3"
+          rx="2"
           width="20%"
           height="50%"
-          fill="black"
-          fill-opacity="0.7"
+          fill="#A6A6A6"
         />
         <text
           x="25%"
@@ -274,7 +248,7 @@
           British Empire
         </text>
       </svg>
-    </div>
+    </div> -->
   {/if}
 </main>
 
@@ -295,7 +269,7 @@
   h1 {
     border-radius: 2px;
     position: absolute;
-    font-weight: 400;
+    font-weight: 450;
     padding: 5px;
     top: -2px;
     font-size: 1.3em;
@@ -311,16 +285,22 @@
   #legend {
     width: 150px;
     height: 100px;
-    border-radius: 3px;
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 45px;
+    left: 5px;
   }
 
   @media only screen and (max-width: 768px) {
     #legend {
       width: 123px;
     }
+  }
+
+  #uni_logo {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    height: 35px;
   }
 
   #time_description {
@@ -335,8 +315,11 @@
 
   #buttons {
     position: absolute;
-    top: 5px;
+    top: -2px;
     left: 5px;
+    padding: 0px;
+    margin: 0px;
+    transition: top 0.3s ease;
   }
 
   #birth,
@@ -347,12 +330,12 @@
     padding: 5px 10px;
     text-align: center;
     font-family: "Montserrat";
-    font-weight: 400;
+    font-weight: 450;
     text-decoration: none;
     display: inline-block;
-    font-size: 14px;
-    margin: 4px 2px;
-    border-radius: 3px;
+    font-size: 16px;
+    margin: 0px;
+    border-radius: 2px;
     transition-duration: 0.4s;
     cursor: pointer;
     box-shadow: 0 0 2px #000000;

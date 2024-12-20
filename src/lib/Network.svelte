@@ -1,11 +1,16 @@
 <script>
     import * as d3 from "d3";
+    import {
+        selectedYearsStore,
+        selectedCareerStore,
+        selectedGenderStore,
+    } from "../years";
 
     export let node_link;
     export let career_width;
     export let career_height;
 
-    const padding = { top: 20, right: 20, bottom: 20, left: 25 };
+    const padding = { top: 10, right: 10, bottom: 10, left: 10 };
 
     $: width = career_width - 10;
     $: height = career_height - 10;
@@ -24,8 +29,8 @@
             d3.forceLink(links).id((d) => d.id),
         )
         .force("charge", d3.forceManyBody())
-        .force("x", d3.forceX(width / 2).strength(0.02))
-        .force("y", d3.forceY(height / 2).strength(0.02))
+        .force("x", d3.forceX(width / 2).strength(0.03))
+        .force("y", d3.forceY(height / 2).strength(0.03))
         .force(
             "collision",
             d3.forceCollide().radius((d) => d.connectionCount),
@@ -60,23 +65,27 @@
             d3.zoom().scaleExtent([0.5, 5]).on("zoom", zoomed),
         );
     }
+
+    function career_click(career) {
+        selectedCareerStore.set(career.id);
+    }
 </script>
 
 <!-- SVG element with zoom and pan capabilities -->
 <svg {width} {height} bind:this={svgElement}>
     <!-- Links between nodes -->
     {#each links as link}
-            <line
-                stroke="#999"
-                stroke-opacity="0.5"
-                x1={link.source.x}
-                y1={link.source.y}
-                x2={link.target.x}
-                y2={link.target.y}
-                transform="translate({transform.x}, {transform.y}) scale({transform.k})"
-            >
-                <title>{link.source.id}</title>
-            </line>
+        <line
+            stroke="#999"
+            stroke-opacity="0.5"
+            x1={link.source.x}
+            y1={link.source.y}
+            x2={link.target.x}
+            y2={link.target.y}
+            transform="translate({transform.x}, {transform.y}) scale({transform.k})"
+        >
+            <title>{link.source.id}</title>
+        </line>
     {/each}
 
     <!-- Career nodes -->
@@ -88,6 +97,7 @@
             cx={point.x}
             cy={point.y}
             transform="translate({transform.x}, {transform.y}) scale({transform.k})"
+            on:click={career_click(point)}
         >
             <title>{point.id}</title>
         </circle>
@@ -97,15 +107,15 @@
     {#each career_nodes as point}
         <text
             x={point.x}
-            y={point.y}
+            y={point.y - 5}
             text-anchor="middle"
             fill="black"
             stroke="white"
             paint-order="stroke"
             font-weight="700"
             transform="translate({transform.x}, {transform.y}) scale({transform.k})"
-        >{point.id}
-    </text>
+            >{point.id}
+        </text>
     {/each}
 
     <!-- Person nodes -->

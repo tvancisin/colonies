@@ -5,17 +5,13 @@
         selectedCareerStore,
         selectedGenderStore,
     } from "../years";
-    import { filterData } from "../utils";
+    import { filterData, career } from "../utils";
 
     export let current_data;
-    export let birth_data;
-    export let floruit_data;
     export let selected_country;
-    export let births_per_colony;
 
-    let data;
     let selected_years = [1700, 1900];
-    let selected_gender;
+    let data_to_draw;
     let selected_career;
     let width = 800;
     let height = 160;
@@ -30,13 +26,34 @@
         selectedLineEnd = null,
         selectedYearStart = null,
         selectedYearEnd = null;
-
     //create array with all years. some may be empty
     let allYears = Array.from({ length: 1970 - 1650 + 1 }, (_, i) => 1650 + i);
 
+    // assign clicked country data to data_to_draw
+    $: if (current_data) {
+        data_to_draw = current_data;
+    }
+
+    ////SELECTED CAREER FILTER
+    //catch new selected career
+    const career_unsubscribe = selectedCareerStore.subscribe((value) => {
+        selected_career = value;
+    });
+
+    $: if (selected_career.length != 0 && selected_country !== null) {
+        // construct career groups based on clicked country
+        let career_groups = career(current_data);
+        // only get people with selected career
+        data_to_draw = career_groups[selected_career].filter(
+            (item, index, self) =>
+                index === self.findIndex((t) => t.id === item.id),
+        );
+    }
+
+    // DATA MANIPULATION
     //group data by study years
     $: grouped = d3
-        .groups(current_data, (d) => {
+        .groups(data_to_draw, (d) => {
             if (d.study && d.study.colleges && d.study.colleges.length > 0) {
                 return +d.study.colleges[0].from; // Convert to number
             } else if (
@@ -157,12 +174,8 @@
             (selectedYearStart !== previousSelectedYears.start ||
                 selectedYearEnd !== previousSelectedYears.end)
         ) {
-            // console.log(`selectedYearStart or selectedYearEnd has changed:
-            // from (${previousSelectedYears.start}, ${previousSelectedYears.end})
-            // to (${selectedYearStart}, ${selectedYearEnd})`);
             //selected two years
             selected_years = [selectedYearStart, selectedYearEnd];
-
             selectedYearsStore.set(selected_years);
         }
 
@@ -185,7 +198,7 @@
     $: xAxis = d3.axisBottom(xScale).tickValues(x_ticks);
     $: yAxis = d3.axisLeft(yScale).tickValues(y_ticks);
 
-    // Append the axes to the SVG
+    // Append axes to the SVG
     $: {
         if (svg) {
             d3.select(svg)
@@ -214,7 +227,6 @@
             selected_years[0],
             selected_years[1],
         );
-        console.log(one_year);
 
         one_year.forEach((d) => {
             if (d.birth_date) {
