@@ -18,9 +18,7 @@
     let containerWidth = 800;
     let margin = { top: 20, right: 30, bottom: 30, left: 40 };
     let svg;
-    let x_ticks = [
-        1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900, 1925, 1950,
-    ];
+    let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900];
     let y_ticks = [5, 15];
     let selectedLineStart = null,
         selectedLineEnd = null,
@@ -50,7 +48,7 @@
         );
     }
 
-    // DATA MANIPULATION
+    // DATA PREP FOR TIMELINE
     //group data by study years
     $: grouped = d3
         .groups(data_to_draw, (d) => {
@@ -69,7 +67,7 @@
 
     $: groupedDataMap = new Map(grouped.map((d) => [d[0], d[1].length]));
 
-    //final dataset
+    //final data
     $: completeGrouped = allYears.map((year) => [
         year,
         groupedDataMap.get(year) || 0,
@@ -82,7 +80,7 @@
             d3.selectAll("#timeline, #year_detail").style("width", "100%");
         } else {
             width = containerWidth; // Full width when selected_country is null
-            d3.selectAll("#timeline, #year_detail").style("width", "85%");
+            d3.selectAll("#timeline, #year_detail").style("width", "95%");
         }
     }
 
@@ -427,7 +425,7 @@
         bottom: 0px;
         width: 85%;
         height: 160px;
-        background: rgba(0, 0, 0, 0.034);
+        background: rgba(0, 0, 0, 0.09);
     }
 
     :global(.brush .selection) {

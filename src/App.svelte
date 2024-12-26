@@ -10,6 +10,8 @@
     asian_colonies,
     caribbean_colonies,
     groupByColony,
+    sections,
+    careerSelect
   } from "./utils.js";
   import * as d3 from "d3";
   import Map from "./lib/Map.svelte";
@@ -28,6 +30,8 @@
   let selected_country = null;
   let legend_height = 50;
   let legend_width = 200;
+  let showScrollToTop = false; // Visibility of the scroll-to-top button
+  let isMenuOpen = false; // Toggle menu visibility
 
   //load biographical data
   let path = ["./data/birth_colonies.json", "./data/floruit_colonies.json"];
@@ -155,7 +159,7 @@
     } else if (current_data_string == "floruit") {
       current_data = floruit_data;
     }
-    d3.select("#time_description").style("left", "8.5%");
+    d3.select("#time_description").style("left", "2.5%");
     d3.select("#details").style("right", "-100%");
     d3.select("h1").style("top", "-2px");
     d3.select("#buttons").style("top", "-2px");
@@ -167,7 +171,7 @@
   //set variables based on selection (birth or floruit)
   function change_data(selected_data) {
     if (selected_data == "birth") {
-      d3.select("#header").text("Student Births in the Colonies (1700-1897)")
+      d3.select("#header").text("Student Births in the Colonies (1700-1897)");
       d3.select("#floruit").style("background-color", "white");
       d3.select("#floruit").style("color", "black");
       d3.select("#birth").style("background-color", "black");
@@ -175,7 +179,7 @@
       current_data = birth_data;
       current_data_string = selected_data;
     } else if (selected_data == "floruit") {
-      d3.select("#header").text("Student Careers in the Colonies (1700-1897)")
+      d3.select("#header").text("Student Careers in the Colonies (1700-1897)");
       d3.select("#floruit").style("background-color", "black");
       d3.select("#floruit").style("color", "white");
       d3.select("#birth").style("background-color", "white");
@@ -208,11 +212,26 @@
         >Career</button
       >
     </div>
+    <!-- Navigation Menu -->
+    <div id="navigation">
+      <i
+        class="fa fa-bars"
+        aria-hidden="true"
+        on:click={() => (isMenuOpen = !isMenuOpen)}
+      ></i>
+
+      {#if isMenuOpen}
+        <ul class="dropdown">
+          {#each sections as section}
+            <li on:click={() => careerSelect(section.id)}>
+              {section.name}
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </div>
     <div id="time_description">Students Entering University</div>
-    <Timeline
-      {current_data}
-      {selected_country}
-    />
+    <Timeline {current_data} {selected_country} />
     <Details
       on:close={handleClose}
       {births_per_colony}
@@ -220,7 +239,7 @@
       {selected_country}
       {current_data_string}
     />
-    <img id="uni_logo" src="uni_black.png">
+    <img id="uni_logo" src="uni_black.png" alt="St Andrews University Logo" />
     <!-- <div id="legend">
       <svg
         height={legend_height}
@@ -282,6 +301,47 @@
     box-shadow: 0 0 3px #5a5a5a;
   }
 
+  /* Navigation Menu */
+  #navigation {
+    position: absolute;
+    top: 2px;
+    left: 150px;
+    z-index: 10;
+  }
+
+  #navigation .fa-bars {
+    font-size: 24px;
+    color: black;
+    cursor: pointer;
+  }
+
+  .dropdown {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    text-align: left;
+    background-color: #252529;
+    border-radius: 1px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 10;
+  }
+
+  .dropdown li {
+    all: unset;
+    font-weight: 300;
+    padding: 10px 20px;
+    color: white;
+    cursor: pointer;
+    display: block;
+    text-align: left;
+  }
+
+  .dropdown li:hover {
+    background-color: #042645;
+  }
+
   #legend {
     width: 150px;
     height: 100px;
@@ -306,10 +366,10 @@
   #time_description {
     border-radius: 2px;
     position: absolute;
-    left: 8.5%;
+    left: 2.5%;
     bottom: 160px;
     font-weight: 450;
-    background: rgba(0, 0, 0, 0.034);
+    background: rgba(0, 0, 0, 0.09);
     padding: 5px;
   }
 
