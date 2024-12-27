@@ -2,7 +2,6 @@
   import {
     getJSON,
     getGeo,
-    colonies,
     india_colonies,
     african_colonies,
     america_colonies,
@@ -10,8 +9,7 @@
     asian_colonies,
     caribbean_colonies,
     groupByColony,
-    sections,
-    careerSelect
+    career,
   } from "./utils.js";
   import * as d3 from "d3";
   import Map from "./lib/Map.svelte";
@@ -39,6 +37,12 @@
   let floruit_data;
   let births_per_colony;
   let floruit_per_colony;
+  let sections = [
+    { id: "education", name: "Education" },
+    { id: "religion", name: "Religion" },
+    { id: "medicine", name: "Medicine" },
+    { id: "military", name: "Military" },
+  ];
 
   getJSON(path).then((json) => {
     birth_data = json[0];
@@ -188,6 +192,22 @@
       current_data_string = selected_data;
     }
   }
+
+  // Scroll to a specific section
+  const careerSelect = (sectionId) => {
+    if (current_data_string == "birth") {
+      current_data = birth_data;
+    } else if (current_data_string == "floruit") {
+      current_data = floruit_data;
+    }
+    // divide into careers
+    let career_groups = career(current_data);
+    // people with selected career
+    let fin_career = career_groups[sectionId].filter(
+      (item, index, self) => index === self.findIndex((t) => t.id === item.id),
+    );
+    current_data = fin_career;
+  };
 </script>
 
 <main bind:clientWidth={width} bind:clientHeight={height}>

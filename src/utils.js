@@ -1,18 +1,5 @@
 import * as d3 from "d3";
 
-export const sections = [
-    { id: "education", name: "Education" },
-    { id: "religion", name: "Religion" },
-    { id: "medicine", name: "Medicine" },
-    { id: "military", name: "Military" },
-];
-
-// Scroll to a specific section
-export const careerSelect = (sectionId) => {
-    console.log(sectionId);
-    
-};
-
 //LOADING DATA FUNCTIONS
 export async function getJson(path) {
     let loadedData = await d3.json(path);
