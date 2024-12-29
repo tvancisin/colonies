@@ -1,10 +1,10 @@
 <script>
     import { createEventDispatcher } from "svelte";
-    import * as d3 from "d3";
     import {
         filterData,
         genderFilter,
         constructNodesAndLinks,
+        constructParallelData,
     } from "../utils";
     import {
         selectedYearsStore,
@@ -12,6 +12,7 @@
         selectedGenderStore,
     } from "../years";
     import Network from "./Network.svelte";
+    import Parallel from "./Parallel.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -48,8 +49,11 @@
     $: def_data = filteredCountry[0][1];
     //set data to manipulate
     $: data = filteredCountry[0][1];
+    
     //data for network
-    $: node_link = constructNodesAndLinks(data);
+    // $: node_link = constructNodesAndLinks(data);
+    // data for parallel
+    $: parallel_data = constructParallelData(data);
 
     //SELECTED YEAR FILTER
     $: if (selectedYears.length != 0) {
@@ -60,7 +64,9 @@
         //update data
         data = filter_years;
         //data for network
-        node_link = constructNodesAndLinks(data);
+        // node_link = constructNodesAndLinks(data);
+        // data for parallel
+        parallel_data = constructParallelData(data);
     } else if (selectedYears.length == 0) {
         //always reset data
         data = def_data;
@@ -104,7 +110,8 @@
                 bind:clientWidth={career_width}
                 bind:clientHeight={career_height}
             >
-                <Network {node_link} {career_width} {career_height} />
+                <!-- <Network {node_link} {career_width} {career_height} /> -->
+                <Parallel {parallel_data} {career_width} {career_height} />
             </div>
         </div>
         <div id="peace_process">
@@ -361,101 +368,10 @@
         display: flex;
         flex-direction: column;
         line-height: 1.5;
-    }
-
-    #overview {
-        flex-basis: 0;
-        width: 100%;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-    }
-
-    #general,
-    #peace_process,
-    #overview {
         background: white;
         border-radius: 2px;
-    }
-
-    #overview h5,
-    #general h5,
-    #peace_process h5 {
-        background-color: #d9d9d9;
-        z-index: 2;
-        box-shadow: 0 2px 3px rgba(117, 117, 117, 0.8);
-    }
-
-    #overview,
-    #general,
-    #peace_process {
         flex-shrink: 0; /* Prevent shrinking of these elements */
-    }
-
-    #overview {
-        flex-grow: 0.7; /* Takes one unit of the available space */
-    }
-
-    #general {
         flex-grow: 1; /* Takes one unit of the available space */
-    }
-
-    #peace_process {
-        flex-grow: 1; /* Takes three units of the available space each */
-    }
-
-    h5 {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-        margin: 0;
-        padding: 5px 15px;
-        color: black;
-        font-size: 1em;
-        font-weight: 550;
-    }
-
-    @media only screen and (max-width: 768px) {
-        h5 {
-            font-size: 0.9em;
-            padding: 3px 10px;
-        }
-    }
-
-    .content-wrapper {
-        flex-grow: 1;
-        display: flex;
-        gap: 5px;
-        padding: 5px;
-        overflow-y: auto;
-        flex-direction: row;
-        align-items: stretch;
-    }
-
-    .content-box {
-        flex-basis: 50%;
-        background: white;
-        color: black;
-        padding: 2px;
-        display: flex;
-        flex-direction: column;
-        box-sizing: border-box;
-        overflow: visible;
-    }
-
-    .row {
-        display: flex;
-        flex-grow: 1;
-        width: 100%; /* Ensure it takes the full width */
-        height: 100%; /* Ensure it takes the full height */
-        font-weight: 450;
-    }
-
-    svg {
-        max-width: 100%;
-        max-height: 100%;
-        width: 100%;
-        display: block; /* Remove inline spacing issues */
     }
 
     .scrollable-content {

@@ -103,6 +103,17 @@
 
     floruit_per_colony = groupByColony(floruit_data);
 
+    // const degreesArray = [
+    //   ...new Set(
+    //     floruit_data
+    //       .map((item) => item.study?.degrees || [])
+    //       .flat()
+    //       .map((degree) => degree.name),
+    //   ),
+    // ];
+
+    // console.log(degreesArray);
+
     current_data = birth_data;
     current_data_string = "birth";
   });
@@ -208,6 +219,8 @@
     );
     current_data = fin_career;
   };
+
+  $: console.log("Current data: ", current_data);
 </script>
 
 <main bind:clientWidth={width} bind:clientHeight={height}>

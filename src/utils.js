@@ -1,5 +1,72 @@
 import * as d3 from "d3";
 
+export function constructParallelData(data) {
+    const transformedData = data.map(item => {
+        const college = item.study?.colleges?.[0]?.name || "unknown";
+        const degree = item.study?.degrees?.[0]?.name || "unknown";
+        const id = item.id;
+
+        // Handle career extraction
+        let career = "unknown";
+        if (item.floruit?.[0]?.occupation) {
+            const occupation = item.floruit[0].occupation;
+            if (Array.isArray(occupation)) {
+                career = occupation[0] || "unknown";
+            } else {
+                career = occupation || "unknown";
+            }
+        }
+
+        career = career.toLowerCase();
+
+        // Assign to the appropriate group
+        if (occupations.medicine.includes(career)) {
+            career = "medicine"
+        } else if (occupations.religion.includes(career)) {
+            career = "religion"
+        } else if (occupations.education.includes(career)) {
+            career = "education"
+        } else if (occupations.noble.includes(career)) {
+            career = "noble"
+        } else if (occupations.trade.includes(career)) {
+            career = "trade"
+        } else if (occupations.land.includes(career)) {
+            career = "land"
+        } else if (occupations.military.includes(career)) {
+            career = "military"
+        } else if (occupations.government.includes(career)) {
+            career = "government"
+        } else if (occupations.local_government.includes(career)) {
+            career = "local_government"
+        } else if (occupations.politics.includes(career)) {
+            career = "politics"
+        } else if (occupations.justice.includes(career)) {
+            career = "justice"
+        } else if (occupations.art.includes(career)) {
+            career = "art"
+        } else if (occupations.printed.includes(career)) {
+            career = "print"
+        } else if (occupations.engineer.includes(career)) {
+            career = "engineering"
+        } else if (occupations.farm.includes(career)) {
+            career = "farming"
+        } else if (occupations.forestry.includes(career)) {
+            career = "forestry"
+        } else if (occupations.sport.includes(career)) {
+            career = "sport"
+        } else if (occupations.unknown.includes(career)) {
+            career = "unclear"
+        }
+
+        return {
+            college,
+            degree,
+            career
+        };
+    });
+    return transformedData
+}
+
 //LOADING DATA FUNCTIONS
 export async function getJson(path) {
     let loadedData = await d3.json(path);
@@ -99,1027 +166,547 @@ export function getOpacityExpression(regions) {
     return expression;
 }
 
-//occupations
-export const medicine = [
-    "Surgeon",
-    "Physician",
-    "surgeon",
-    "Surgeon’s mate",
 
-    "Professor of natural philosophy",
-    "Professor of Moral Philosophy",
-
-    "Doctor",
-    "Assistant surgeon",
-    "Medical student",
-    "Medical Officer",
-
-    "Nurse",
-    "Civil surgeon",
-    "Assistant Surgeon",
-    "Surgoen",
-    "Surgeon apothecary",
-
-    "Secession minister",
-    "Examiner of medical stores",
-    "army surgeon",
-    "Medical missionary",
-
-    "doctor",
-    "Head surgeon",
-    "Hospital Mate",
-    "Second surgeon",
-    "chief physician",
-
-    "Surgeon to Governor",
-    "Surgeon’s Mate",
-    "Congregational minister and physician",
-
-    "Surgeon General",
-    "Medical assistant",
-    "Colonial surgeon",
-    "physician superintendent",
-
-    "Physician General",
-    "Principal surgeon",
-    "Hospital mate",
-    "House surgeon",
-
-    "Pathologist and curator",
-    "Medical superintendent",
-    "Senior Assistant Surgeon",
-
-    "Principal Surgeon",
-    "Apothecary",
-    "medical student",
-];
-
-export const religion = [
-    "Evangelist",
-    "representative of ‘waalsche’ churches",
-
-    "Minister",
-    "clergyman",
-    "Precentor",
-    "Bishop",
-    "minister",
-    "presbytery",
-
-    "Preached",
-    "bishop",
-    "Archdeacon",
-    "Episcopal minister",
-    "Missionary",
-    "Vicar",
-
-    "Curate",
-    "preacher",
-    "Church of Scotland chaplain",
-    "Chaplain",
-    "U.F. minister",
-
-    "missionary",
-    "United Presbyterian Minister",
-    "Free Church minister",
-
-    "Relief and United Presbyterian minister",
-    "Chaplain to Forces",
-
-    "Military chaplain and minister",
-    "Church of Scotland minister",
-    "Ordained",
-
-    "Free Church and U.F. missionary",
-    "U.P. and U.F. minister",
-    "Unitarian minister",
-
-    "Congregational minister",
-    "Presbyterian minister",
-    "catechist",
-    "Baptist minister",
-
-    "United Presbyterian minister",
-    "London Missionary Society missionary",
-
-    "Free Church missionary",
-    "Secession minister",
-    "Assistant minister",
-    "Perpetual curate",
-
-    "priest",
-    "Preacher",
-    "Session clerk",
-    "Head of Scots Mission",
-    "Pastor",
-    "Priest",
-
-    "Priest in charge",
-    "Burgher minister",
-    "chaplain",
-
-    "Free Church and United Free Church missionary",
-    "U.F. minister",
-    "Catechist",
-
-    "Reader and preacher",
-    "Assistant chaplain",
-    "Episcopal clergyman",
-    "U.P. minister",
-
-    "Congregational missionary",
-    "Principal Medical Officer",
-    "divinity student",
-
-    "United Presbyterian and U.F. minister",
-    "Theological student",
-    "Antiburgher minister",
-
-    "Church Missionary Society",
-    "Baptist missionary",
-    "Army chaplain",
-
-    "United Associate and United Presbyterian minister",
-];
-
-export const education = [
-    "Schoolmaster and clerk",
-    "Rector",
-    "schoolmaster",
-
-    "teacher of Latin and Greek",
-    "Professor of divinity",
-    "Principal",
-    "Schoolmaster",
-
-    "Professor of Hebrew",
-    "Professor of Mathematics",
-    "Tutor",
-    "Professor",
-
-    "Inspector of Schools",
-    "Professor of Oriental Languages",
-    "Master",
-
-    "Assistant in Humanity",
-    "Professor of Chemistry",
-    "Professor of Obstetric Medicine",
-
-    "MacDonald Professor of Chemistry",
-    "Founder and first principal",
-    "Provost",
-
-    "Lecturer in Natural History",
-    "Professor of Natural History",
-
-    "Professor of Comparative Anatomy and Zoology",
-    "Professor of Biology",
-
-    "Professor of Engineering",
-    "Vice-principal",
-    "Vice - Principal",
-    "school teacher",
-
-    "tutor",
-    "Professor of English",
-    "Rector of the University",
-    "teacher of music",
-
-    "Professor of Humanity",
-    "Professor of Sacred Literature",
-    "Professor of Modern History",
-
-    "Professor of Sanskrit",
-    "Professor of Anatomy",
-    "Tutor in mathematics",
-
-    "Mathematics master",
-    "Assistant in Greek",
-    "Professor of Classics",
-    "Vice Chancellor",
-
-    "Professor of Natural History and Chemistry",
-    "Classical master",
-    "Private tutor",
-
-    "classics master",
-    "Professor of New Testament Studies",
-    "Science and mathematics master",
-
-    "Mathematics teacher",
-    "Professor of Civil History",
-    "Teacher",
-    "Assistant master",
-
-    "Lecturer",
-    "Commissioner of Schools",
-    "Senior assistant in zoology",
-
-    "Naturalist at Marine laboratory",
-    "Professor of zoology",
-    "Demonstrator in Chemistry",
-
-    "Science master",
-    "Tutor in gynaecology",
-    "Professor of Obstetrics",
-
-    "Professor of Midwifery",
-    "Professor of Physiology and Pathology",
-    "Chancellor",
-
-    "Lecturer in Logic",
-    "Professor of Mental and Moral Philosophy",
-
-    "Professor of Sacred Languages",
-    "Professor of English Language and Literature",
-
-    "Classics master",
-    "Professor of Forestry",
-    "Marine biologist",
-    "Professor of Zoology",
-
-    "Professor of Church History and History of Dogma",
-    "Venture schoolmaster",
-
-    "Superintending chemist",
-    "Tutor and guardian",
-    "Lecturer in Political Economy",
-
-    "Assistant to Professor Fischer",
-    "Chief Inspector of Schools",
-    "Senior language mistress",
-
-    "Classical mistress",
-    "Modern languages tutor",
-    "Assistant French mistress",
-    "Fellow",
-
-    "Professor of English Literature",
-    "Professor of Comparative Literature",
-    "Professor of Arabic",
-
-    "Professor of Belles Lettres",
-    "Professor of Biblical Criticism",
-    "Assistant in humanity",
-
-    "Taylorian lecturer in Scandinavian languages",
-    "Professor of Anglo-Saxon",
-
-    "Lecturer in Anatomy",
-    "Professor of Physiology",
-    "Lecturer in materia medica",
-
-    "university lecturer",
-    "Professor of Physics",
-    "Professor of Clinical Surgery",
-
-    "Headmaster",
-    "Assistant lecturer",
-    "Master of Method",
-    "Head teacher",
-
-    "First professor of philosophy and English literature",
-    "Assistant to Professor of Hebrew",
-
-    "English master",
-    "Assistant classical master",
-    "Professor of systematic Theology",
-
-    "teacher of languages",
-    "Professor of English and Philosophy",
-    "Vice principal",
-
-    "School Superintendent",
-    "Head master",
-    "Assistant to Professor of Humanity",
-
-    "Professor of Greek, Latin and English",
-];
-
-export const noble = ["Earl", "Baron", "Marquess", "baronet", "Duke", "duke", "Bt."];
-
-export const trade = [
-    "Senior merchant",
-    "Factor",
-    "Clerk",
-    "Chairman",
-    "merchant",
-
-    "general merchant, importer and shipping agent",
-    "coffee planter",
-    "business man",
-
-    "Sugar planter",
-    "planter",
-    "Town clerk",
-    "Senior clerk",
-
-    "Officiating import warehouse keeper and naval stock keeper",
-    "manager",
-
-    "indigo planter",
-    "dry goods business",
-    "free merchant",
-    "Banker",
-    "Free merchant",
-
-    "burgher",
-    "Teller",
-    "Bookkeeper",
-];
-
-export const land = ["Landowner", "Laird"];
-
-export const military = [
-    "officer of militia",
-    "Captain in the army",
-    "Captain",
-    "cadet",
-
-    "Cadet",
-    "Ensign",
-    "Garrison Mate",
-    "Deputy Adjutant General",
-    "Soldier",
-    "Artillery"
-];
-
-export const government = [
-    "Chamberlain",
-    "HM Comptroller",
-    "Governor",
-    "Ambassador",
-    "Regent",
-
-    "Director of Public Instruction",
-    "Governor General",
-
-    "Superintendent of the government botanic garden",
-    "Parliamentary Librarian",
-
-    "District commissioner",
-    "British Consular Service",
-    "Minister of Education",
-
-    "Superintendent General of Education",
-    "Governor and Commander in Chief",
-
-    "Chief Secretary to the Government",
-    "Deputy Inspector General",
-    "Inspector General",
-
-    "Commissioner of Court of Requests",
-    "Commissioner of Fisheries",
-    "Civil servant",
-
-    "Privy Councillor and Chancellor",
-    "civil servant and magistrate",
-    "Lieutenant governor",
-
-    "Secretary of State",
-    "Deputy master of the Mint",
-    "Attaché",
-    "Chargé d’affaires",
-
-    "Envoy extraordinary and minister plenipotentiary",
-
-    "Clerk of the Executive and Legislative Councils",
-    "Member of legislative council",
-
-    "U.S. ambassador",
-    "Colonial treasurer and Naval officer",
-
-    "Chief engineer and Secretary to Government",
-    "Official member of Council",
-
-    "Assistant Commissioner and Settlement Officer",
-    "Collector of Customs",
-
-    "Commissioner of customs, salt and opium",
-    "Sheriff",
-    "Senator",
-    "Inspector",
-
-    "Member of Council",
-    "Deputy Inspector",
-    "Divisional Revenue Commissioner",
-
-    "Paymaster General",
-    "Chief secretary ",
-    "Lord Lieutenant",
-    "Commissioner for Crown lands",
-
-    "Scientific Advisor",
-    "Lieutenant Governor",
-];
-
-export const local_government = [
-    "Burgess",
-    "Town Councillor",
-    "Mayor",
-    "City Superintendent",
-
-    "City Superintendent",
-    "Councillor and Mayor",
-];
-
-export const politics = [
-    "Member of Parliament",
-    "Tory M.P.",
-    "M.P.",
-    "Member of the House of Assembly",
-
-    "Member of local legislature",
-    " Liberal leader",
-];
-
-export const justice = [
-    "magistrate",
-    "Chief Justice",
-    "Associate Justice Supreme Court",
-
-    "Civil and Sessions judge",
-    "City coroner",
-    "Chief justice",
-    "lawyer",
-    "Assistant judge",
-
-    "Barrister",
-    "Attorney General",
-    "Judge",
-    "Advocate General",
-    "Advocate",
-    "Law agent",
-    "Writer",
-
-    "writer",
-];
-
-export const art = ["author", "Curator"];
-
-export const printed = [
-    "journalist",
-    "Editor",
-    "Assistant editor",
-    "Assistant librarian",
-    "Colporteur",
-];
-
-export const engineer = [
-    "civil engineer",
-    "chief engineer",
-    "Superintending engineer",
-    "Engineer",
-
-    "consulting engineer",
-];
-
-export const farm = [
-    "sheep farmer",
-    "practitioner and farmer",
-    "farm labourer",
-    "sheep breeder",
-
-    "Farmer",
-    "Estanciero",
-];
-
-export const forestry = [
-    "Conservator of Forests",
-    "Delegate for instruction in Forestry",
-];
-
-export const sport = ["Amateur golf champion"];
-
-export const unknown = [
-    "Assistant",
-    "Retired",
-    "Member",
-    "Moderator",
-    "Private assistant",
-
-    "Director",
-    "member of the St Andrews Society",
-    "Casualty Clearing Station",
-    "Apprentice",
-
-    "pioneer",
-    "Staff",
-    "assistant",
-    "Chief",
-    "director",
-    "Warden",
-    "President ",
-    "Secretary",
-
-    "President",
-    "Superintendent",
-    "Incumbent",
-    "Usher",
-];
 
 export const occupations = {
     medicine: [
-        "Surgeon",
-        "Physician",
         "surgeon",
-        "Surgeon’s mate",
+        "physician",
+        "surgeon",
+        "surgeon’s mate",
 
-        "Professor of natural philosophy",
-        "Professor of Moral Philosophy",
-
-        "Doctor",
-        "Assistant surgeon",
-        "Medical student",
-        "Medical Officer",
-
-        "Nurse",
-        "Civil surgeon",
-        "Assistant Surgeon",
-        "Surgoen",
-        "Surgeon apothecary",
-
-        "Secession minister",
-        "Examiner of medical stores",
-        "army surgeon",
-        "Medical missionary",
+        "professor of natural philosophy",
+        "professor of moral philosophy",
 
         "doctor",
-        "Head surgeon",
-        "Hospital Mate",
-        "Second surgeon",
+        "assistant surgeon",
+        "medical student",
+        "medical officer",
+
+        "nurse",
+        "civil surgeon",
+        "assistant surgeon",
+        "surgoen",
+        "surgeon apothecary",
+
+        "secession minister",
+        "examiner of medical stores",
+        "army surgeon",
+        "medical missionary",
+
+        "doctor",
+        "head surgeon",
+        "hospital mate",
+        "second surgeon",
         "chief physician",
 
-        "Surgeon to Governor",
-        "Surgeon’s Mate",
-        "Congregational minister and physician",
+        "surgeon to governor",
+        "surgeon’s mate",
+        "congregational minister and physician",
 
-        "Surgeon General",
-        "Medical assistant",
-        "Colonial surgeon",
+        "surgeon general",
+        "medical assistant",
+        "colonial surgeon",
         "physician superintendent",
 
-        "Physician General",
-        "Principal surgeon",
-        "Hospital mate",
-        "House surgeon",
+        "physician general",
+        "principal surgeon",
+        "hospital mate",
+        "house surgeon",
 
-        "Pathologist and curator",
-        "Medical superintendent",
-        "Senior Assistant Surgeon",
+        "pathologist and curator",
+        "medical superintendent",
+        "senior assistant surgeon",
+        "assistant indian medical service",
 
-        "Principal Surgeon",
-        "Apothecary",
+        "principal surgeon",
+        "apothecary",
         "medical student",
+        "medical service",
+        "hospital apprentice"
     ],
+
     religion: [
-        "Evangelist",
+        "evangelist",
         "representative of ‘waalsche’ churches",
 
-        "Minister",
+        "minister",
         "clergyman",
-        "Precentor",
-        "Bishop",
+        "precentor",
+        "bishop",
         "minister",
         "presbytery",
 
-        "Preached",
+        "preached",
         "bishop",
-        "Archdeacon",
-        "Episcopal minister",
-        "Missionary",
-        "Vicar",
+        "archdeacon",
+        "episcopal minister",
+        "missionary",
+        "vicar",
 
-        "Curate",
+        "curate",
         "preacher",
-        "Church of Scotland chaplain",
-        "Chaplain",
-        "U.F. minister",
+        "church of scotland chaplain",
+        "chaplain",
+        "u.f. minister",
 
         "missionary",
-        "United Presbyterian Minister",
-        "Free Church minister",
+        "united presbyterian minister",
+        "free church minister",
 
-        "Relief and United Presbyterian minister",
-        "Chaplain to Forces",
+        "relief and united presbyterian minister",
+        "chaplain to forces",
 
-        "Military chaplain and minister",
-        "Church of Scotland minister",
-        "Ordained",
+        "military chaplain and minister",
+        "church of scotland minister",
+        "ordained",
 
-        "Free Church and U.F. missionary",
-        "U.P. and U.F. minister",
-        "Unitarian minister",
+        "free church and u.f. missionary",
+        "u.p. and u.f. minister",
+        "unitarian minister",
 
-        "Congregational minister",
-        "Presbyterian minister",
+        "congregational minister",
+        "presbyterian minister",
         "catechist",
-        "Baptist minister",
+        "baptist minister",
 
-        "United Presbyterian minister",
-        "London Missionary Society missionary",
+        "united presbyterian minister",
+        "london missionary society missionary",
 
-        "Free Church missionary",
-        "Secession minister",
-        "Assistant minister",
-        "Perpetual curate",
+        "free church missionary",
+        "secession minister",
+        "assistant minister",
+        "perpetual curate",
 
         "priest",
-        "Preacher",
-        "Session clerk",
-        "Head of Scots Mission",
-        "Pastor",
-        "Priest",
+        "preacher",
+        "session clerk",
+        "head of scots mission",
+        "pastor",
+        "priest",
 
-        "Priest in charge",
-        "Burgher minister",
+        "priest in charge",
+        "burgher minister",
         "chaplain",
 
-        "Free Church and United Free Church missionary",
-        "U.F. minister",
-        "Catechist",
+        "free church and united free church missionary",
+        "u.f. minister",
+        "catechist",
 
-        "Reader and preacher",
-        "Assistant chaplain",
-        "Episcopal clergyman",
-        "U.P. minister",
+        "reader and preacher",
+        "assistant chaplain",
+        "episcopal clergyman",
+        "u.p. minister",
 
-        "Congregational missionary",
-        "Principal Medical Officer",
+        "congregational missionary",
+        "principal medical officer",
         "divinity student",
 
-        "United Presbyterian and U.F. minister",
-        "Theological student",
-        "Antiburgher minister",
+        "united presbyterian and u.f. minister",
+        "theological student",
+        "antiburgher minister",
 
-        "Church Missionary Society",
-        "Baptist missionary",
-        "Army chaplain",
+        "church missionary society",
+        "baptist missionary",
+        "army chaplain",
 
-        "United Associate and United Presbyterian minister",
+        "united associate and united presbyterian minister",
     ],
+
     education: [
-        "Schoolmaster and clerk",
-        "Rector",
+        "schoolmaster and clerk",
+        "rector",
         "schoolmaster",
 
-        "teacher of Latin and Greek",
-        "Professor of divinity",
-        "Principal",
-        "Schoolmaster",
+        "teacher of latin and greek",
+        "professor of divinity",
+        "principal",
+        "schoolmaster",
 
-        "Professor of Hebrew",
-        "Professor of Mathematics",
-        "Tutor",
-        "Professor",
+        "professor of hebrew",
+        "professor of mathematics",
+        "tutor",
+        "professor",
 
-        "Inspector of Schools",
-        "Professor of Oriental Languages",
-        "Master",
+        "inspector of schools",
+        "professor of oriental languages",
+        "master",
 
-        "Assistant in Humanity",
-        "Professor of Chemistry",
-        "Professor of Obstetric Medicine",
+        "assistant in humanity",
+        "professor of chemistry",
+        "professor of obstetric medicine",
 
-        "MacDonald Professor of Chemistry",
-        "Founder and first principal",
-        "Provost",
+        "macdonald professor of chemistry",
+        "founder and first principal",
+        "provost",
 
-        "Lecturer in Natural History",
-        "Professor of Natural History",
+        "lecturer in natural history",
+        "professor of natural history",
 
-        "Professor of Comparative Anatomy and Zoology",
-        "Professor of Biology",
+        "professor of comparative anatomy and zoology",
+        "professor of biology",
 
-        "Professor of Engineering",
-        "Vice-principal",
-        "Vice - Principal",
+        "professor of engineering",
+        "vice-principal",
+        "vice - principal",
         "school teacher",
 
         "tutor",
-        "Professor of English",
-        "Rector of the University",
+        "professor of english",
+        "rector of the university",
         "teacher of music",
 
-        "Professor of Humanity",
-        "Professor of Sacred Literature",
-        "Professor of Modern History",
+        "professor of humanity",
+        "professor of sacred literature",
+        "professor of modern history",
 
-        "Professor of Sanskrit",
-        "Professor of Anatomy",
-        "Tutor in mathematics",
+        "professor of sanskrit",
+        "professor of anatomy",
+        "tutor in mathematics",
 
-        "Mathematics master",
-        "Assistant in Greek",
-        "Professor of Classics",
-        "Vice Chancellor",
+        "mathematics master",
+        "assistant in greek",
+        "professor of classics",
+        "vice chancellor",
 
-        "Professor of Natural History and Chemistry",
-        "Classical master",
-        "Private tutor",
+        "professor of natural history and chemistry",
+        "classical master",
+        "private tutor",
 
         "classics master",
-        "Professor of New Testament Studies",
-        "Science and mathematics master",
+        "professor of new testament studies",
+        "science and mathematics master",
 
-        "Mathematics teacher",
-        "Professor of Civil History",
-        "Teacher",
-        "Assistant master",
+        "mathematics teacher",
+        "professor of civil history",
+        "teacher",
+        "assistant master",
 
-        "Lecturer",
-        "Commissioner of Schools",
-        "Senior assistant in zoology",
+        "lecturer",
+        "commissioner of schools",
+        "senior assistant in zoology",
 
-        "Naturalist at Marine laboratory",
-        "Professor of zoology",
-        "Demonstrator in Chemistry",
+        "naturalist at marine laboratory",
+        "professor of zoology",
+        "demonstrator in chemistry",
 
-        "Science master",
-        "Tutor in gynaecology",
-        "Professor of Obstetrics",
+        "science master",
+        "tutor in gynaecology",
+        "professor of obstetrics",
 
-        "Professor of Midwifery",
-        "Professor of Physiology and Pathology",
-        "Chancellor",
+        "professor of midwifery",
+        "professor of physiology and pathology",
+        "chancellor",
 
-        "Lecturer in Logic",
-        "Professor of Mental and Moral Philosophy",
+        "lecturer in logic",
+        "professor of mental and moral philosophy",
 
-        "Professor of Sacred Languages",
-        "Professor of English Language and Literature",
+        "professor of sacred languages",
+        "professor of english language and literature",
 
-        "Classics master",
-        "Professor of Forestry",
-        "Marine biologist",
-        "Professor of Zoology",
+        "classics master",
+        "professor of forestry",
+        "marine biologist",
+        "professor of zoology",
 
-        "Professor of Church History and History of Dogma",
-        "Venture schoolmaster",
+        "professor of church history and history of dogma",
+        "venture schoolmaster",
 
-        "Superintending chemist",
-        "Tutor and guardian",
-        "Lecturer in Political Economy",
+        "superintending chemist",
+        "tutor and guardian",
+        "lecturer in political economy",
 
-        "Assistant to Professor Fischer",
-        "Chief Inspector of Schools",
-        "Senior language mistress",
+        "assistant to professor fischer",
+        "chief inspector of schools",
+        "senior language mistress",
 
-        "Classical mistress",
-        "Modern languages tutor",
-        "Assistant French mistress",
-        "Fellow",
+        "classical mistress",
+        "modern languages tutor",
+        "assistant french mistress",
+        "fellow",
 
-        "Professor of English Literature",
-        "Professor of Comparative Literature",
-        "Professor of Arabic",
+        "professor of english literature",
+        "professor of comparative literature",
+        "professor of arabic",
 
-        "Professor of Belles Lettres",
-        "Professor of Biblical Criticism",
-        "Assistant in humanity",
+        "professor of belles lettres",
+        "professor of biblical criticism",
+        "assistant in humanity",
 
-        "Taylorian lecturer in Scandinavian languages",
-        "Professor of Anglo-Saxon",
+        "taylorian lecturer in scandinavian languages",
+        "professor of anglo-saxon",
 
-        "Lecturer in Anatomy",
-        "Professor of Physiology",
-        "Lecturer in materia medica",
+        "lecturer in anatomy",
+        "professor of physiology",
+        "lecturer in materia medica",
 
         "university lecturer",
-        "Professor of Physics",
-        "Professor of Clinical Surgery",
+        "professor of physics",
+        "professor of clinical surgery",
 
-        "Headmaster",
-        "Assistant lecturer",
-        "Master of Method",
-        "Head teacher",
+        "headmaster",
+        "assistant lecturer",
+        "master of method",
+        "head teacher",
 
-        "First professor of philosophy and English literature",
-        "Assistant to Professor of Hebrew",
+        "first professor of philosophy and english literature",
+        "assistant to professor of hebrew",
 
-        "English master",
-        "Assistant classical master",
-        "Professor of systematic Theology",
+        "english master",
+        "assistant classical master",
+        "professor of systematic theology",
 
         "teacher of languages",
-        "Professor of English and Philosophy",
-        "Vice principal",
+        "professor of english and philosophy",
+        "vice principal",
 
-        "School Superintendent",
-        "Head master",
-        "Assistant to Professor of Humanity",
+        "school superintendent",
+        "head master",
+        "assistant to professor of humanity",
 
-        "Professor of Greek, Latin and English",
+        "professor of greek, latin and english",
     ],
-    noble: ["Earl", "Baron", "Marquess", "baronet", "Duke", "duke", "Bt."],
+
+    noble: ["earl", "baron", "marquess", "baronet", "duke", "duke", "bt."],
+
     trade: [
-        "Senior merchant",
-        "Factor",
-        "Clerk",
-        "Chairman",
+        "honourable east india company service",
+        "senior merchant",
+        "factor",
+        "clerk",
+        "chairman",
         "merchant",
 
         "general merchant, importer and shipping agent",
         "coffee planter",
         "business man",
 
-        "Sugar planter",
+        "sugar planter",
         "planter",
-        "Town clerk",
-        "Senior clerk",
+        "town clerk",
+        "senior clerk",
 
-        "Officiating import warehouse keeper and naval stock keeper",
+        "officiating import warehouse keeper and naval stock keeper",
         "manager",
 
         "indigo planter",
         "dry goods business",
         "free merchant",
-        "Banker",
-        "Free merchant",
+        "banker",
+        "free merchant",
 
         "burgher",
-        "Teller",
-        "Bookkeeper",
+        "teller",
+        "bookkeeper",
     ],
-    land: ["Landowner", "Laird"],
+
+    land: ["landowner", "laird", "landed proprietor"],
+
     military: [
         "officer of militia",
-        "Captain in the army",
-        "Captain",
+        "captain in the army",
+        "captain",
         "cadet",
+        "army",
+        "colonel",
+        "major",
+        "adjutant",
 
-        "Cadet",
-        "Ensign",
-        "Garrison Mate",
-        "Deputy Adjutant General",
-        "Soldier",
-        "Artillery"
+        "cadet",
+        "ensign",
+        "ensign",
+        "garrison mate",
+        "deputy adjutant general",
+        "soldier",
+        "artillery"
     ],
+
     government: [
-        "Chamberlain",
-        "HM Comptroller",
-        "Governor",
-        "Ambassador",
-        "Regent",
+        "chamberlain",
+        "hm comptroller",
+        "governor",
+        "ambassador",
+        "regent",
 
-        "Director of Public Instruction",
-        "Governor General",
+        "director of public instruction",
+        "governor general",
 
-        "Superintendent of the government botanic garden",
-        "Parliamentary Librarian",
+        "superintendent of the government botanic garden",
+        "parliamentary librarian",
 
-        "District commissioner",
-        "British Consular Service",
-        "Minister of Education",
+        "district commissioner",
+        "british consular service",
+        "minister of education",
 
-        "Superintendent General of Education",
-        "Governor and Commander in Chief",
+        "superintendent general of education",
+        "governor and commander in chief",
 
-        "Chief Secretary to the Government",
-        "Deputy Inspector General",
-        "Inspector General",
+        "chief secretary to the government",
+        "deputy inspector general",
+        "inspector general",
 
-        "Commissioner of Court of Requests",
-        "Commissioner of Fisheries",
-        "Civil servant",
+        "commissioner of court of requests",
+        "commissioner of fisheries",
+        "civil servant",
+        "indian civil service",
 
-        "Privy Councillor and Chancellor",
+        "privy councillor and chancellor",
         "civil servant and magistrate",
-        "Lieutenant governor",
+        "lieutenant governor",
 
-        "Secretary of State",
-        "Deputy master of the Mint",
-        "Attaché",
-        "Chargé d’affaires",
+        "secretary of state",
+        "deputy master of the mint",
+        "attaché",
+        "chargé d’affaires",
 
-        "Envoy extraordinary and minister plenipotentiary",
+        "envoy extraordinary and minister plenipotentiary",
 
-        "Clerk of the Executive and Legislative Councils",
-        "Member of legislative council",
+        "clerk of the executive and legislative councils",
+        "member of legislative council",
 
-        "U.S. ambassador",
-        "Colonial treasurer and Naval officer",
+        "u.s. ambassador",
+        "colonial treasurer and naval officer",
 
-        "Chief engineer and Secretary to Government",
-        "Official member of Council",
+        "chief engineer and secretary to government",
+        "official member of council",
 
-        "Assistant Commissioner and Settlement Officer",
-        "Collector of Customs",
+        "assistant commissioner and settlement officer",
+        "collector of customs",
 
-        "Commissioner of customs, salt and opium",
-        "Sheriff",
-        "Senator",
-        "Inspector",
+        "commissioner of customs, salt and opium",
+        "sheriff",
+        "senator",
+        "inspector",
 
-        "Member of Council",
-        "Deputy Inspector",
-        "Divisional Revenue Commissioner",
+        "member of council",
+        "deputy inspector",
+        "divisional revenue commissioner",
 
-        "Paymaster General",
-        "Chief secretary ",
-        "Lord Lieutenant",
-        "Commissioner for Crown lands",
+        "paymaster general",
+        "chief secretary ",
+        "lord lieutenant",
+        "lieutenant",
+        "commissioner for crown lands",
 
-        "Scientific Advisor",
-        "Lieutenant Governor",
+        "scientific advisor",
+        "lieutenant governor",
     ],
+
     local_government: [
-        "Burgess",
-        "Town Councillor",
-        "Mayor",
-        "City Superintendent",
+        "burgess",
+        "town councillor",
+        "mayor",
+        "city superintendent",
 
-        "City Superintendent",
-        "Councillor and Mayor",
+        "city superintendent",
+        "councillor and mayor",
     ],
+
     politics: [
-        "Member of Parliament",
-        "Tory M.P.",
-        "M.P.",
-        "Member of the House of Assembly",
+        "member of parliament",
+        "tory m.p.",
+        "m.p.",
+        "member of the house of assembly",
 
-        "Member of local legislature",
-        " Liberal leader",
+        "member of local legislature",
+        " liberal leader",
     ],
+
     justice: [
         "magistrate",
-        "Chief Justice",
-        "Associate Justice Supreme Court",
+        "chief justice",
+        "associate justice supreme court",
 
-        "Civil and Sessions judge",
-        "City coroner",
-        "Chief justice",
+        "civil and sessions judge",
+        "city coroner",
+        "chief justice",
         "lawyer",
-        "Assistant judge",
+        "assistant judge",
 
-        "Barrister",
-        "Attorney General",
-        "Judge",
-        "Advocate General",
-        "Advocate",
-        "Law agent",
-        "Writer",
+        "barrister",
+        "attorney general",
+        "judge",
+        "judge",
+        "advocate general",
+        "advocate",
+        "law agent",
+        "writer",
 
         "writer",
     ],
-    art: ["author", "Curator"],
+
+    art: ["author", "curator"],
+
     printed: [
         "journalist",
-        "Editor",
-        "Assistant editor",
-        "Assistant librarian",
-        "Colporteur",
+        "editor",
+        "assistant editor",
+        "assistant librarian",
+        "colporteur",
     ],
+
     engineer: [
         "civil engineer",
         "chief engineer",
-        "Superintending engineer",
-        "Engineer",
+        "superintending engineer",
+        "engineer",
 
         "consulting engineer",
+        "engineer officer"
     ],
+
     farm: [
         "sheep farmer",
         "practitioner and farmer",
         "farm labourer",
         "sheep breeder",
 
-        "Farmer",
-        "Estanciero",
+        "farmer",
+        "estanciero",
     ],
-    forestry: [
-        "Conservator of Forests",
-        "Delegate for instruction in Forestry",
-    ],
-    sport: ["Amateur golf champion"],
-    unknown: [
-        "Assistant",
-        "Retired",
-        "Member",
-        "Moderator",
-        "Private assistant",
 
-        "Director",
-        "member of the St Andrews Society",
-        "Casualty Clearing Station",
-        "Apprentice",
+    forestry: [
+        "conservator of forests",
+        "delegate for instruction in forestry",
+    ],
+
+    sport: ["amateur golf champion"],
+
+    unknown: [
+        "assistant",
+        "retired",
+        "member",
+        "moderator",
+        "private assistant",
+
+        "director",
+        "member of the st andrews society",
+        "casualty clearing station",
+        "apprentice",
 
         "pioneer",
-        "Staff",
+        "staff",
         "assistant",
-        "Chief",
+        "chief",
         "director",
-        "Warden",
-        "President ",
-        "Secretary",
+        "warden",
+        "president ",
+        "secretary",
 
-        "President",
-        "Superintendent",
-        "Incumbent",
-        "Usher",
+        "president",
+        "superintendent",
+        "incumbent",
+        "usher",
+        "practised"
     ]
 };
 
+console.log(occupations.medicine);
+
+
 export function career(career_data) {
+    console.log(career_data);
+    
     let grps = {
         medicine: [],
         religion: [],
@@ -1159,58 +746,58 @@ export function career(career_data) {
             }
 
             // Handle cases where occupation is a valid string
-            const occupation = f.occupation;
+            const occupation = f.occupation.toLowerCase();
 
             // Assign to the appropriate group
-            if (medicine.includes(occupation)) {
+            if (occupations.medicine.includes(occupation)) {
                 grps.medicine.push(item);
                 hasValidOccupation = true;
-            } else if (religion.includes(occupation)) {
+            } else if (occupations.religion.includes(occupation)) {
                 grps.religion.push(item);
                 hasValidOccupation = true;
-            } else if (education.includes(occupation)) {
+            } else if (occupations.education.includes(occupation)) {
                 grps.education.push(item);
                 hasValidOccupation = true;
-            } else if (noble.includes(occupation)) {
+            } else if (occupations.noble.includes(occupation)) {
                 grps.noble.push(item);
                 hasValidOccupation = true;
-            } else if (trade.includes(occupation)) {
+            } else if (occupations.trade.includes(occupation)) {
                 grps.trade.push(item);
                 hasValidOccupation = true;
-            } else if (land.includes(occupation)) {
+            } else if (occupations.land.includes(occupation)) {
                 grps.land.push(item);
                 hasValidOccupation = true;
-            } else if (military.includes(occupation)) {
+            } else if (occupations.military.includes(occupation)) {
                 grps.military.push(item);
                 hasValidOccupation = true;
-            } else if (government.includes(occupation)) {
+            } else if (occupations.government.includes(occupation)) {
                 grps.government.push(item);
                 hasValidOccupation = true;
-            } else if (local_government.includes(occupation)) {
+            } else if (occupations.local_government.includes(occupation)) {
                 grps.local_government.push(item);
                 hasValidOccupation = true;
-            } else if (politics.includes(occupation)) {
+            } else if (occupations.politics.includes(occupation)) {
                 grps.politics.push(item);
                 hasValidOccupation = true;
-            } else if (justice.includes(occupation)) {
+            } else if (occupations.justice.includes(occupation)) {
                 grps.justice.push(item);
                 hasValidOccupation = true;
-            } else if (art.includes(occupation)) {
+            } else if (occupations.art.includes(occupation)) {
                 grps.art.push(item);
                 hasValidOccupation = true;
-            } else if (printed.includes(occupation)) {
+            } else if (occupations.printed.includes(occupation)) {
                 grps.printed.push(item);
                 hasValidOccupation = true;
-            } else if (engineer.includes(occupation)) {
+            } else if (occupations.engineer.includes(occupation)) {
                 grps.engineer.push(item);
                 hasValidOccupation = true;
-            } else if (farm.includes(occupation)) {
+            } else if (occupations.farm.includes(occupation)) {
                 grps.farm.push(item);
                 hasValidOccupation = true;
-            } else if (forestry.includes(occupation)) {
+            } else if (occupations.forestry.includes(occupation)) {
                 grps.forestry.push(item);
                 hasValidOccupation = true;
-            } else if (sport.includes(occupation)) {
+            } else if (occupations.sport.includes(occupation)) {
                 grps.sport.push(item);
                 hasValidOccupation = true;
             }
