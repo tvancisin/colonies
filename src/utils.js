@@ -1,5 +1,13 @@
 import * as d3 from "d3";
 
+// Scroll to a specific section
+export const scrollToSection = (sectionId) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+    }
+};
+
 export function constructParallelData(data) {
     const transformedData = data.map(item => {
         const college = item.study?.colleges?.[0]?.name || "unknown";
@@ -99,7 +107,7 @@ export async function getGeo(paths) {
 }
 
 //MAP FUNCTIONS
-export function filterData(data, startYear, endYear) {
+export function year_filter(data, startYear, endYear) {
     return data.filter((item) => {
         // Check if 'study' exists and is not null
         if (!item.study) return false;
@@ -129,7 +137,7 @@ export function filterData(data, startYear, endYear) {
     });
 }
 
-// Opacity scale
+// Width scale
 const widthScale = d3.scaleLinear().domain([0, 350]).range([0, 15]);
 
 export function width_generator(data) {
@@ -157,7 +165,7 @@ export function width_generator(data) {
 
 
 // Function to build dynamic opacity expression
-export function getOpacityExpression(regions) {
+export function getWidthExpression(regions) {
     let expression = ["match", ["get", "ADMIN"]]; // Using 'ADMIN' as the property to check
     regions.forEach(([region, opacity]) => {
         expression.push(region, opacity);
@@ -701,12 +709,56 @@ export const occupations = {
     ]
 };
 
-console.log(occupations.medicine);
 
+export let dimensions = ["college", "degree", "career"];
+export let colleges = [
+    "United College",
+    "U.C.D.",
+    "St Mary’s College",
+    "St Salvator’s College",
+    "St Leonard’s College",
+    "unknown",
+];
+export let degrees = [
+    "M.D.",
+    "M.A.",
+    "LL.D.",
+    "B.A.",
+    "B.D.",
+    "D.D.",
+    "B.Sc.",
+    "D.Sc.",
+    "M.B. Ch.B.",
+    "D.Mus.",
+    "LLA",
+    "M.B. C.M.",
+    "unknown",
+];
+export let careers = [
+    "trade",
+    "sport",
+    "religion",
+    "print",
+    "politics",
+    "noble",
+    "military",
+    "medicine",
+    "art",
+    "education",
+    "engineering",
+    "farming",
+    "forestry",
+    "government",
+    "justice",
+    "land",
+    "local_government",
+    "unclear",
+    "unknown",
+];
 
 export function career(career_data) {
     console.log(career_data);
-    
+
     let grps = {
         medicine: [],
         religion: [],

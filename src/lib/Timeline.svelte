@@ -5,7 +5,7 @@
         selectedCareerStore,
         selectedGenderStore,
     } from "../years";
-    import { filterData, career } from "../utils";
+    import { year_filter, career } from "../utils";
 
     export let current_data;
     export let selected_country;
@@ -77,10 +77,14 @@
     $: {
         if (selected_country) {
             width = containerWidth - innerWidth * 0.4;
-            d3.selectAll("#timeline, #year_detail").style("width", "100%");
+            d3.selectAll("#timeline, #year_detail")
+                .style("width", "100%")
+                .style("left", "0%");
         } else {
             width = containerWidth; // Full width when selected_country is null
-            d3.selectAll("#timeline, #year_detail").style("width", "95%");
+            d3.selectAll("#timeline, #year_detail")
+                .style("width", "95%")
+                .style("left", "2.5%");
         }
     }
 
@@ -220,7 +224,7 @@
     let one_year;
     $: if (selected_years[0] == selected_years[1]) {
         //filter data to selected years
-        one_year = filterData(
+        one_year = year_filter(
             current_data,
             selected_years[0],
             selected_years[1],
@@ -423,7 +427,8 @@
         position: absolute;
         border-radius: 5px;
         bottom: 0px;
-        width: 85%;
+        left: 2.5%;
+        width: 95%;
         height: 160px;
         background: rgba(0, 0, 0, 0.09);
     }
@@ -435,7 +440,7 @@
     #year_detail {
         position: absolute;
         visibility: hidden;
-        width: 85%;
+        width: 95%;
         height: 110px;
         /* background-color: rgba(255, 0, 0, 0.264); */
         bottom: 160px;

@@ -1,7 +1,7 @@
 <script>
     import { createEventDispatcher } from "svelte";
     import {
-        filterData,
+        year_filter,
         genderFilter,
         constructNodesAndLinks,
         constructParallelData,
@@ -11,9 +11,8 @@
         selectedCareerStore,
         selectedGenderStore,
     } from "../years";
-    import Network from "./Network.svelte";
+    // import Network from "./Network.svelte";
     import Parallel from "./Parallel.svelte";
-
     const dispatch = createEventDispatcher();
 
     export let births_per_colony;
@@ -24,17 +23,9 @@
     let details_width, details_height;
     let career_width = 100;
     let career_height = 100;
-    let gender_height = 10;
-    let gender_width = 20;
     let def_data;
-    let def_groups;
-    let def_male, def_female;
     let data;
     let selectedYears = [];
-    let gender, all, male, female, groups;
-    let gy;
-    let ticks = [10, 20, 30, 40, 50];
-    let change = 0;
 
     //selected years from store
     const unsubscribe = selectedYearsStore.subscribe((value) => {
@@ -60,7 +51,7 @@
         //always reset data
         data = def_data;
         //filter data to selected years
-        let filter_years = filterData(data, selectedYears[0], selectedYears[1]);
+        let filter_years = year_filter(data, selectedYears[0], selectedYears[1]);
         //update data
         data = filter_years;
         //data for network
@@ -223,6 +214,7 @@
         color: black;
         position: fixed;
         right: -100%;
+        bottom: 0px;
         width: 40%;
         height: calc(100%);
         transition: right 0.3s ease;

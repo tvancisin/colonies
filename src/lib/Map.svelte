@@ -3,8 +3,8 @@
     import mapboxgl from "mapbox-gl";
     import * as d3 from "d3";
     import {
-        filterData,
-        getOpacityExpression,
+        year_filter,
+        getWidthExpression,
         width_generator,
         career,
     } from "../utils";
@@ -28,10 +28,14 @@
     let height;
     let clicked_country;
     let countryNames;
-    let opacity_mapbox_expression;
     let hoveredPolygonId = null;
     let selectedYears = [1700, 1900];
     let selectedCareer;
+    let isOverlayVisible = true; // Controls the visibility of the overlay
+
+    function removeOverlay() {
+        isOverlayVisible = false;
+    }
 
     // redrawing locations if current_data changes [used on exit also]
     $: if (current_data && map && map.getSource("locations")) {
@@ -40,15 +44,15 @@
         drawLocations(current_data, current_data_string);
     }
 
-    ////SELECTED YEAR FILTER
+    //// YEAR FILTER
     //catch new selected years
     const unsubscribe = selectedYearsStore.subscribe((value) => {
         selectedYears = value;
     });
 
-    //redrawing locations if selected years change
+    //redrawing locations
     $: if (selectedYears.length != 0) {
-        let filtered_country = filterData(
+        let filtered_country = year_filter(
             current_data,
             selectedYears[0],
             selectedYears[1],
@@ -57,7 +61,7 @@
         drawLocations(filtered_country, current_data_string);
     }
 
-    ////SELECTED CAREER FILTER
+    //// CAREER FILTER
     //catch new selected career
     const career_unsubscribe = selectedCareerStore.subscribe((value) => {
         selectedCareer = value;
@@ -75,11 +79,11 @@
         drawLocations(fin_career, current_data_string);
     }
 
-    ////WIDTH OF SHIPPING LINES
-    //restrict to the selected years
+    //// SHIPPING LINES
+    // restrict to the selected years
     $: filteredData =
         selectedYears && selectedYears.length > 0
-            ? filterData(current_data, selectedYears[0], selectedYears[1])
+            ? year_filter(current_data, selectedYears[0], selectedYears[1])
             : current_data; // Use original data if no years are selected
 
     // Function to flatten floruit objects and associate them with their person
@@ -101,35 +105,20 @@
                   (d) => d.floruit.location.colony,
               );
 
-    $: filtered_opacity = width_generator(filtered_grouped_colonies);
-    $: opacity_mapbox_expression = getOpacityExpression(filtered_opacity);
-    $: countryNames = filtered_opacity
+    // mapbox expresssion for width changes
+    $: filtered_width = width_generator(filtered_grouped_colonies);
+    $: width_mapbox_expression = getWidthExpression(filtered_width);
+    $: countryNames = filtered_width
         .filter((item) => item[0] !== undefined) // Ignore undefined values
         .map((item) => item[0]); // Extract the country names
 
-    //shipping line width
+    // change line width
     $: if (map && countryNames && map.getSource("countries")) {
         countryNames.push("Britain");
-        //opacity of colonies
-        // map.setFilter("countries_fill", [
-        //     "in",
-        //     ["get", "ADMIN"],
-        //     ["literal", countryNames],
-        // ]);
-        // map.setPaintProperty(
-        //     "countries_fill",
-        //     "fill-opacity",
-        //     opacity_mapbox_expression,
-        // );
-
-        map.setPaintProperty(
-            "shipline",
-            "line-width",
-            opacity_mapbox_expression,
-        );
+        map.setPaintProperty("shipline", "line-width", width_mapbox_expression);
     }
 
-    ////CHANGE COLONIES GEOJSON FOR DIFFERENT PERIODS
+    //// CHANGE COLONIES GEOJSON FOR DIFFERENT PERIODS
     $: if (selectedYears[1] < 1750) {
         map.getSource("countries").setData(colonies_1680);
     } else if (
@@ -148,7 +137,7 @@
         map.getSource("countries").setData(colonies_1885);
     }
 
-    ////MAP ZOOM ADJUSTMENT
+    //// ZOOM ADJUSTMENT
     function adjustMapForWindowSize() {
         if (window.innerWidth <= 768) {
             map.flyTo({
@@ -168,7 +157,7 @@
         }
     }
 
-    ////INIT FUNCTION
+    //// INIT FUNCTION
     onMount(() => {
         mapboxgl.accessToken =
             "pk.eyJ1IjoidG9tYXN2YW5jaXNpbiIsImEiOiJjbTN1OXUzODUwZTEwMnFxdHd5NzA3cmNuIn0.vz2M0cTMfPvLAQ-wKMKbQA";
@@ -183,16 +172,17 @@
             maxZoom: 8,
             minZoom: 1.3,
             projection: "naturalEarth",
+            logoPosition: "top-right",
         });
     });
 
-    //DRAW POLYGONS, SHIPPPING LINES, INDIVIDUAL LOCATIONS
+    //// DRAW POLYGONS, SHIPPPING LINES, INDIVIDUAL LOCATIONS
     $: if (colonies_1885 && shipping_json && countryNames && map) {
         // Ensure this block runs only after the map has fully loaded
         map.on("load", () => {
             // Check if the source already exists
             if (!map.getSource("countries")) {
-                //DRAW SHIPPING ROUTES
+                //// SHIPPING LINES
                 map.addSource("shipping", {
                     type: "geojson",
                     data: shipping_json,
@@ -227,15 +217,13 @@
                     },
                 });
 
-                //DRAW COUNTRY POLYGONS
-                //add source
+                //// COUNTRY POLYGONS
                 map.addSource("countries", {
                     type: "geojson",
                     data: colonies_1885,
                     generateId: true, // Ensures all features have unique IDs
                 });
 
-                //add fill layer
                 map.addLayer({
                     id: "countries_fill",
                     type: "fill",
@@ -248,8 +236,7 @@
                             "gray",
                             "gray",
                         ],
-                        // "fill-opacity": opacity_mapbox_expression, // Initial opacity
-                        "fill-opacity": 0.7,
+                        "fill-opacity": 0.5,
                     },
                     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
                 });
@@ -291,7 +278,7 @@
                     }
                 });
 
-                // on mouse leave, no highlight
+                // remove highlight on leave
                 map.on("mouseleave", "countries_fill", () => {
                     map.getCanvas().style.cursor = "";
                     if (hoveredPolygonId !== null) {
@@ -303,30 +290,24 @@
                     hoveredPolygonId = null;
                 });
 
+                // draw individual locations
                 drawLocations(current_data, current_data_string);
 
+                // clicking events
                 map.on("click", "countries_fill", (e) => {
-                    // if (map.getSource("locations")) {
-                    //     map.removeLayer("population");
-                    //     map.removeSource("locations");
-                    // }
                     clicked_country = e.features[0].properties.ADMIN;
-                    zoomToCountry(clicked_country);
-                    dispatch("polygonClick", clicked_country);
+                    if (clicked_country != "Britain") {
+                        zoomToCountry(clicked_country);
+                        dispatch("polygonClick", clicked_country);
+                    }
                 });
 
                 // animateShipping();
                 adjustMapForWindowSize();
                 window.addEventListener("resize", adjustMapForWindowSize);
-            } else {
-                // If the source exists, update the data and filter
-                // map.getSource("countries").setData(countries_json);
-                // map.setFilter("countries-layer", [
-                //     "in",
-                //     ["get", "ADMIN"],
-                //     ["literal", countryNames],
-                // ]);
             }
+
+            //
             dispatch("mapLoaded");
         });
     }
@@ -549,17 +530,17 @@
     //ZOOM IN TO CLICKED COUNTRY
     function zoomToCountry(clicked_colony) {
         if (clicked_colony == "America") {
-            map.flyTo({ center: [-70, 50], zoom: 3.5 });
+            map.flyTo({ center: [-70, 50], zoom: 3 });
         } else if (clicked_colony == "Caribbean") {
-            map.flyTo({ center: [-55, 10], zoom: 4 });
+            map.flyTo({ center: [-55, 10], zoom: 3 });
         } else if (clicked_colony == "Australia") {
-            map.flyTo({ center: [153, -31], zoom: 4 });
+            map.flyTo({ center: [153, -31], zoom: 3 });
         } else if (clicked_colony == "India") {
-            map.flyTo({ center: [98, 20], zoom: 4 });
+            map.flyTo({ center: [98, 20], zoom: 3 });
         } else if (clicked_colony == "Africa") {
-            map.flyTo({ center: [40, -30], zoom: 4 });
+            map.flyTo({ center: [40, -30], zoom: 3 });
         } else if (clicked_colony == "Asia") {
-            map.flyTo({ center: [118, 6], zoom: 4 });
+            map.flyTo({ center: [118, 6], zoom: 3 });
         }
     }
 
@@ -573,6 +554,13 @@
 
 <div class="map-container" bind:clientHeight={height}>
     <div id="map" bind:this={map}></div>
+    {#if isOverlayVisible}
+        <div class="overlay">
+            <button class="remove-overlay" on:click={removeOverlay}
+                >Click to Explore</button
+            >
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -590,10 +578,35 @@
         height: 100%;
     }
 
-    div {
+    .overlay {
         position: absolute;
         top: 0;
-        bottom: 0;
+        left: 0;
         width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+    }
+
+    .remove-overlay {
+        color: white;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: none;
+        background-color: rgba(0, 0, 0, 0.76);
+        font-family: "Montserrat", sans-serif;
+        font-size: 20px;
+        font-optical-sizing: auto;
+        font-weight: 400;
+        font-style: normal;
+    }
+
+    .remove-overlay:hover {
+        cursor: pointer;
+        background-color: #8f2121;
     }
 </style>

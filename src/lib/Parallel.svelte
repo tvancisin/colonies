@@ -1,5 +1,6 @@
 <script>
     import * as d3 from "d3";
+    import { dimensions, colleges, degrees, careers } from "../utils";
 
     export let parallel_data;
     export let career_width;
@@ -12,51 +13,6 @@
     let margin = { top: 10, right: 10, bottom: 10, left: 10 };
     $: width = career_width - 10;
     $: height = career_height - 10;
-    let dimensions = ["college", "degree", "career"];
-    let colleges = [
-        "United College",
-        "U.C.D.",
-        "St Mary’s College",
-        "St Salvator’s College",
-        "St Leonard’s College",
-        "unknown",
-    ];
-    let degrees = [
-        "M.D.",
-        "M.A.",
-        "LL.D.",
-        "B.A.",
-        "B.D.",
-        "D.D.",
-        "B.Sc.",
-        "D.Sc.",
-        "M.B. Ch.B.",
-        "D.Mus.",
-        "LLA",
-        "M.B. C.M.",
-        "unknown",
-    ];
-    let careers = [
-        "trade",
-        "sport",
-        "religion",
-        "print",
-        "politics",
-        "noble",
-        "military",
-        "medicine",
-        "art",
-        "education",
-        "engineering",
-        "farming",
-        "forestry",
-        "government",
-        "justice",
-        "land",
-        "local_government",
-        "unclear",
-        "unknown",
-    ];
 
     $: y = {
         college: d3
