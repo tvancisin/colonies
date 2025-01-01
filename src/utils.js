@@ -8,24 +8,85 @@ export const scrollToSection = (sectionId) => {
     }
 };
 
+export let dimensions = ["college", "degree", "career"];
+export let colleges = [
+    "UNC",
+    "UCD",
+    "SMC",
+    "SSC",
+    "SLC",
+    "N/A",
+];
+export let degrees = [
+    "M.D.",
+    "M.A.",
+    "LL.D.",
+    "B.A.",
+    "B.D.",
+    "D.D.",
+    "B.Sc.",
+    "D.Sc.",
+    "M.B. Ch.B.",
+    "D.Mus.",
+    "LLA",
+    "M.B. C.M.",
+    "N/A",
+];
+export let careers = [
+    "trade",
+    "sport",
+    "religion",
+    "print",
+    "politics",
+    "noble",
+    "military",
+    "medicine",
+    "art",
+    "education",
+    "engineering",
+    "farming",
+    "forestry",
+    "government",
+    "justice",
+    "land",
+    "local_government",
+    "unclear",
+    "N/A",
+];
+
 export function constructParallelData(data) {
     const transformedData = data.map(item => {
-        const college = item.study?.colleges?.[0]?.name || "unknown";
-        const degree = item.study?.degrees?.[0]?.name || "unknown";
+        let college = item.study?.colleges?.[0]?.name || "N/A";
+
+        if (college == "St Leonard’s College") {
+            college = "SLC"
+        } else if (college == "St Salvator’s College") {
+            college = "SSC"
+        } else if (college == "St Mary’s College") {
+            college = "SMC"
+        } else if (college == "U.C.D.") {
+            college = "UCD"
+        } else if (college == "United College") {
+            college = "UNC"
+        }
+
+        const degree = item.study?.degrees?.[0]?.name || "N/A";
         const id = item.id;
 
         // Handle career extraction
-        let career = "unknown";
+        let career = "N/A";
         if (item.floruit?.[0]?.occupation) {
             const occupation = item.floruit[0].occupation;
             if (Array.isArray(occupation)) {
-                career = occupation[0] || "unknown";
+                career = occupation[0] || "N/A";
             } else {
-                career = occupation || "unknown";
+                career = occupation || "N/A";
             }
         }
 
-        career = career.toLowerCase();
+        if (career != "N/A") {
+            career = career.toLowerCase();
+        }
 
         // Assign to the appropriate group
         if (occupations.medicine.includes(career)) {
@@ -617,7 +678,7 @@ export const occupations = {
         "member of the house of assembly",
 
         "member of local legislature",
-        " liberal leader",
+        "liberal leader",
     ],
 
     justice: [
@@ -705,56 +766,12 @@ export const occupations = {
         "superintendent",
         "incumbent",
         "usher",
-        "practised"
+        "practised",
+        "killed earl of strathmore in a brawl"
     ]
 };
 
 
-export let dimensions = ["college", "degree", "career"];
-export let colleges = [
-    "United College",
-    "U.C.D.",
-    "St Mary’s College",
-    "St Salvator’s College",
-    "St Leonard’s College",
-    "unknown",
-];
-export let degrees = [
-    "M.D.",
-    "M.A.",
-    "LL.D.",
-    "B.A.",
-    "B.D.",
-    "D.D.",
-    "B.Sc.",
-    "D.Sc.",
-    "M.B. Ch.B.",
-    "D.Mus.",
-    "LLA",
-    "M.B. C.M.",
-    "unknown",
-];
-export let careers = [
-    "trade",
-    "sport",
-    "religion",
-    "print",
-    "politics",
-    "noble",
-    "military",
-    "medicine",
-    "art",
-    "education",
-    "engineering",
-    "farming",
-    "forestry",
-    "government",
-    "justice",
-    "land",
-    "local_government",
-    "unclear",
-    "unknown",
-];
 
 export function career(career_data) {
     console.log(career_data);

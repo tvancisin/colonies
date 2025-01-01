@@ -1,0 +1,105 @@
+<script>
+    import { scrollToSection } from "../utils";
+    let sections = [
+        { id: "home", name: "Home" },
+        { id: "people", name: "About" },
+        { id: "provenance", name: "Provenance" },
+        { id: "vis", name: "Visualization" },
+    ];
+
+    let showScrollToTop = false; // Visibility of the scroll-to-top button
+    let isMenuOpen = false; // Toggle menu visibility
+</script>
+
+<div id="home">
+    <!-- Navigation Menu -->
+    <div id="navigation">
+        <i
+            class="fa fa-bars"
+            aria-hidden="true"
+            on:click={() => (isMenuOpen = !isMenuOpen)}
+        ></i>
+
+        {#if isMenuOpen}
+            <ul class="dropdown">
+                {#each sections as section}
+                    <li on:click={() => scrollToSection(section.id)}>
+                        {section.name}
+                    </li>
+                {/each}
+            </ul>
+        {/if}
+    </div>
+    <img id="uni_logo" src="uni_white.png" alt="St Andrews University Logo" />
+    <h1>University of St Andrews in the Colonies</h1>
+    <h3>
+        Exploring connections between the University of St Andrews' students and
+        the British Empire.
+    </h3>
+</div>
+
+<style>
+    #home {
+        position: relative;
+        width: 100%;
+        height: 300px;
+        align-content: center;
+        text-align: center;
+        background-color: #001c23;
+    }
+    h1 {
+        color: white;
+        font-weight: 500;
+        margin-bottom: 5px;
+        font-family: "Montserrat", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 500;
+        font-style: normal;
+    }
+    h3 {
+        color: white;
+        font-weight: 400;
+    }
+    #navigation {
+        position: absolute;
+        top: 10px;
+        left: 20px;
+        z-index: 10;
+    }
+    #navigation .fa-bars {
+        font-size: 24px;
+        color: white;
+        cursor: pointer;
+    }
+    .dropdown {
+        position: absolute;
+        top: 30px;
+        left: 0;
+        text-align: left;
+        background-color: #252529;
+        border-radius: 1px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        z-index: 10;
+    }
+    .dropdown li {
+        all: unset;
+        font-weight: 300;
+        padding: 10px 20px;
+        color: white;
+        cursor: pointer;
+        display: block;
+        text-align: left;
+    }
+    .dropdown li:hover {
+        background-color: #042645;
+    }
+
+    #uni_logo {
+        position: absolute;
+        top: 2px;
+        right: 5px;
+        height: 50px;
+    }
+</style>

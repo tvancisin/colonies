@@ -77,6 +77,8 @@
         );
         // update map locations
         drawLocations(fin_career, current_data_string);
+    } else if (selectedCareer.length == 0 && selected_country !== null) {
+        drawLocations(current_data, current_data_string);
     }
 
     //// SHIPPING LINES

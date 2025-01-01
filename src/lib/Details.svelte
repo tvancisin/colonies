@@ -5,6 +5,7 @@
         genderFilter,
         constructNodesAndLinks,
         constructParallelData,
+        career,
     } from "../utils";
     import {
         selectedYearsStore,
@@ -26,6 +27,7 @@
     let def_data;
     let data;
     let selectedYears = [];
+    let selectedCareer;
 
     //selected years from store
     const unsubscribe = selectedYearsStore.subscribe((value) => {
@@ -40,7 +42,7 @@
     $: def_data = filteredCountry[0][1];
     //set data to manipulate
     $: data = filteredCountry[0][1];
-    
+
     //data for network
     // $: node_link = constructNodesAndLinks(data);
     // data for parallel
@@ -51,7 +53,11 @@
         //always reset data
         data = def_data;
         //filter data to selected years
-        let filter_years = year_filter(data, selectedYears[0], selectedYears[1]);
+        let filter_years = year_filter(
+            data,
+            selectedYears[0],
+            selectedYears[1],
+        );
         //update data
         data = filter_years;
         //data for network
@@ -63,19 +69,43 @@
         data = def_data;
     }
 
+    //// CAREER FILTER
+    //catch new selected career
+    const career_unsubscribe = selectedCareerStore.subscribe((value) => {
+        selectedCareer = value;
+    });
+
+    $: if (selectedCareer.length != 0) {
+        data = def_data;
+        // construct career groups based on clicked country
+        let career_groups = career(data);
+        // only get people with selected career
+        let fin_career = career_groups[selectedCareer].filter(
+            (item, index, self) =>
+                index === self.findIndex((t) => t.id === item.id),
+        );
+        data = fin_career;
+    } else if (selectedCareer.length == 0) {
+        data = def_data;
+    }
+
     function closeDetails() {
         dispatch("close");
         // change = 0;
     }
 
-    // function refresh() {
-    //     // change = 0;
-    //     data = def_data;
-    //     // let gender_pass = [def_data, "default"];
-    //     // let floruit_pass = [def_data, "default"];
-    //     // selectedGenderStore.set(gender_pass);
-    //     // selectedCareerStore.set(floruit_pass);
-    // }
+    function refresh() {
+        // change = 0;
+        // data = def_data;
+        selectedCareerStore.set([]);
+
+        // let gender_pass = [def_data, "default"];
+        // let floruit_pass = [def_data, "default"];
+        // selectedGenderStore.set(gender_pass);
+        // selectedCareerStore.set(floruit_pass);
+    }
+
+    $: console.log("Data:", data);
 </script>
 
 <div
@@ -87,9 +117,9 @@
         <button class="btn close" on:click={closeDetails}
             ><i class="fa fa-close"></i></button
         >
-        <!-- <button class="btn refresh" on:click={refresh}
+        <button class="btn refresh" on:click={refresh}
             ><i class="fa fa-refresh"></i></button
-        > -->
+        >
         {#if selected_country}
             <h3>{selected_country}</h3>
         {/if}
@@ -231,18 +261,6 @@
         box-shadow: 0 0 5px #000000;
     }
 
-    /* @media (max-width: 1450px) {
-        #details {
-            width: 450px;
-        }
-    }
-
-    @media (max-width: 1200px) {
-        #details {
-            width: 450px;
-        }
-    } */
-
     @media (max-width: 768px) {
         #details {
             width: 100%;
@@ -295,7 +313,23 @@
         transition: border 0.3s ease;
     }
 
-    .btn.close:hover {
+    .btn.refresh {
+        position: absolute;
+        left: 5px;
+        background: none;
+        color: white;
+        border: none;
+        padding: 2px 10px;
+        border-radius: 2px;
+        font-size: 1.2em;
+        cursor: pointer;
+        font-family: "Montserrat";
+        transition: border 0.3s ease;
+
+    }
+
+    .btn.close:hover,
+    .btn.refresh:hover {
         color: red;
     }
 

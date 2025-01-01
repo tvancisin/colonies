@@ -46,6 +46,8 @@
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
+    } else if (selected_career.length == 0) {
+        data_to_draw = current_data;
     }
 
     // DATA PREP FOR TIMELINE
