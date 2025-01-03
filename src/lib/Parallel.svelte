@@ -33,7 +33,7 @@
     let gy_degree;
     let gy_career;
 
-    let margin = { top: 25, right: 35, bottom: 10, left: 35 };
+    let margin = { top: 15, right: 35, bottom: 25, left: 35 };
     $: width = career_width - 10;
     $: height = career_height - 10;
 
@@ -147,7 +147,7 @@
             text-anchor="middle"
             font-weight="600"
             font-size="13"
-            y="12">{d}</text
+            y={career_height- 13}>{d}</text
         >
     {/each}
 </svg>

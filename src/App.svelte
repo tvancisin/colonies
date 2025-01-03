@@ -173,6 +173,7 @@
     d3.select("#buttons").style("top", "10px");
     selected_country = null;
     selectedCareerStore.set([]);
+    selectedYearsStore.set([]);
     mapRef.flyToInitialPosition();
   }
 
@@ -213,7 +214,6 @@
     current_data = fin_career;
   };
 
-  $: console.log(selected_country);
 </script>
 
 <main bind:clientWidth={width}>
@@ -249,11 +249,11 @@
       <div id="time_description">Students Entering University</div>
       <Timeline {current_data} {selected_country} />
       <Details
-        on:close={handleClose}
         {births_per_colony}
         {floruit_per_colony}
         {selected_country}
         {current_data_string}
+        on:close={handleClose}
       />
     {/if}
   </div>

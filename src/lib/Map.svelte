@@ -26,34 +26,42 @@
     export let selected_country;
 
     let height;
+    let def_data;
+    let data;
     let clicked_country;
     let countryNames;
     let hoveredPolygonId = null;
     let selectedYears = [1700, 1900];
     let selectedCareer;
     let isOverlayVisible = true; // Controls the visibility of the overlay
-
-    function removeOverlay() {
-        isOverlayVisible = false;
-    }
-
-    // redrawing locations if current_data changes [used on exit also]
-    $: if (current_data && map && map.getSource("locations")) {
-        map.removeLayer("population");
-        map.removeSource("locations");
-        drawLocations(current_data, current_data_string);
-    }
-
-    //// YEAR FILTER
     //catch new selected years
     const unsubscribe = selectedYearsStore.subscribe((value) => {
         selectedYears = value;
     });
+    //catch new selected career
+    const career_unsubscribe = selectedCareerStore.subscribe((value) => {
+        selectedCareer = value;
+    });
 
-    //redrawing locations
+    // redrawing locations if current_data changes [used on exit also]
+    $: if (data && map && map.getSource("locations")) {
+        map.removeLayer("population");
+        map.removeSource("locations");
+        drawLocations(data, current_data_string);
+    }
+
+    // assign current_data to default and data
+    $: if (current_data) {
+        data = current_data;
+        def_data = current_data;
+    }
+
+    //// YEAR FILTER
+    // redraw locations based on years
     $: if (selectedYears.length != 0) {
+        // filter to country
         let filtered_country = year_filter(
-            current_data,
+            data,
             selectedYears[0],
             selectedYears[1],
         );
@@ -62,31 +70,31 @@
     }
 
     //// CAREER FILTER
-    //catch new selected career
-    const career_unsubscribe = selectedCareerStore.subscribe((value) => {
-        selectedCareer = value;
-    });
-
     $: if (selectedCareer.length != 0 && selected_country !== null) {
         // construct career groups based on clicked country
-        let career_groups = career(current_data);
+        let career_groups = career(data);
         // only get people with selected career
         let fin_career = career_groups[selectedCareer].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
+
+        // work only with this data when career selected
+        data = fin_career
+
         // update map locations
         drawLocations(fin_career, current_data_string);
     } else if (selectedCareer.length == 0 && selected_country !== null) {
-        drawLocations(current_data, current_data_string);
+        drawLocations(def_data, current_data_string);
+        data = def_data;
     }
 
     //// SHIPPING LINES
     // restrict to the selected years
     $: filteredData =
         selectedYears && selectedYears.length > 0
-            ? year_filter(current_data, selectedYears[0], selectedYears[1])
-            : current_data; // Use original data if no years are selected
+            ? year_filter(data, selectedYears[0], selectedYears[1])
+            : data; // Use original data if no years are selected
 
     // Function to flatten floruit objects and associate them with their person
     function flattenFloruit(filteredData) {
@@ -157,6 +165,11 @@
                 zoom: 2,
             });
         }
+    }
+
+    // remove initial div
+    function removeOverlay() {
+        isOverlayVisible = false;
     }
 
     //// INIT FUNCTION
@@ -293,7 +306,7 @@
                 });
 
                 // draw individual locations
-                drawLocations(current_data, current_data_string);
+                drawLocations(data, current_data_string);
 
                 // clicking events
                 map.on("click", "countries_fill", (e) => {
@@ -609,6 +622,6 @@
 
     .remove-overlay:hover {
         cursor: pointer;
-        background-color: #8f2121;
+        background-color: #003645;
     }
 </style>

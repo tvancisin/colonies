@@ -2,16 +2,11 @@
     import { createEventDispatcher } from "svelte";
     import {
         year_filter,
-        genderFilter,
         constructNodesAndLinks,
         constructParallelData,
         career,
     } from "../utils";
-    import {
-        selectedYearsStore,
-        selectedCareerStore,
-        selectedGenderStore,
-    } from "../years";
+    import { selectedYearsStore, selectedCareerStore } from "../years";
     // import Network from "./Network.svelte";
     import Parallel from "./Parallel.svelte";
     const dispatch = createEventDispatcher();
@@ -24,88 +19,85 @@
     let details_width, details_height;
     let career_width = 100;
     let career_height = 100;
-    let def_data;
     let data;
+    let parallel_data;
     let selectedYears = [];
     let selectedCareer;
+    let filteredCountry;
 
-    //selected years from store
+    // selected years from store
     const unsubscribe = selectedYearsStore.subscribe((value) => {
         selectedYears = value;
     });
-
-    //INITIAL DATA & FILTER BY SELECTED COUNTRY
-    $: filteredCountry = (
-        current_data_string === "birth" ? births_per_colony : floruit_per_colony
-    ).filter((item) => item[0] == selected_country);
-    //default data
-    $: def_data = filteredCountry[0][1];
-    //set data to manipulate
-    $: data = filteredCountry[0][1];
-
-    //data for network
-    // $: node_link = constructNodesAndLinks(data);
-    // data for parallel
-    $: parallel_data = constructParallelData(data);
-
-    //SELECTED YEAR FILTER
-    $: if (selectedYears.length != 0) {
-        //always reset data
-        data = def_data;
-        //filter data to selected years
-        let filter_years = year_filter(
-            data,
-            selectedYears[0],
-            selectedYears[1],
-        );
-        //update data
-        data = filter_years;
-        //data for network
-        // node_link = constructNodesAndLinks(data);
-        // data for parallel
-        parallel_data = constructParallelData(data);
-    } else if (selectedYears.length == 0) {
-        //always reset data
-        data = def_data;
-    }
-
-    //// CAREER FILTER
-    //catch new selected career
+    // selected career from store
     const career_unsubscribe = selectedCareerStore.subscribe((value) => {
         selectedCareer = value;
     });
 
+    //// COUNTRY FILTER
+    $: if (selected_country != null) {
+        // default data
+        filteredCountry = (
+            current_data_string === "birth"
+                ? births_per_colony
+                : floruit_per_colony
+        ).filter((item) => item[0] == selected_country)[0][1];
+
+        // data to operate with
+        data = filteredCountry;
+    }
+
+    //// YEAR FILTER
+    $: if (selectedYears.length != 0 && selected_country != null) {
+        //filter data to selected years
+        let filter_years = year_filter(
+            filteredCountry,
+            selectedYears[0],
+            selectedYears[1],
+        );
+
+        //update data
+        data = filter_years;
+    }
+
+    //// CAREER FILTER
     $: if (selectedCareer.length != 0) {
-        data = def_data;
+        console.log("here");
         // construct career groups based on clicked country
         let career_groups = career(data);
-        // only get people with selected career
+
+        // only get people with sele    cted career
         let fin_career = career_groups[selectedCareer].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
+
+        // update data
         data = fin_career;
-    } else if (selectedCareer.length == 0) {
-        data = def_data;
     }
 
     function closeDetails() {
         dispatch("close");
-        // change = 0;
+    }
+
+    let check = false;
+
+    $: if (check) {
+        data = filteredCountry;
+        check = false;
     }
 
     function refresh() {
-        // change = 0;
-        // data = def_data;
         selectedCareerStore.set([]);
-
-        // let gender_pass = [def_data, "default"];
-        // let floruit_pass = [def_data, "default"];
-        // selectedGenderStore.set(gender_pass);
-        // selectedCareerStore.set(floruit_pass);
+        check = true;
     }
 
-    $: console.log("Data:", data);
+    //data for network
+    // $: node_link = constructNodesAndLinks(data);
+    // data for parallel
+    $: if (data) {
+        parallel_data = constructParallelData(data);
+    }
 </script>
 
 <div
@@ -117,9 +109,9 @@
         <button class="btn close" on:click={closeDetails}
             ><i class="fa fa-close"></i></button
         >
-        <button class="btn refresh" on:click={refresh}
-            ><i class="fa fa-refresh"></i></button
-        >
+        <button class="btn refresh" on:click={refresh}>
+            <i class="fa fa-refresh"></i>
+        </button>
         {#if selected_country}
             <h3>{selected_country}</h3>
         {/if}
@@ -132,108 +124,112 @@
                 bind:clientHeight={career_height}
             >
                 <!-- <Network {node_link} {career_width} {career_height} /> -->
-                <Parallel {parallel_data} {career_width} {career_height} />
+                {#if parallel_data}
+                    <Parallel {parallel_data} {career_width} {career_height} />
+                {/if}
             </div>
         </div>
         <div id="peace_process">
             <div class="scrollable-content">
-                {#each data as d}
-                    <p><strong>Name:</strong> {d.forename} {d.surname}</p>
+                {#if data}
+                    {#each data as d}
+                        <p><strong>Name:</strong> {d.forename} {d.surname}</p>
 
-                    <p>
-                        <strong>Birth Location:</strong>
-                        {d.birth_location?.original_name || "Unknown"}
-                    </p>
+                        <p>
+                            <strong>Birth Location:</strong>
+                            {d.birth_location?.original_name || "Unknown"}
+                        </p>
 
-                    <p>
-                        <strong>Birth Date:</strong>
-                        {d.birth_date || "Unknown"}
-                    </p>
+                        <p>
+                            <strong>Birth Date:</strong>
+                            {d.birth_date || "Unknown"}
+                        </p>
 
-                    <p>
-                        <strong>Death Date:</strong>
-                        {d.death_date || "Unknown"}
-                    </p>
+                        <p>
+                            <strong>Death Date:</strong>
+                            {d.death_date || "Unknown"}
+                        </p>
 
-                    <p>
-                        <strong>Death Location:</strong>
-                        {d.death_location?.original_name || "Unknown"}
-                    </p>
+                        <p>
+                            <strong>Death Location:</strong>
+                            {d.death_location?.original_name || "Unknown"}
+                        </p>
 
-                    <p>
-                        <strong>Father:</strong>
-                        {d.father?.forename || ""}
-                        {d.father?.surname || "Unknown"}
-                    </p>
+                        <p>
+                            <strong>Father:</strong>
+                            {d.father?.forename || ""}
+                            {d.father?.surname || "Unknown"}
+                        </p>
 
-                    <p>
-                        <strong>Mother:</strong>
-                        {d.mother?.forename || ""}
-                        {d.mother?.surname || "Unknown"}
-                    </p>
+                        <p>
+                            <strong>Mother:</strong>
+                            {d.mother?.forename || ""}
+                            {d.mother?.surname || "Unknown"}
+                        </p>
 
-                    <!-- Colleges -->
-                    <p>
-                        <strong>Colleges:</strong>
-                        {#if d.study?.colleges?.length > 0}
-                            {#each d.study.colleges as college, index}
-                                {#if index > 0}<br />{/if}
-                                {college.name || "Unknown"} (From: {college.from ||
-                                    "Unknown"})
-                            {/each}
-                        {:else}
-                            None
-                        {/if}
-                    </p>
+                        <!-- Colleges -->
+                        <p>
+                            <strong>Colleges:</strong>
+                            {#if d.study?.colleges?.length > 0}
+                                {#each d.study.colleges as college, index}
+                                    {#if index > 0}<br />{/if}
+                                    {college.name || "Unknown"} (From: {college.from ||
+                                        "Unknown"})
+                                {/each}
+                            {:else}
+                                None
+                            {/if}
+                        </p>
 
-                    <!-- Degrees -->
-                    <p>
-                        <strong>Degrees:</strong>
-                        {#if d.study?.degrees?.length > 0}
-                            {#each d.study.degrees as degree, index}
-                                {#if index > 0}<br />{/if}
-                                {degree.name || "Unknown"} (Date: {degree.date ||
-                                    "Unknown"})
-                            {/each}
-                        {:else}
-                            None
-                        {/if}
-                    </p>
+                        <!-- Degrees -->
+                        <p>
+                            <strong>Degrees:</strong>
+                            {#if d.study?.degrees?.length > 0}
+                                {#each d.study.degrees as degree, index}
+                                    {#if index > 0}<br />{/if}
+                                    {degree.name || "Unknown"} (Date: {degree.date ||
+                                        "Unknown"})
+                                {/each}
+                            {:else}
+                                None
+                            {/if}
+                        </p>
 
-                    <!-- Floruit -->
-                    <p>
-                        <strong>Floruit:</strong>
-                        {#if d.floruit?.length > 0}
-                            {#each d.floruit as floruit, index}
-                                {#if index > 0}<br />{/if}
-                                {floruit.occupation || "Unknown"} at
-                                {floruit.location?.original_name ||
-                                    "Unknown Location"}
-                                (From: {floruit.from || "Unknown"} To: {floruit.to ||
-                                    "Unknown"})
-                            {/each}
-                        {:else}
-                            None
-                        {/if}
-                    </p>
+                        <!-- Floruit -->
+                        <p>
+                            <strong>Floruit:</strong>
+                            {#if d.floruit?.length > 0}
+                                {#each d.floruit as floruit, index}
+                                    {#if index > 0}<br />{/if}
+                                    {floruit.occupation || "Unknown"} at
+                                    {floruit.location?.original_name ||
+                                        "Unknown Location"}
+                                    (From: {floruit.from || "Unknown"} To: {floruit.to ||
+                                        "Unknown"})
+                                {/each}
+                            {:else}
+                                None
+                            {/if}
+                        </p>
 
-                    <!-- References -->
-                    <p>
-                        <strong>References:</strong>
-                        {#if d.references?.length > 0}
-                            {#each d.references as reference, index}
-                                {#if index > 0}<br />{/if}
-                                {reference || "Unknown"}
-                            {/each}
-                        {:else}
-                            None
-                        {/if}
-                    </p>
+                        <!-- References -->
+                        <p>
+                            <strong>References:</strong>
+                            {#if d.references?.length > 0}
+                                {#each d.references as reference, index}
+                                    {#if index > 0}<br />{/if}
+                                    {reference || "Unknown"}
+                                {/each}
+                            {:else}
+                                None
+                            {/if}
+                        </p>
 
-                    <p><strong>ID:</strong> {d.id || "Unknown"}</p>
+                        <p><strong>ID:</strong> {d.id || "Unknown"}</p>
 
-                    <hr />
-                {/each}
+                        <hr />
+                    {/each}
+                {/if}
             </div>
         </div>
     </div>
@@ -319,13 +315,12 @@
         background: none;
         color: white;
         border: none;
-        padding: 2px 10px;
+        padding: 3px 10px;
         border-radius: 2px;
         font-size: 1.2em;
         cursor: pointer;
         font-family: "Montserrat";
         transition: border 0.3s ease;
-
     }
 
     .btn.close:hover,

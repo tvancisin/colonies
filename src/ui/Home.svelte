@@ -49,16 +49,15 @@
     }
     h1 {
         color: white;
-        font-weight: 500;
         margin-bottom: 5px;
         font-family: "Montserrat", sans-serif;
         font-optical-sizing: auto;
-        font-weight: 500;
+        font-weight: 800;
         font-style: normal;
     }
     h3 {
         color: white;
-        font-weight: 400;
+        font-weight: 500;
     }
     #navigation {
         position: absolute;
@@ -91,9 +90,10 @@
         cursor: pointer;
         display: block;
         text-align: left;
+        font-weight: 500;
     }
     .dropdown li:hover {
-        background-color: #042645;
+        background-color: #1c4265;
     }
 
     #uni_logo {

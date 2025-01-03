@@ -774,7 +774,7 @@ export const occupations = {
 
 
 export function career(career_data) {
-    console.log(career_data);
+    // console.log(career_data);
 
     let grps = {
         medicine: [],

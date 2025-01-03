@@ -101,7 +101,7 @@
 <style>
     h3 {
         color: white;
-        font-weight: 400;
+        font-weight: 700;
     }
     /* Parent container for all timeline events */
     .timeline-container {
@@ -114,6 +114,7 @@
         padding: 20px 0; /* Add padding to the top and bottom */
         padding-top: 100px;
         background-color: #001c23;
+        z-index: 5;
     }
 
     /* Timeline Line */
