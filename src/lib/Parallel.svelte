@@ -145,7 +145,7 @@
         <text
             x={x_scale(d)}
             text-anchor="middle"
-            font-weight="600"
+            font-weight="500"
             font-size="13"
             y={career_height- 13}>{d}</text
         >

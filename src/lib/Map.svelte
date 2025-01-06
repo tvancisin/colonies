@@ -80,7 +80,7 @@
         );
 
         // work only with this data when career selected
-        data = fin_career
+        data = fin_career;
 
         // update map locations
         drawLocations(fin_career, current_data_string);
@@ -172,6 +172,8 @@
         isOverlayVisible = false;
     }
 
+    let imageURL = new URL("/uni.png", import.meta.url).href;
+
     //// INIT FUNCTION
     onMount(() => {
         mapboxgl.accessToken =
@@ -189,6 +191,22 @@
             projection: "naturalEarth",
             logoPosition: "top-right",
         });
+
+        const el = document.createElement("div");
+        const width = 90;
+        const height = 25;
+        el.className = "marker";
+        el.style.backgroundImage = `url(${imageURL})`;
+        el.style.width = `${width}px`;
+        el.style.height = `${height}px`;
+        el.style.backgroundSize = "100%";
+
+        // Create a default Marker, colored black, rotated 45 degrees.
+        new mapboxgl.Marker(el, {
+            offset: [width / 3, 0],
+        })
+            .setLngLat([-2.7967, 56.3398])
+            .addTo(map);
     });
 
     //// DRAW POLYGONS, SHIPPPING LINES, INDIVIDUAL LOCATIONS
@@ -197,6 +215,45 @@
         map.on("load", () => {
             // Check if the source already exists
             if (!map.getSource("countries")) {
+                //// COUNTRY POLYGONS
+                map.addSource("countries", {
+                    type: "geojson",
+                    data: colonies_1885,
+                    generateId: true, // Ensures all features have unique IDs
+                });
+
+                map.addLayer({
+                    id: "countries_fill",
+                    type: "fill",
+                    source: "countries",
+                    paint: {
+                        "fill-color": [
+                            "match",
+                            ["get", "ADMIN"],
+                            "Britain",
+                            "gray",
+                            "gray",
+                        ],
+                        "fill-opacity": 0.5,
+                    },
+                    filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
+                });
+
+                // HISTORICAL LAYER
+                map.addSource("portland", {
+                    type: "raster",
+                    url: "mapbox://tomasvancisin.30mip8ve",
+                });
+
+                map.addLayer({
+                    id: "portland",
+                    source: "portland",
+                    type: "raster",
+                    layout: {
+                        visibility: "none", // Set the initial visibility explicitly
+                    },
+                });
+
                 //// SHIPPING LINES
                 map.addSource("shipping", {
                     type: "geojson",
@@ -232,48 +289,24 @@
                     },
                 });
 
-                //// COUNTRY POLYGONS
-                map.addSource("countries", {
-                    type: "geojson",
-                    data: colonies_1885,
-                    generateId: true, // Ensures all features have unique IDs
-                });
-
-                map.addLayer({
-                    id: "countries_fill",
-                    type: "fill",
-                    source: "countries",
-                    paint: {
-                        "fill-color": [
-                            "match",
-                            ["get", "ADMIN"],
-                            "Britain",
-                            "gray",
-                            "gray",
-                        ],
-                        "fill-opacity": 0.5,
-                    },
-                    filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
-                });
-
                 countryNames.push("Britain");
 
-                map.addLayer({
-                    id: "countries_outline",
-                    type: "line",
-                    source: "countries",
-                    layout: {},
-                    paint: {
-                        "line-color": "black",
-                        "line-width": [
-                            "case",
-                            ["boolean", ["feature-state", "hover"], false],
-                            1,
-                            0,
-                        ],
-                    },
-                    filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
-                });
+                // map.addLayer({
+                //     id: "countries_outline",
+                //     type: "line",
+                //     source: "countries",
+                //     layout: {},
+                //     paint: {
+                //         "line-color": "black",
+                //         "line-width": [
+                //             "case",
+                //             ["boolean", ["feature-state", "hover"], false],
+                //             1,
+                //             0,
+                //         ],
+                //     },
+                //     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
+                // });
 
                 // highlight polygon on hover
                 map.on("mousemove", "countries_fill", (e) => {
@@ -451,7 +484,7 @@
                 type: "circle",
                 source: "locations",
                 paint: {
-                    "circle-opacity": 0.5,
+                    // "circle-opacity": 0.5,
                     "circle-radius": [
                         "interpolate",
                         ["linear"],
@@ -462,6 +495,8 @@
                         10, // Radius for 10 people (adjust as needed)
                     ],
                     "circle-color": "black",
+                    "circle-stroke-color": "white", 
+                    "circle-stroke-width": 1,
                 },
             });
         }
@@ -565,10 +600,38 @@
     }
 
     export { flyToInitialPosition };
+
+    // switch between historical layers
+    function toggleLayer(checkbox) {
+        const visibility = map.getLayoutProperty("portland", "visibility");
+
+        if (checkbox.checked) {
+            // Show the layer
+            if (visibility === "none") {
+                map.setLayoutProperty("portland", "visibility", "visible");
+            }
+        } else {
+            // Hide the layer
+            if (visibility === "visible" || !visibility) {
+                map.setLayoutProperty("portland", "visibility", "none");
+            }
+        }
+    }
 </script>
 
 <div class="map-container" bind:clientHeight={height}>
     <div id="map" bind:this={map}></div>
+    <div class="toggle-container">
+        <label class="toggle-switch">
+            <input
+                type="checkbox"
+                id="toggle-layer"
+                on:change={(e) => toggleLayer(e.target)}
+            />
+            <span class="slider"></span>
+        </label>
+        <p class="toggle-text">Historical Layer</p>
+    </div>
     {#if isOverlayVisible}
         <div class="overlay">
             <button class="remove-overlay" on:click={removeOverlay}
@@ -623,5 +686,70 @@
     .remove-overlay:hover {
         cursor: pointer;
         background-color: #003645;
+    }
+
+    .toggle-container {
+        display: flex;
+        position: absolute;
+        top: 40px;
+        right: 10px;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px; /* Space between the toggle and the text */
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 25px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #7d7d7d;
+        transition: 0.4s;
+        border-radius: 25px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 21px;
+        width: 21px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #2196f3;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(25px);
+    }
+
+    .toggle-text {
+        margin: 0;
+        font-size: 12px;
+        font-family: "Montserrat";
+        font-weight: 500;
+        color: #333;
     }
 </style>

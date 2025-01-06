@@ -114,7 +114,7 @@
         padding: 20px 0; /* Add padding to the top and bottom */
         padding-top: 100px;
         background-color: #001c23;
-        z-index: 5;
+        z-index: 11;
     }
 
     /* Timeline Line */

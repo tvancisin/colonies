@@ -43,6 +43,14 @@
   let selected_country = null;
   let legend_height = 50;
   let legend_width = 200;
+  let isMenuOpen = false; // Toggle menu visibility
+  let sections = [
+    { id: "all", name: "All" },
+    { id: "education", name: "Education" },
+    { id: "religion", name: "Religion" },
+    { id: "medicine", name: "Medicine" },
+    { id: "military", name: "Military" },
+  ];
 
   //load biographical data
   let path = ["./data/birth_colonies.json", "./data/floruit_colonies.json"];
@@ -138,6 +146,7 @@
   });
 
   function handlePolygonClick(event) {
+    isMenuOpen = false;
     selected_country = event.detail;
     let new_data;
 
@@ -158,7 +167,7 @@
 
     d3.select("#time_description").style("left", "0%");
     d3.select("#details").style("right", "0px");
-    d3.select("#buttons").style("top", "-50px");
+    d3.selectAll("#buttons, #career_navigation").style("top", "-50px");
   }
 
   function handleClose() {
@@ -170,7 +179,8 @@
     }
     d3.select("#time_description").style("left", "2.5%");
     d3.select("#details").style("right", "-100%");
-    d3.select("#buttons").style("top", "10px");
+    d3.select("#buttons").style("top", "12px");
+    d3.select("#career_navigation").style("top", "45px");
     selected_country = null;
     selectedCareerStore.set([]);
     selectedYearsStore.set([]);
@@ -200,20 +210,19 @@
 
   // Scroll to a specific section
   const career_select = (sectionId) => {
-    if (current_data_string == "birth") {
-      current_data = birth_data;
-    } else if (current_data_string == "floruit") {
+    if (current_data_string != "birth") {
       current_data = floruit_data;
+      if (sectionId != "all") {
+        // divide into careers
+        let career_groups = career(current_data);
+        // people with selected career
+        current_data = career_groups[sectionId].filter(
+          (item, index, self) =>
+            index === self.findIndex((t) => t.id === item.id),
+        );
+      }
     }
-    // divide into careers
-    let career_groups = career(current_data);
-    // people with selected career
-    let fin_career = career_groups[sectionId].filter(
-      (item, index, self) => index === self.findIndex((t) => t.id === item.id),
-    );
-    current_data = fin_career;
   };
-
 </script>
 
 <main bind:clientWidth={width}>
@@ -241,12 +250,40 @@
         on:polygonClick={handlePolygonClick}
       />
       <div id="buttons">
-        <button id="birth" on:click={() => change_data("birth")}>Birth</button>
-        <button id="floruit" on:click={() => change_data("floruit")}
-          >Career</button
+        <button
+          id="birth"
+          on:click={() => {
+            isMenuOpen = false;
+            change_data("birth");
+          }}>Birth</button
         >
       </div>
       <div id="time_description">Students Entering University</div>
+      <!-- Navigation Menu -->
+      <div id="career_navigation">
+        <button
+          id="floruit"
+          on:click={() => {
+            isMenuOpen = !isMenuOpen;
+            change_data("floruit");
+          }}
+        >
+          Career
+        </button>
+        {#if isMenuOpen}
+          <ul class="dropdown">
+            {#each sections as section}
+              <li
+                on:click={() => {
+                  career_select(section.id);
+                }}
+              >
+                {section.name}
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      </div>
       <Timeline {current_data} {selected_country} />
       <Details
         {births_per_colony}
@@ -257,24 +294,6 @@
       />
     {/if}
   </div>
-  <!-- Navigation Menu -->
-  <!-- <div id="navigation">
-      <i
-        class="fa fa-bars"
-        aria-hidden="true"
-        on:click={() => (isMenuOpen = !isMenuOpen)}
-      ></i>
-
-      {#if isMenuOpen}
-        <ul class="dropdown">
-          {#each sections as section}
-            <li on:click={() => career_select(section.id)}>
-              {section.name}
-            </li>
-          {/each}
-        </ul>
-      {/if}
-    </div> -->
 </main>
 
 <style>
@@ -312,6 +331,7 @@
     border: none;
     color: black;
     padding: 5px 10px;
+    width: 80px;
     text-align: center;
     font-family: "Montserrat";
     font-weight: 450;
@@ -333,5 +353,45 @@
   #floruit:hover {
     background-color: #000000;
     color: white;
+  }
+
+  #career_navigation {
+    position: absolute;
+    top: 45px;
+    left: 5px;
+    z-index: 10;
+    padding-bottom: 10px;
+    padding-right: 10px;
+    transition: top 0.3s ease;
+  }
+  #career_navigation .fa-bars {
+    font-size: 24px;
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+  }
+  .dropdown {
+    position: absolute;
+    top: 33px;
+    left: 0;
+    text-align: left;
+    background-color: #252529;
+    border-radius: 1px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 10;
+  }
+  .dropdown li {
+    all: unset;
+    font-weight: 300;
+    padding: 10px 20px;
+    color: white;
+    cursor: pointer;
+    display: block;
+    text-align: left;
+    font-weight: 500;
+  }
+  .dropdown li:hover {
+    background-color: #1c4265;
   }
 </style>
