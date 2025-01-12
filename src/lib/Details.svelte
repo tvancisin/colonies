@@ -112,7 +112,17 @@
         <button class="btn refresh" on:click={refresh}>
             <i class="fa fa-refresh"></i>
         </button>
-        {#if selected_country}
+        {#if selected_country == "America"}
+            <h3>North America</h3>
+        {:else if selected_country == "India"}
+            <h3>British India</h3>
+        {:else if selected_country == "Asia"}
+            <h3>Southeast Asia</h3>
+        {:else if selected_country == "Australia"}
+            <h3>Australia & New Zealand</h3>
+        {:else if selected_country == "Caribbean"}
+            <h3>{selected_country}</h3>
+        {:else if selected_country == "Africa"}
             <h3>{selected_country}</h3>
         {/if}
     </div>
@@ -197,7 +207,7 @@
 
                         <!-- Floruit -->
                         <p>
-                            <strong>Floruit:</strong>
+                            <strong>Career:</strong>
                             {#if d.floruit?.length > 0}
                                 {#each d.floruit as floruit, index}
                                     {#if index > 0}<br />{/if}

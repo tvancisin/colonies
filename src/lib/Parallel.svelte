@@ -1,8 +1,8 @@
 <script>
     import {
-        selectedYearsStore,
+        selectedCollegeStore,
+        selectedDegreeStore,
         selectedCareerStore,
-        selectedGenderStore,
     } from "../years";
     import * as d3 from "d3";
     import { dimensions, colleges, degrees, careers } from "../utils";
@@ -84,18 +84,51 @@
         );
     };
 
+    function college_click(college) {
+        selectedCollegeStore.set(college);
+        console.log(college);
+    }
+
+    function degree_click(degree) {
+        selectedDegreeStore.set(degree);
+        console.log(degree);
+    }
+
     function career_click(career) {
         selectedCareerStore.set(career);
     }
 
     $: {
-        d3.select(gy_college).selectAll("path, .tick>line").style("opacity", 0.5);
-        d3.select(gy_degree).selectAll("path, .tick>line").style("opacity", 0.5);
-        d3.select(gy_career).selectAll("path, .tick>line").style("opacity", 0.5);
+        d3.select(gy_college)
+            .selectAll("path, .tick>line")
+            .style("opacity", 0.5);
+        d3.select(gy_degree)
+            .selectAll("path, .tick>line")
+            .style("opacity", 0.5);
+        d3.select(gy_career)
+            .selectAll("path, .tick>line")
+            .style("opacity", 0.5);
     }
 </script>
 
 <svg {width} {height}>
+    {#if parallel_data}
+        {#each parallel_data as data}
+            <path fill="none" stroke="#69b3a2" opacity="0.1" d={line(data)} />
+        {/each}
+    {/if}
+    <g bind:this={gy_college} transform="translate({x_scale('college')},0)" />
+    <g bind:this={gy_degree} transform="translate({x_scale('degree')},0)" />
+    <g bind:this={gy_career} transform="translate({x_scale('career')},0)" />
+    {#each dimensions as d}
+        <text
+            x={x_scale(d)}
+            text-anchor="middle"
+            font-weight="500"
+            font-size="13"
+            y={career_height - 13}>{d}</text
+        >
+    {/each}
     {#if collegeCounts}
         {#each Object.entries(collegeCounts) as [college, count]}
             <rect
@@ -106,6 +139,8 @@
                 height="10"
                 fill="black"
                 class="bar"
+                on:click={college_click(college)}
+                style="cursor: pointer;"
             />
         {/each}
         {#each Object.entries(degreeCounts) as [degree, count]}
@@ -117,6 +152,8 @@
                 height="10"
                 fill="black"
                 class="bar"
+                on:click={degree_click(degree)}
+                style="cursor: pointer;"
             />
         {/each}
         {#each Object.entries(careerCounts) as [career, count]}
@@ -133,23 +170,6 @@
             />
         {/each}
     {/if}
-    {#if parallel_data}
-        {#each parallel_data as data}
-            <path fill="none" stroke="#69b3a2" opacity="0.1" d={line(data)} />
-        {/each}
-    {/if}
-    <g bind:this={gy_college} transform="translate({x_scale('college')},0)" />
-    <g bind:this={gy_degree} transform="translate({x_scale('degree')},0)" />
-    <g bind:this={gy_career} transform="translate({x_scale('career')},0)" />
-    {#each dimensions as d}
-        <text
-            x={x_scale(d)}
-            text-anchor="middle"
-            font-weight="500"
-            font-size="13"
-            y={career_height- 13}>{d}</text
-        >
-    {/each}
 </svg>
 
 <style>
