@@ -771,6 +771,64 @@ export const occupations = {
     ]
 };
 
+export function degree(degree_data) {
+
+    let grps = {
+        "M.B. C.M.": [],
+        "LLA": [],
+        "D.Mus.": [],
+        "M.B. Ch.B.": [],
+        "D.Sc.": [],
+        "B.Sc.": [],
+        "D.D.": [],
+        "B.D.": [],
+        "B.A.": [],
+        "LL.D.": [],
+        "M.A.": [],
+        "M.D.": [],
+        "unknown": [],
+    };
+
+    // Filter objects with degree 
+    let with_degree = degree_data.filter(
+        (item) => item.study && item.study.degrees && item.study.degrees.length > 0,
+    );
+
+    with_degree.forEach((item) => {
+        // Loop through each degree entry for the item
+        let hasValidDegree = false;
+
+        item.study.degrees.forEach((degree) => {
+            if (!degree.name) {
+                return; // Skip null or invalid degrees
+            }
+
+            // Handle cases where degree is a valid string
+            const degreeName = degree.name;
+
+            // Assign to the appropriate group
+            if (degrees.includes(degreeName)) {
+                grps[degreeName].push(item);
+                hasValidDegree = true;
+            }
+        });
+
+        // If no valid degree was found, push to the unknown group
+        if (!hasValidDegree) {
+            grps.unknown.push(item);
+        }
+    });
+
+    let without_degree = degree_data.filter(
+        (item) => !item.study || !item.study.degrees || item.study.degrees.length === 0,
+    );
+
+    without_degree.forEach((item) => {
+        grps.unknown.push(item); // If no degree information, add to 'unknown'
+    });
+
+    return grps;
+}
 
 
 export function career(career_data) {

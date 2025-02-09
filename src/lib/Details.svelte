@@ -5,12 +5,18 @@
         constructNodesAndLinks,
         constructParallelData,
         career,
+        degree,
     } from "../utils";
-    import { selectedYearsStore, selectedCareerStore } from "../years";
+    import {
+        selectedYearsStore,
+        selectedCareerStore,
+        selectedDegreeStore,
+    } from "../years";
     // import Network from "./Network.svelte";
     import Parallel from "./Parallel.svelte";
     const dispatch = createEventDispatcher();
 
+    export let current_data;
     export let births_per_colony;
     export let floruit_per_colony;
     export let selected_country;
@@ -23,6 +29,7 @@
     let parallel_data;
     let selectedYears = [];
     let selectedCareer;
+    let selectedDegree;
     let filteredCountry;
 
     // selected years from store
@@ -33,9 +40,17 @@
     const career_unsubscribe = selectedCareerStore.subscribe((value) => {
         selectedCareer = value;
     });
+    // selected degree from store
+    const degree_unsubscribe = selectedDegreeStore.subscribe((value) => {
+        selectedDegree = value;
+    });
+
+    $: console.log(data);
 
     //// COUNTRY FILTER
     $: if (selected_country != null) {
+        console.log("country selected");
+
         // default data
         filteredCountry = (
             current_data_string === "birth"
@@ -45,13 +60,17 @@
 
         // data to operate with
         data = filteredCountry;
+    } else {
+        console.log("no country selected");
+        data = current_data;
     }
 
     //// YEAR FILTER
-    $: if (selectedYears.length != 0 && selected_country != null) {
+    $: if (selectedYears.length != 0) {
+        data = current_data;
         //filter data to selected years
         let filter_years = year_filter(
-            filteredCountry,
+            data,
             selectedYears[0],
             selectedYears[1],
         );
@@ -62,7 +81,6 @@
 
     //// CAREER FILTER
     $: if (selectedCareer.length != 0) {
-        console.log("here");
         // construct career groups based on clicked country
         let career_groups = career(data);
 
@@ -76,20 +94,36 @@
         data = fin_career;
     }
 
+    //// DEGREE FILTER
+    $: if (selectedDegree.length != 0) {
+        // construct career groups based on clicked country
+        let degree_groups = degree(data);
+
+        // only get people with sele    cted career
+        let fin_degree = degree_groups[selectedDegree].filter(
+            (item, index, self) =>
+                index === self.findIndex((t) => t.id === item.id),
+        );
+
+        // update data
+        data = fin_degree;
+    }
+
     function closeDetails() {
         dispatch("close");
     }
 
+    // if refreshed, reset to filteredCountry data
     let check = false;
-
     $: if (check) {
         data = filteredCountry;
         check = false;
     }
 
     function refresh() {
-        selectedCareerStore.set([]);
         check = true;
+        selectedCareerStore.set([]);
+        selectedDegreeStore.set([]);
     }
 
     //data for network
@@ -109,9 +143,11 @@
         <button class="btn close" on:click={closeDetails}
             ><i class="fa fa-close"></i></button
         >
-        <button class="btn refresh" on:click={refresh}>
-            <i class="fa fa-refresh"></i>
-        </button>
+        {#if selected_country !== null && selected_country !== undefined}
+            <button class="btn refresh" on:click={refresh}>
+                <i class="fa fa-refresh"></i>
+            </button>
+        {/if}
         {#if selected_country == "America"}
             <h3>North America</h3>
         {:else if selected_country == "India"}
@@ -124,6 +160,8 @@
             <h3>{selected_country}</h3>
         {:else if selected_country == "Africa"}
             <h3>{selected_country}</h3>
+        {:else if selected_country == null}
+            <h3>Whole Empire</h3>
         {/if}
     </div>
     <div id="peace_content">
@@ -248,13 +286,13 @@
 <style>
     #details {
         color: black;
-        position: fixed;
-        right: -100%;
+        position: absolute;
+        right: 0px;
         bottom: 0px;
-        width: 40%;
-        height: calc(100%);
+        width: 500px;
+        height: 100%;
         transition: right 0.3s ease;
-        background-color: rgb(0, 0, 0);
+        background-color: #003847;
         overflow: hidden;
         z-index: 5;
         font-family: "Montserrat", sans-serif;
@@ -264,12 +302,20 @@
         display: flex;
         flex-direction: column;
         z-index: 11;
-        box-shadow: 0 0 5px #000000;
+        box-shadow: 0 0 10px #000000;
+    }
+    hr {
+        border: 1px solid rgb(72, 72, 72);
     }
 
+    strong {
+        font-weight: 450;
+        color: #a6a6a6;
+    }
     @media (max-width: 768px) {
         #details {
             width: 100%;
+            height: 50%;
         }
     }
 
@@ -313,8 +359,8 @@
         border: none;
         padding: 2px 10px;
         border-radius: 2px;
-        font-size: 1.5em;
         cursor: pointer;
+        font-size: 1.5em;
         font-family: "Montserrat";
         transition: border 0.3s ease;
     }
@@ -327,7 +373,7 @@
         border: none;
         padding: 3px 10px;
         border-radius: 2px;
-        font-size: 1.2em;
+        font-size: 1.4em;
         cursor: pointer;
         font-family: "Montserrat";
         transition: border 0.3s ease;
@@ -337,17 +383,15 @@
     .btn.refresh:hover {
         color: red;
     }
-
-    @media only screen and (max-width: 1450px) {
-        .btn.close {
-            font-size: 1.3em;
-        }
+    
+    #peace_title_div {
+        display: flex;
+        align-items: stretch; /* Ensures all children take full height */
     }
 
-    @media only screen and (max-width: 1024px) {
-        .btn.close {
-            font-size: 1.2em;
-        }
+    #peace_title_div .btn {
+        flex-grow: 1; /* Makes buttons take up equal height */
+        height: 100%; /* Ensures they fill the parent */
     }
 
     #peace_content {
@@ -399,7 +443,9 @@
         display: flex;
         flex-direction: column;
         line-height: 1.5;
-        background: white;
+        background: #001c23;
+        font-size: 12px;
+        color: white;
         border-radius: 2px;
         flex-shrink: 0; /* Prevent shrinking of these elements */
         flex-grow: 1; /* Takes one unit of the available space */
@@ -411,7 +457,8 @@
         padding: 2px 15px;
         background: none;
         box-sizing: border-box;
-        font-weight: 450;
+        font-weight: 400;
+        overflow-x: hidden;
     }
 
     #career_wrapper {
@@ -420,7 +467,7 @@
         padding: 2px;
         background: none;
         box-sizing: border-box;
-        font-weight: 450;
+        font-weight: 300;
     }
 
     #peace_title_div {
@@ -444,4 +491,5 @@
     p {
         margin: 0px;
     }
+
 </style>

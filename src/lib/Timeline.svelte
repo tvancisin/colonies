@@ -3,9 +3,9 @@
     import {
         selectedYearsStore,
         selectedCareerStore,
-        selectedGenderStore,
+        selectedDegreeStore,
     } from "../years";
-    import { year_filter, career } from "../utils";
+    import { year_filter, career, degree } from "../utils";
 
     export let current_data;
     export let selected_country;
@@ -13,10 +13,11 @@
     let selected_years = [1700, 1900];
     let data_to_draw;
     let selected_career;
+    let selected_degree;
     let width = 800;
     let height = 160;
     let containerWidth = 800;
-    let margin = { top: 20, right: 30, bottom: 30, left: 40 };
+    let margin = { top: 20, right: 30, bottom: 20, left: 40 };
     let svg;
     let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900];
     let y_ticks = [5, 15];
@@ -38,15 +39,35 @@
         selected_career = value;
     });
 
-    $: if (selected_career.length != 0 && selected_country !== null) {
+    $: if (selected_career.length != 0) {
         // construct career groups based on clicked country
         let career_groups = career(current_data);
+
         // only get people with selected career
         data_to_draw = career_groups[selected_career].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
     } else if (selected_career.length == 0) {
+        data_to_draw = current_data;
+    }
+
+    ////SELECTED DEGREE FILTER
+    //catch new selected degree
+    const degree_unsubscribe = selectedDegreeStore.subscribe((value) => {
+        selected_degree = value;
+    });
+
+    $: if (selected_degree.length != 0) {
+        // construct degree groups
+        let degree_groups = degree(current_data);
+
+        // only selected degree
+        data_to_draw = degree_groups[selected_degree].filter(
+            (item, index, self) =>
+                index === self.findIndex((t) => t.id === item.id),
+        );
+    } else if (selected_degree.length == 0) {
         data_to_draw = current_data;
     }
 
@@ -78,15 +99,15 @@
     // Reactive block to update width when selected_country changes
     $: {
         if (selected_country) {
-            width = containerWidth - innerWidth * 0.4;
-            d3.selectAll("#timeline, #year_detail")
-                .style("width", "100%")
-                .style("left", "0%");
+            // width = containerWidth - innerWidth * 0.4;
+            // d3.selectAll("#timeline, #year_detail")
+            //     .style("width", "100%")
+            //     .style("left", "0%");
         } else {
             width = containerWidth; // Full width when selected_country is null
             d3.selectAll("#timeline, #year_detail")
-                .style("width", "95%")
-                .style("left", "2.5%");
+                .style("width", "calc(100% - 500px)")
+                .style("left", "0%");
         }
     }
 
@@ -208,18 +229,30 @@
             d3.select(svg)
                 .select(".x-axis")
                 .call(xAxis)
+                .select(".domain")
+                .style("stroke", "gray");
+
+            d3.select(svg)
+                .select(".x-axis")
                 .selectAll("text")
                 .style("font-family", "Montserrat")
-                .style("font-weight", 500)
-                .style("font-size", 12);
+                .style("font-weight", 300)
+                .style("font-size", 13)
+                .style("fill", "white");
 
             d3.select(svg)
                 .select(".y-axis")
                 .call(yAxis)
+                .select(".domain")
+                .style("stroke", "gray");
+
+            d3.select(svg)
+                .select(".y-axis")
                 .selectAll("text")
                 .style("font-family", "Montserrat")
-                .style("font-weight", 500)
-                .style("font-size", 12);
+                .style("font-weight", 300)
+                .style("font-size", 13)
+                .style("fill", "white");
         }
     }
 
@@ -289,7 +322,7 @@
                               ? xScale(year.birth_date)
                               : xScale(selected_years[0]) - 10)}
                     height="1"
-                    fill="black"
+                    fill="#424242"
                 />
                 {#if year.birth_date}
                     <circle
@@ -360,7 +393,7 @@
                 y={yScale(d[1])}
                 width={xScale.bandwidth()}
                 height={yScale(0) - yScale(d[1])}
-                fill="black"
+                fill="white"
                 class="bar"
             />
         {/each}
@@ -380,42 +413,40 @@
             <!-- Start line and label -->
             <line
                 x1={selectedLineStart}
-                y1={margin.top}
+                y1={margin.top - 7}
                 x2={selectedLineStart}
                 y2={height - margin.bottom}
-                stroke="red"
-                stroke-width="1"
+                stroke="white"
+                stroke-width="2"
             />
             <text
                 x={selectedLineStart}
-                y={margin.top - 5}
+                y={margin.top - 10}
                 text-anchor="middle"
-                font-size="13px"
-                font-weight="550"
-                fill="red"
+                font-size="14px"
+                font-weight="300"
+                fill="white"
             >
                 {selectedYearStart}
             </text>
-
             <!-- End line -->
             <line
                 x1={selectedLineEnd}
-                y1={margin.top}
+                y1={margin.top - 7}
                 x2={selectedLineEnd}
                 y2={height - margin.bottom}
-                stroke="red"
-                stroke-width="1"
+                stroke="white"
+                stroke-width="2"
             />
-
             <!-- Only show the end label if more than one year is selected -->
             {#if selectedYearStart !== selectedYearEnd}
                 <text
                     x={selectedLineEnd}
-                    y={margin.top - 5}
+                    y={margin.top - 10}
                     text-anchor="middle"
-                    font-size="13px"
-                    font-weight="550"
-                    fill="red"
+                    font-size="14px"
+                    font-weight="300"
+                    fill="white"
                 >
                     {selectedYearEnd}
                 </text>
@@ -429,10 +460,8 @@
         position: absolute;
         border-radius: 5px;
         bottom: 0px;
-        left: 2.5%;
-        width: 95%;
+        width: calc(100% - 500px);
         height: 160px;
-        background: rgba(0, 0, 0, 0.09);
     }
 
     :global(.brush .selection) {
@@ -444,7 +473,6 @@
         visibility: hidden;
         width: 95%;
         height: 110px;
-        /* background-color: rgba(255, 0, 0, 0.264); */
         bottom: 160px;
     }
 </style>

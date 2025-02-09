@@ -33,7 +33,7 @@
     let gy_degree;
     let gy_career;
 
-    let margin = { top: 15, right: 35, bottom: 25, left: 35 };
+    let margin = { top: 30, right: 35, bottom: 10, left: 35 };
     $: width = career_width - 10;
     $: height = career_height - 10;
 
@@ -64,17 +64,17 @@
         .call(d3.axisLeft(y["college"]))
         .selectAll("text")
         .style("font-family", "Montserrat")
-        .style("font-weight", 500);
+        .style("font-weight", 300)
     $: d3.select(gy_degree)
         .call(d3.axisLeft(y["degree"]))
         .selectAll("text")
         .style("font-family", "Montserrat")
-        .style("font-weight", 500);
+        .style("font-weight", 300);
     $: d3.select(gy_career)
         .call(d3.axisLeft(y["career"]))
         .selectAll("text")
         .style("font-family", "Montserrat")
-        .style("font-weight", 500);
+        .style("font-weight", 300);
 
     $: line = function path(d) {
         return d3.line()(
@@ -91,7 +91,6 @@
 
     function degree_click(degree) {
         selectedDegreeStore.set(degree);
-        console.log(degree);
     }
 
     function career_click(career) {
@@ -114,7 +113,7 @@
 <svg {width} {height}>
     {#if parallel_data}
         {#each parallel_data as data}
-            <path fill="none" stroke="#69b3a2" opacity="0.1" d={line(data)} />
+            <path fill="none" stroke="gray" opacity="0.1" d={line(data)} />
         {/each}
     {/if}
     <g bind:this={gy_college} transform="translate({x_scale('college')},0)" />
@@ -124,9 +123,10 @@
         <text
             x={x_scale(d)}
             text-anchor="middle"
-            font-weight="500"
+            font-weight="400"
             font-size="13"
-            y={career_height - 13}>{d}</text
+            fill="white"
+            y={15}>{d.toUpperCase()}</text
         >
     {/each}
     {#if collegeCounts}
@@ -137,9 +137,17 @@
                 y={y["college"](college) - 5}
                 width={x_bar_scale(count)}
                 height="10"
-                fill="black"
+                fill="white"
                 class="bar"
-                on:click={college_click(college)}
+                role="button"
+                tabindex="0"
+                aria-label="Select {college}"
+                on:click={() => college_click(college)}
+                on:keydown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                        college_click(college);
+                    }
+                }}
                 style="cursor: pointer;"
             />
         {/each}
@@ -150,9 +158,16 @@
                 y={y["degree"](degree) - 5}
                 width={x_bar_scale(count)}
                 height="10"
-                fill="black"
+                fill="white"
                 class="bar"
-                on:click={degree_click(degree)}
+                role="button"
+                tabindex="0"
+                on:click={() => degree_click(degree)}
+                on:keydown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                        degree_click(degree);
+                    }
+                }}
                 style="cursor: pointer;"
             />
         {/each}
@@ -163,9 +178,16 @@
                 y={y["career"](career) - 5}
                 width={x_bar_scale(count)}
                 height="10"
-                fill="black"
+                fill="white"
                 class="bar"
-                on:click={career_click(career)}
+                role="button"
+                tabindex="0"
+                on:click={() => career_click(career)}
+                on:keydown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                        career_click(career);
+                    }
+                }}
                 style="cursor: pointer;"
             />
         {/each}

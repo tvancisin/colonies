@@ -6,12 +6,13 @@
         year_filter,
         getWidthExpression,
         width_generator,
-        career,
+        career, degree
     } from "../utils";
     import {
         selectedYearsStore,
         selectedGenderStore,
         selectedCareerStore,
+        selectedDegreeStore,
     } from "../years";
     const dispatch = createEventDispatcher();
 
@@ -33,7 +34,8 @@
     let hoveredPolygonId = null;
     let selectedYears = [1700, 1900];
     let selectedCareer;
-    let isOverlayVisible = true; // Controls the visibility of the overlay
+    let selectedDegree;
+
     //catch new selected years
     const unsubscribe = selectedYearsStore.subscribe((value) => {
         selectedYears = value;
@@ -41,6 +43,11 @@
     //catch new selected career
     const career_unsubscribe = selectedCareerStore.subscribe((value) => {
         selectedCareer = value;
+    });
+
+    //catch new selected degree
+    const degree_unsubscribe = selectedDegreeStore.subscribe((value) => {
+        selectedDegree = value;
     });
 
     // redrawing locations if current_data changes [used on exit also]
@@ -70,7 +77,7 @@
     }
 
     //// CAREER FILTER
-    $: if (selectedCareer.length != 0 && selected_country !== null) {
+    $: if (selectedCareer.length != 0) {
         // construct career groups based on clicked country
         let career_groups = career(data);
         // only get people with selected career
@@ -84,6 +91,26 @@
 
         // update map locations
         drawLocations(fin_career, current_data_string);
+    } else if (selectedCareer.length == 0 && selected_country !== null) {
+        drawLocations(def_data, current_data_string);
+        data = def_data;
+    }
+
+    //// DEGREE FILTER
+    $: if (selectedDegree.length != 0) {
+        // construct career groups based on clicked country
+        let degree_groups = degree(data);
+        // only get people with selected career
+        let fin_degree = degree_groups[selectedDegree].filter(
+            (item, index, self) =>
+                index === self.findIndex((t) => t.id === item.id),
+        );
+
+        // work only with this data when career selected
+        data = fin_degree;
+
+        // update map locations
+        drawLocations(fin_degree, current_data_string);
     } else if (selectedCareer.length == 0 && selected_country !== null) {
         drawLocations(def_data, current_data_string);
         data = def_data;
@@ -149,30 +176,27 @@
 
     //// ZOOM ADJUSTMENT
     function adjustMapForWindowSize() {
-        if (window.innerWidth <= 768) {
+        // console.log(map);
+
+        if (window.innerWidth <= 1000) {
             map.flyTo({
-                center: [13, 10],
-                zoom: 1.3,
+                center: [20, 0],
+                zoom: 0.8,
             });
-        } else if (window.innerWidth <= 1300 || window.innerHeight <= 720) {
+        } else if (window.innerWidth <= 1200) {
             map.flyTo({
-                center: [13, 10],
-                zoom: 1.5,
+                center: [20, 0],
+                zoom: 0.9,
             });
-        } else {
+        } else if (window.innerWidth >= 1200) {
             map.flyTo({
-                center: [13, 10],
-                zoom: 2,
+                center: [20, 0],
+                zoom: 1,
             });
         }
     }
 
-    // remove initial div
-    function removeOverlay() {
-        isOverlayVisible = false;
-    }
-
-    let imageURL = new URL("/uni.png", import.meta.url).href;
+    let imageURL = new URL("/uni_logo.png", import.meta.url).href;
 
     //// INIT FUNCTION
     onMount(() => {
@@ -183,18 +207,15 @@
         map = new mapboxgl.Map({
             attributionControl: false,
             container: "map",
-            style: "mapbox://styles/tomasvancisin/cm0i5fpy4004b01qodg9g2awr",
-            center: [13, 10],
-            zoom: 2,
+            style: "mapbox://styles/tomasvancisin/cm63qqxy1004j01s7bp770wpf",
             maxZoom: 8,
-            minZoom: 1.3,
             projection: "naturalEarth",
             logoPosition: "top-right",
         });
 
         const el = document.createElement("div");
-        const width = 90;
-        const height = 25;
+        const width = 100;
+        const height = 30;
         el.className = "marker";
         el.style.backgroundImage = `url(${imageURL})`;
         el.style.width = `${width}px`;
@@ -234,7 +255,7 @@
                             "gray",
                             "gray",
                         ],
-                        "fill-opacity": 0.5,
+                        "fill-opacity": 0.7,
                     },
                     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
                 });
@@ -266,8 +287,7 @@
                     type: "line",
                     source: "shipping",
                     paint: {
-                        "line-color": "black",
-                        "line-opacity": 0.7,
+                        "line-color": "white",
                         "line-width": [
                             "match",
                             ["get", "ADMIN"],
@@ -291,22 +311,22 @@
 
                 countryNames.push("Britain");
 
-                // map.addLayer({
-                //     id: "countries_outline",
-                //     type: "line",
-                //     source: "countries",
-                //     layout: {},
-                //     paint: {
-                //         "line-color": "black",
-                //         "line-width": [
-                //             "case",
-                //             ["boolean", ["feature-state", "hover"], false],
-                //             1,
-                //             0,
-                //         ],
-                //     },
-                //     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
-                // });
+                map.addLayer({
+                    id: "countries_outline",
+                    type: "line",
+                    source: "countries",
+                    layout: {},
+                    paint: {
+                        "line-color": "#a6a6a6",
+                        "line-width": [
+                            "case",
+                            ["boolean", ["feature-state", "hover"], false],
+                            1,
+                            0,
+                        ],
+                    },
+                    filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
+                });
 
                 // highlight polygon on hover
                 map.on("mousemove", "countries_fill", (e) => {
@@ -351,8 +371,8 @@
                 });
 
                 // animateShipping();
-                adjustMapForWindowSize();
                 window.addEventListener("resize", adjustMapForWindowSize);
+                adjustMapForWindowSize();
             }
 
             //
@@ -484,7 +504,7 @@
                 type: "circle",
                 source: "locations",
                 paint: {
-                    // "circle-opacity": 0.5,
+                    "circle-opacity": 0.5,
                     "circle-radius": [
                         "interpolate",
                         ["linear"],
@@ -495,7 +515,7 @@
                         10, // Radius for 10 people (adjust as needed)
                     ],
                     "circle-color": "black",
-                    "circle-stroke-color": "white", 
+                    "circle-stroke-color": "white",
                     "circle-stroke-width": 1,
                 },
             });
@@ -580,23 +600,23 @@
     //ZOOM IN TO CLICKED COUNTRY
     function zoomToCountry(clicked_colony) {
         if (clicked_colony == "America") {
-            map.flyTo({ center: [-70, 50], zoom: 3 });
+            map.flyTo({ center: [-90, 50], zoom: 3 });
         } else if (clicked_colony == "Caribbean") {
-            map.flyTo({ center: [-55, 10], zoom: 3 });
+            map.flyTo({ center: [-70, 10], zoom: 3 });
         } else if (clicked_colony == "Australia") {
-            map.flyTo({ center: [153, -31], zoom: 3 });
+            map.flyTo({ center: [135, -31], zoom: 3 });
         } else if (clicked_colony == "India") {
-            map.flyTo({ center: [98, 20], zoom: 3 });
+            map.flyTo({ center: [75, 20], zoom: 3 });
         } else if (clicked_colony == "Africa") {
-            map.flyTo({ center: [40, -30], zoom: 3 });
+            map.flyTo({ center: [30, -30], zoom: 3 });
         } else if (clicked_colony == "Asia") {
-            map.flyTo({ center: [118, 6], zoom: 3 });
+            map.flyTo({ center: [110, 6], zoom: 3 });
         }
     }
 
     //RESET DEFAULT ZOOM AND FLY TO INITIAL COORDINATES
     function flyToInitialPosition() {
-        map.flyTo({ center: [13, 10], zoom: 1.5 });
+        map.flyTo({ center: [20, 0], zoom: 1.2 });
     }
 
     export { flyToInitialPosition };
@@ -632,60 +652,29 @@
         </label>
         <p class="toggle-text">Historical Layer</p>
     </div>
-    {#if isOverlayVisible}
-        <div class="overlay">
-            <button class="remove-overlay" on:click={removeOverlay}
-                >Click to Explore</button
-            >
-        </div>
-    {/if}
 </div>
 
 <style>
     .map-container {
-        width: 100%;
+        position: relative;
+        width: calc(100% - 500px);
         height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
-        position: relative;
+        bottom: -3px;
+    }
+
+    @media (max-width: 768px) {
+        .map-container {
+            width: 100%;
+            height: 50%;
+        }
     }
 
     #map {
         width: 100%;
         height: 100%;
-    }
-
-    .overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.3);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 100;
-    }
-
-    .remove-overlay {
-        color: white;
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        border: none;
-        background-color: rgba(0, 0, 0, 0.76);
-        font-family: "Montserrat", sans-serif;
-        font-size: 20px;
-        font-optical-sizing: auto;
-        font-weight: 400;
-        font-style: normal;
-    }
-
-    .remove-overlay:hover {
-        cursor: pointer;
-        background-color: #003645;
     }
 
     .toggle-container {

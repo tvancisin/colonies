@@ -19,6 +19,7 @@
   import {
     selectedYearsStore,
     selectedCareerStore,
+    selectedDegreeStore,
     selectedGenderStore,
   } from "./years";
   import Home from "./ui/Home.svelte";
@@ -43,7 +44,7 @@
   let selected_country = null;
   let legend_height = 50;
   let legend_width = 200;
-  let isMenuOpen = false; // Toggle menu visibility
+  let isOverlayVisible = true; // Controls the visibility of the overlay
   let sections = [
     { id: "all", name: "All" },
     { id: "education", name: "Education" },
@@ -58,6 +59,11 @@
   let floruit_data;
   let births_per_colony;
   let floruit_per_colony;
+
+  // remove initial div
+  function removeOverlay() {
+    isOverlayVisible = false;
+  }
 
   getJSON(path).then((json) => {
     birth_data = json[0];
@@ -146,7 +152,6 @@
   });
 
   function handlePolygonClick(event) {
-    isMenuOpen = false;
     selected_country = event.detail;
     let new_data;
 
@@ -164,10 +169,6 @@
       // Only update if value changes
       current_data = new_data;
     }
-
-    d3.select("#time_description").style("left", "0%");
-    d3.select("#details").style("right", "0px");
-    d3.selectAll("#buttons, #career_navigation").style("top", "-50px");
   }
 
   function handleClose() {
@@ -177,13 +178,10 @@
     } else if (current_data_string == "floruit") {
       current_data = floruit_data;
     }
-    d3.select("#time_description").style("left", "2.5%");
-    d3.select("#details").style("right", "-100%");
-    d3.select("#buttons").style("top", "12px");
-    d3.select("#career_navigation").style("top", "45px");
     selected_country = null;
     selectedCareerStore.set([]);
     selectedYearsStore.set([]);
+    selectedDegreeStore.set([]);
     mapRef.flyToInitialPosition();
   }
 
@@ -191,38 +189,18 @@
   function change_data(selected_data) {
     if (selected_data == "birth") {
       d3.select("#header").text("Student Births in the Colonies (1700-1897)");
-      d3.select("#floruit").style("background-color", "white");
-      d3.select("#floruit").style("color", "black");
-      d3.select("#birth").style("background-color", "black");
-      d3.select("#birth").style("color", "white");
+      d3.select("#floruit").style("background-color", "gray");
+      d3.select("#birth").style("background-color", "white");
       current_data = birth_data;
       current_data_string = selected_data;
     } else if (selected_data == "floruit") {
       d3.select("#header").text("Student Careers in the Colonies (1700-1897)");
-      d3.select("#floruit").style("background-color", "black");
-      d3.select("#floruit").style("color", "white");
-      d3.select("#birth").style("background-color", "white");
-      d3.select("#birth").style("color", "black");
+      d3.select("#floruit").style("background-color", "white");
+      d3.select("#birth").style("background-color", "gray");
       current_data = floruit_data;
       current_data_string = selected_data;
     }
   }
-
-  // Scroll to a specific section
-  const career_select = (sectionId) => {
-    if (current_data_string != "birth") {
-      current_data = floruit_data;
-      if (sectionId != "all") {
-        // divide into careers
-        let career_groups = career(current_data);
-        // people with selected career
-        current_data = career_groups[sectionId].filter(
-          (item, index, self) =>
-            index === self.findIndex((t) => t.id === item.id),
-        );
-      }
-    }
-  };
 </script>
 
 <main bind:clientWidth={width}>
@@ -253,39 +231,23 @@
         <button
           id="birth"
           on:click={() => {
-            isMenuOpen = false;
             change_data("birth");
           }}>Birth</button
         >
-      </div>
-      <div id="time_description">Students Entering University</div>
-      <!-- Navigation Menu -->
-      <div id="career_navigation">
         <button
           id="floruit"
           on:click={() => {
-            isMenuOpen = !isMenuOpen;
             change_data("floruit");
           }}
         >
           Career
         </button>
-        {#if isMenuOpen}
-          <ul class="dropdown">
-            {#each sections as section}
-              <li
-                on:click={() => {
-                  career_select(section.id);
-                }}
-              >
-                {section.name}
-              </li>
-            {/each}
-          </ul>
-        {/if}
       </div>
+      <div id="time_description">Students Entering University</div>
+      <!-- Navigation Menu -->
       <Timeline {current_data} {selected_country} />
       <Details
+        {current_data}
         {births_per_colony}
         {floruit_per_colony}
         {selected_country}
@@ -293,10 +255,50 @@
         on:close={handleClose}
       />
     {/if}
+    {#if isOverlayVisible}
+      <div class="overlay">
+        <button class="remove-overlay" on:click={removeOverlay}
+          >Click to Explore</button
+        >
+      </div>
+    {/if}
   </div>
 </main>
 
 <style>
+  .overlay {
+    position: absolute;
+    left: 0;
+    bottom: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+  }
+
+  .remove-overlay {
+    color: black;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.8);
+    font-family: "Montserrat", sans-serif;
+    font-size: 20px;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .remove-overlay:hover {
+    cursor: pointer;
+    background-color: red;
+    color: white;
+  }
+
   main {
     position: relative;
     align-items: center;
@@ -309,10 +311,11 @@
   #time_description {
     border-radius: 2px;
     position: absolute;
-    left: 2.5%;
-    bottom: 160px;
-    font-weight: 450;
-    background: rgba(0, 0, 0, 0.09);
+    color: white;
+    left: 45px;
+    bottom: 110px;
+    font-weight: 400;
+    font-size: 14px;
     padding: 5px;
   }
 
@@ -327,71 +330,28 @@
 
   #birth,
   #floruit {
-    background-color: white; /* Green */
     border: none;
+    border-radius: 2px;
     color: black;
-    padding: 5px 10px;
-    width: 80px;
+    padding: 5px 0px;
+    width: 75px;
     text-align: center;
-    font-family: "Montserrat";
+    font-family: "Montserrat", sans-serif;
     font-weight: 450;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
     margin: 0px;
-    transition-duration: 0.4s;
+    transition: box-shadow 0.2s ease-in-out; /* Smooth transition */
     cursor: pointer;
-    box-shadow: 0 0 2px #000000;
   }
 
+  /* Button background colors */
   #birth {
-    background-color: #000000;
-    color: white;
+    background-color: white;
   }
 
-  #birth:hover,
-  #floruit:hover {
-    background-color: #000000;
-    color: white;
-  }
-
-  #career_navigation {
-    position: absolute;
-    top: 45px;
-    left: 5px;
-    z-index: 10;
-    padding-bottom: 10px;
-    padding-right: 10px;
-    transition: top 0.3s ease;
-  }
-  #career_navigation .fa-bars {
-    font-size: 24px;
-    color: rgb(0, 0, 0);
-    cursor: pointer;
-  }
-  .dropdown {
-    position: absolute;
-    top: 33px;
-    left: 0;
-    text-align: left;
-    background-color: #252529;
-    border-radius: 1px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    z-index: 10;
-  }
-  .dropdown li {
-    all: unset;
-    font-weight: 300;
-    padding: 10px 20px;
-    color: white;
-    cursor: pointer;
-    display: block;
-    text-align: left;
-    font-weight: 500;
-  }
-  .dropdown li:hover {
-    background-color: #1c4265;
+  #floruit {
+    background-color: gray;
   }
 </style>
