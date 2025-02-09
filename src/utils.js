@@ -771,6 +771,76 @@ export const occupations = {
     ]
 };
 
+export function college(college_data) {
+
+    let grps = {
+        "N/A": [],
+        "SLC": [],
+        "SSC": [],
+        "SMC": [],
+        "UCD": [],
+        "UNC": [],
+    }
+
+    // Filter objects with degree 
+    let with_college = college_data.filter(
+        (item) => item.study && item.study.colleges && item.study.colleges.length > 0,
+    );
+
+    with_college.forEach((item) => {
+        // Loop through each degree entry for the item
+        let hasValidDegree = false;
+
+        item.study.colleges.forEach((college) => {
+            if (!college.name) {
+                return; // Skip null or invalid degrees
+            }
+
+            // Handle cases where degree is a valid string
+            let collegeName = college.name;
+
+            if (collegeName == "St Leonard’s College") {
+                collegeName = "SLC"
+            }
+            else if (collegeName == "St Salvator’s College") {
+                collegeName = "SSC"
+            }
+            else if (collegeName == "St Mary’s College") {
+                collegeName = "SMC"
+            }
+            else if (collegeName == "U.C.D.") {
+                collegeName = "UCD"
+            }
+            else if (collegeName == "United College") {
+                collegeName = "UNC"
+            }
+
+            // Assign to the appropriate group
+            if (colleges.includes(collegeName)) {
+                grps[collegeName].push(item);
+                hasValidDegree = true;
+            }
+        });
+
+        // If no valid degree was found, push to the unknown group
+        if (!hasValidDegree) {
+            grps["N/A"].push(item);
+        }
+    });
+
+
+    let without_college = college_data.filter(
+        (item) => !item.study || !item.study.colleges || item.study.colleges.length === 0,
+    );
+
+    without_college.forEach((item) => {
+        grps["N/A"].push(item); // If no degree information, add to 'unknown'
+    });
+
+    return grps;
+}
+
+
 export function degree(degree_data) {
 
     let grps = {

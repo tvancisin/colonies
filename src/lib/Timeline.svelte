@@ -4,16 +4,18 @@
         selectedYearsStore,
         selectedCareerStore,
         selectedDegreeStore,
+        selectedCollegeStore,
     } from "../years";
-    import { year_filter, career, degree } from "../utils";
+    import { year_filter, career, degree, college } from "../utils";
 
     export let current_data;
     export let selected_country;
 
     let selected_years = [1700, 1900];
-    let data_to_draw;
     let selected_career;
     let selected_degree;
+    let selected_college;
+    let data_to_draw;
     let width = 800;
     let height = 160;
     let containerWidth = 800;
@@ -68,6 +70,25 @@
                 index === self.findIndex((t) => t.id === item.id),
         );
     } else if (selected_degree.length == 0) {
+        data_to_draw = current_data;
+    }
+
+    ////SELECTED COLLEGE FILTER
+    //catch new selected college
+    const college_unsubscribe = selectedCollegeStore.subscribe((value) => {
+        selected_college = value;
+    });
+
+    $: if (selected_college.length != 0) {
+        // construct college groups
+        let college_groups = college(current_data);
+
+        // only selected college 
+        data_to_draw = college_groups[selected_college].filter(
+            (item, index, self) =>
+                index === self.findIndex((t) => t.id === item.id),
+        );
+    } else if (selected_college.length == 0) {
         data_to_draw = current_data;
     }
 

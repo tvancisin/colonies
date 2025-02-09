@@ -20,6 +20,7 @@
     selectedYearsStore,
     selectedCareerStore,
     selectedDegreeStore,
+    selectedCollegeStore,
     selectedGenderStore,
   } from "./years";
   import Home from "./ui/Home.svelte";
@@ -182,6 +183,7 @@
     selectedCareerStore.set([]);
     selectedYearsStore.set([]);
     selectedDegreeStore.set([]);
+    selectedCollegeStore.set([]);
     mapRef.flyToInitialPosition();
   }
 

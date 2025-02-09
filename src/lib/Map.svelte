@@ -6,13 +6,16 @@
         year_filter,
         getWidthExpression,
         width_generator,
-        career, degree
+        career,
+        degree,
+        college,
     } from "../utils";
     import {
         selectedYearsStore,
         selectedGenderStore,
         selectedCareerStore,
         selectedDegreeStore,
+        selectedCollegeStore,
     } from "../years";
     const dispatch = createEventDispatcher();
 
@@ -35,6 +38,7 @@
     let selectedYears = [1700, 1900];
     let selectedCareer;
     let selectedDegree;
+    let selectedCollege;
 
     //catch new selected years
     const unsubscribe = selectedYearsStore.subscribe((value) => {
@@ -48,6 +52,11 @@
     //catch new selected degree
     const degree_unsubscribe = selectedDegreeStore.subscribe((value) => {
         selectedDegree = value;
+    });
+
+    //catch new selected college
+    const college_unsubscribe = selectedCollegeStore.subscribe((value) => {
+        selectedCollege = value;
     });
 
     // redrawing locations if current_data changes [used on exit also]
@@ -112,6 +121,27 @@
         // update map locations
         drawLocations(fin_degree, current_data_string);
     } else if (selectedCareer.length == 0 && selected_country !== null) {
+        drawLocations(def_data, current_data_string);
+        data = def_data;
+    }
+
+    //// COLLEGE FILTER
+    $: if (selectedCollege.length != 0) {
+        // college groups
+        let college_groups = college(data);
+
+        // only selected college
+        let fin_college = college_groups[selectedCollege].filter(
+            (item, index, self) =>
+                index === self.findIndex((t) => t.id === item.id),
+        );
+
+        // update data 
+        data = fin_college;
+
+        // update map locations
+        drawLocations(fin_college, current_data_string);
+    } else if (selectedCollege.length == 0 && selected_country !== null) {
         drawLocations(def_data, current_data_string);
         data = def_data;
     }
@@ -738,7 +768,7 @@
         margin: 0;
         font-size: 12px;
         font-family: "Montserrat";
-        font-weight: 500;
-        color: #333;
+        font-weight: 400;
+        color: #ffffff;
     }
 </style>

@@ -1,8 +1,8 @@
 <script>
     import {
-        selectedCollegeStore,
         selectedDegreeStore,
         selectedCareerStore,
+        selectedCollegeStore,
     } from "../years";
     import * as d3 from "d3";
     import { dimensions, colleges, degrees, careers } from "../utils";
@@ -86,7 +86,6 @@
 
     function college_click(college) {
         selectedCollegeStore.set(college);
-        console.log(college);
     }
 
     function degree_click(degree) {

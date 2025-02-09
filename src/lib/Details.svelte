@@ -6,11 +6,13 @@
         constructParallelData,
         career,
         degree,
+        college,
     } from "../utils";
     import {
         selectedYearsStore,
         selectedCareerStore,
         selectedDegreeStore,
+        selectedCollegeStore,
     } from "../years";
     // import Network from "./Network.svelte";
     import Parallel from "./Parallel.svelte";
@@ -28,9 +30,10 @@
     let data;
     let parallel_data;
     let selectedYears = [];
+    let filteredCountry;
     let selectedCareer;
     let selectedDegree;
-    let filteredCountry;
+    let selectedCollege;
 
     // selected years from store
     const unsubscribe = selectedYearsStore.subscribe((value) => {
@@ -44,13 +47,13 @@
     const degree_unsubscribe = selectedDegreeStore.subscribe((value) => {
         selectedDegree = value;
     });
-
-    $: console.log(data);
+    // selected college from store
+    const college_unsubscribe = selectedCollegeStore.subscribe((value) => {
+        selectedCollege = value;
+    });
 
     //// COUNTRY FILTER
     $: if (selected_country != null) {
-        console.log("country selected");
-
         // default data
         filteredCountry = (
             current_data_string === "birth"
@@ -61,7 +64,6 @@
         // data to operate with
         data = filteredCountry;
     } else {
-        console.log("no country selected");
         data = current_data;
     }
 
@@ -81,10 +83,10 @@
 
     //// CAREER FILTER
     $: if (selectedCareer.length != 0) {
-        // construct career groups based on clicked country
+        // construct career groups
         let career_groups = career(data);
 
-        // only get people with sele    cted career
+        // only selected career
         let fin_career = career_groups[selectedCareer].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
@@ -96,10 +98,10 @@
 
     //// DEGREE FILTER
     $: if (selectedDegree.length != 0) {
-        // construct career groups based on clicked country
+        // degree groups
         let degree_groups = degree(data);
 
-        // only get people with sele    cted career
+        // only selected degree
         let fin_degree = degree_groups[selectedDegree].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
@@ -107,6 +109,21 @@
 
         // update data
         data = fin_degree;
+    }
+
+    //// COLLEGE FILTER
+    $: if (selectedCollege.length != 0) {
+        // college groups
+        let college_groups = college(data);
+
+        // only selected college
+        let fin_college = college_groups[selectedCollege].filter(
+            (item, index, self) =>
+                index === self.findIndex((t) => t.id === item.id),
+        );
+
+        // update data
+        data = fin_college;
     }
 
     function closeDetails() {
@@ -124,6 +141,7 @@
         check = true;
         selectedCareerStore.set([]);
         selectedDegreeStore.set([]);
+        selectedCollegeStore.set([]);
     }
 
     //data for network
@@ -383,7 +401,7 @@
     .btn.refresh:hover {
         color: red;
     }
-    
+
     #peace_title_div {
         display: flex;
         align-items: stretch; /* Ensures all children take full height */
@@ -491,5 +509,4 @@
     p {
         margin: 0px;
     }
-
 </style>
