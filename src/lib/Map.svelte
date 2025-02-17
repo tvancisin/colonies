@@ -87,40 +87,54 @@
 
     //// CAREER FILTER
     $: if (selectedCareer.length != 0) {
-        // construct career groups based on clicked country
+        // career groups
         let career_groups = career(data);
-        // only get people with selected career
+
+        // only selected career
         let fin_career = career_groups[selectedCareer].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
 
-        // work only with this data when career selected
+        // update data
         data = fin_career;
 
         // update map locations
         drawLocations(fin_career, current_data_string);
     } else if (selectedCareer.length == 0 && selected_country !== null) {
-        drawLocations(def_data, current_data_string);
-        data = def_data;
+        // drawLocations(def_data, current_data_string);
+        // data = def_data;
+        // console.log("career filter log");
     }
 
     //// DEGREE FILTER
     $: if (selectedDegree.length != 0) {
-        // construct career groups based on clicked country
+        // degree groups
         let degree_groups = degree(data);
-        // only get people with selected career
+
+        // only selected degree
         let fin_degree = degree_groups[selectedDegree].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
 
-        // work only with this data when career selected
+        // update data
         data = fin_degree;
 
         // update map locations
         drawLocations(fin_degree, current_data_string);
-    } else if (selectedCareer.length == 0 && selected_country !== null) {
+    } else if (selectedDegree.length == 0 && selected_country !== null) {
+        // drawLocations(def_data, current_data_string);
+        // data = def_data;
+        // console.log("degree filter log");
+    }
+
+    $: if (
+        selectedCareer.length == 0 &&
+        selectedDegree.length == 0 &&
+        selectedCollege.length == 0 &&
+        selected_country !== null
+    ) {
         drawLocations(def_data, current_data_string);
         data = def_data;
     }
@@ -136,15 +150,18 @@
                 index === self.findIndex((t) => t.id === item.id),
         );
 
-        // update data 
+        // update data
         data = fin_college;
 
         // update map locations
         drawLocations(fin_college, current_data_string);
     } else if (selectedCollege.length == 0 && selected_country !== null) {
-        drawLocations(def_data, current_data_string);
-        data = def_data;
+        // drawLocations(def_data, current_data_string);
+        // data = def_data;
+        // console.log("college filter log");
     }
+
+    $: console.log(data, selected_country, selectedCollege.length);
 
     //// SHIPPING LINES
     // restrict to the selected years
