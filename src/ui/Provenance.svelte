@@ -4,26 +4,35 @@
     <div class="timeline"></div>
 
     <!-- Events -->
-    <div class="timeline-event" style="margin-bottom: 1000px">
+    <div class="timeline-event" style="margin-bottom: 1200px">
         <div class="event-content">
-            <div class="event-image">
-                <img src="./orig.jpg" alt="1579 Event" />
+            <div class="event-text">
+                <h3 style="margin-bottom: 10px;">1579</h3>
+                <p><strong>Name</strong>: Matriculation Roll</p>
+                <p><strong>Period</strong>: 1579-1897 (318 years)</p>
+                <p><strong>People</strong>: 25 525</p>
             </div>
-            <div class="event-text" style="padding-left: 10px">
-                <h3>1579</h3>
-                <p>Matriculation Roll</p>
+            <div class="event-image">
+                <img id="original" src="./orig.jpg" alt="1579 Event" />
             </div>
         </div>
     </div>
 
     <div class="timeline-event" style="margin-bottom: 20px">
         <div class="event-content">
-            <div
-                class="event-text"
-                style="text-align: right; margin-right: 10px"
-            >
+            <div class="event-text">
                 <h3>1905</h3>
-                <p>Manual transcription of 1747-1897 records</p>
+                <p><strong>Transformation</strong>: Manual Transcription</p>
+                <p>
+                    <strong>Name</strong>: The Matriculation Roll of the
+                    University of St Andrews 1747-1897
+                </p>
+                <p><strong>Period</strong>: 1747-1897 (150 years)</p>
+                <p><strong>Labor Duration</strong>: 1888-1905 (17 years)</p>
+                <p>
+                    <strong>Author</strong>: James Maitland-Anderson (1852-1927)
+                    and family
+                </p>
             </div>
             <div class="event-image">
                 <img src="ander.jpg" alt="1888 Event" />
@@ -31,26 +40,64 @@
         </div>
     </div>
 
-    <div class="timeline-event" style="margin-bottom: 300px">
+    <div class="timeline-event" style="margin-bottom: 0px">
         <div class="event-content">
+            <div class="event-text">
+                <h3>1926</h3>
+                <p><strong>Transformation</strong>: Manual Transcription</p>
+                <p>
+                    <strong>Name</strong>: Early records of the University of St
+                    Andrews 1413-1579
+                </p>
+                <p><strong>Period</strong>: 1413-1579 (166 years)</p>
+                <p><strong>Labor Duration</strong>: 1888-1926 (38 years)</p>
+                <p>
+                    <strong>Author</strong>: James Maitland-Anderson (1852-1927)
+                    and family
+                </p>
+            </div>
             <div class="event-image">
                 <img src="ander_2.jpg" alt="1888 Event" />
             </div>
-            <div class="event-text" style="padding-left: 10px">
+        </div>
+    </div>
+
+    <div class="timeline-event" style="margin-bottom: 400px">
+        <div class="event-content">
+            <div class="event-text">
                 <h3>1927</h3>
-                <p>Manual transcription of 1579-1746 records</p>
+                <p><strong>Transformation</strong>: Manual Transcription</p>
+                <p>
+                    <strong>Name</strong>: Records of the University of St
+                    Andrews 1579-1747
+                </p>
+                <p><strong>Period</strong>: 1579-1747 (168 years)</p>
+                <p><strong>Labor Duration</strong>: 1888-1927 (39 years)</p>
+                <p>
+                    <strong>Author</strong>: James Maitland-Anderson (1852-1927)
+                    and family, Ronald Cant (1908 - 1999)
+                </p>
+            </div>
+            <div class="event-image">
+                <img src="ander_3.jpg" alt="1888 Event" />
             </div>
         </div>
     </div>
 
     <div class="timeline-event" style="margin-bottom: 50px">
         <div class="event-content">
-            <div
-                class="event-text"
-                style="text-align: right; margin-right: 10px"
-            >
+            <div class="event-text">
                 <h3>2004</h3>
-                <p>Expansion of 1747-1897 records</p>
+                <p><strong>Transformation</strong>: Content Expansion</p>
+                <p>
+                    <strong>Name</strong>: Biographical Register of the
+                    University of St Andrews 1747-1897
+                </p>
+                <p><strong>Period</strong>: 1747-1897 (150 years)</p>
+                <p><strong>Labor Duration</strong>: 1960-2004 (44 years)</p>
+                <p>
+                    <strong>Author</strong>: Robert Smart (1931-2019) and family
+                </p>
             </div>
             <div class="event-image">
                 <img src="smart.png" alt="1888 Event" />
@@ -60,22 +107,29 @@
 
     <div class="timeline-event" style="margin-bottom: 10px">
         <div class="event-content">
+            <div class="event-text">
+                <h3>2012</h3>
+                <p><strong>Transformation</strong>: Content Expansion</p>
+                <p>
+                    <strong>Name</strong>: Alphabetical Register of the
+                    Students, Graduates and Officials of the University of St
+                    Andrews 1579-1747
+                </p>
+                <p><strong>Period</strong>: 1579-1747 (168 years)</p>
+                <p><strong>Labor Duration</strong>: 1960-2012 (52 years)</p>
+                <p>
+                    <strong>Author</strong>: Robert Smart (1931-2019) and family
+                </p>
+            </div>
             <div class="event-image">
                 <img src="smart_2.png" alt="1888 Event" />
-            </div>
-            <div class="event-text" style="padding-left: 10px">
-                <h3>2012</h3>
-                <p>Expansion of 1579-1746 records</p>
             </div>
         </div>
     </div>
 
     <div class="timeline-event">
         <div class="event-content">
-            <div
-                class="event-text"
-                style="text-align: right; margin-right: 10px"
-            >
+            <div class="event-text">
                 <h3>2016</h3>
                 <p>Digitization of 1747-1897 records</p>
             </div>
@@ -87,12 +141,12 @@
 
     <div class="timeline-event">
         <div class="event-content">
-            <div class="event-image">
-                <img src="digital_2.png" alt="1888 Event" />
-            </div>
-            <div class="event-text" style="padding-left: 10px">
+            <div class="event-text">
                 <h3>2020</h3>
                 <p>Digitization of 1579-1746 records</p>
+            </div>
+            <div class="event-image">
+                <img src="digital2.png" alt="1888 Event" />
             </div>
         </div>
     </div>
@@ -103,13 +157,13 @@
         color: white;
         font-weight: 700;
     }
+
     /* Parent container for all timeline events */
     .timeline-container {
         position: relative;
         width: 100%; /* Full screen width */
         display: flex;
         flex-direction: column; /* Stack events vertically */
-        align-items: center; /* Center the events horizontally relative to the timeline */
         gap: 20px; /* Add vertical spacing between events */
         padding: 20px 0; /* Add padding to the top and bottom */
         padding-top: 100px;
@@ -120,29 +174,31 @@
     /* Timeline Line */
     .timeline {
         position: absolute;
+        left: 5px;
         width: 1px;
-        height: 95%;
-        background-color: rgb(255, 0, 0);
-        z-index: 1; /* Ensure it's below the events */
+        height: calc(100% - 120px);
+        background-color: rgb(255, 255, 255);
+        z-index: 1;
     }
 
     /* Timeline Events */
     .timeline-event {
-        position: relative; /* Positioned within the flex container */
-        width: 80%; /* Takes 80% of screen width */
+        position: relative;
         display: flex;
         justify-content: center;
-        z-index: 2; /* Ensure it appears above the timeline */
+        z-index: 2;
     }
 
     .event-content {
         display: flex;
         width: 100%;
         overflow: hidden;
+        padding: 30px;
     }
 
     .event-image {
-        flex: 1;
+        padding: 20px;
+        flex: 2;
         display: flex;
         align-items: center;
         justify-content: center;

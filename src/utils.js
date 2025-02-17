@@ -15,7 +15,7 @@ export let colleges = [
     "SMC",
     "SSC",
     "SLC",
-    "N/A",
+    "unk",
 ];
 export let degrees = [
     "M.D.",
@@ -56,7 +56,7 @@ export let careers = [
 
 export function constructParallelData(data) {
     const transformedData = data.map(item => {
-        let college = item.study?.colleges?.[0]?.name || "N/A";
+        let college = item.study?.colleges?.[0]?.name || "unk";
 
         if (college == "St Leonard’s College") {
             college = "SLC"
@@ -774,7 +774,7 @@ export const occupations = {
 export function college(college_data) {
 
     let grps = {
-        "N/A": [],
+        "unk": [],
         "SLC": [],
         "SSC": [],
         "SMC": [],
@@ -824,7 +824,7 @@ export function college(college_data) {
 
         // If no valid degree was found, push to the unknown group
         if (!hasValidDegree) {
-            grps["N/A"].push(item);
+            grps["unk"].push(item);
         }
     });
 
@@ -834,7 +834,7 @@ export function college(college_data) {
     );
 
     without_college.forEach((item) => {
-        grps["N/A"].push(item); // If no degree information, add to 'unknown'
+        grps["unk"].push(item); // If no degree information, add to 'unknown'
     });
 
     return grps;
