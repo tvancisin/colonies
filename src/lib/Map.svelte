@@ -23,6 +23,7 @@
     export let current_data_string;
     export let map;
     export let shipping_json;
+    export let suez;
     export let colonies_1680;
     export let colonies_1750;
     export let colonies_1820;
@@ -221,6 +222,13 @@
         map.getSource("countries").setData(colonies_1885);
     }
 
+
+    $: if (map && selectedYears[1] > 1869 && map.getSource("shipping")) {
+        map.getSource("shipping").setData(suez);
+    } else if (map && selectedYears[1] <= 1869 && map.getSource("shipping")) {
+        map.getSource("shipping").setData(shipping_json);
+    }
+
     //// ZOOM ADJUSTMENT
     function adjustMapForWindowSize() {
         // console.log(map);
@@ -278,7 +286,7 @@
     });
 
     //// DRAW POLYGONS, SHIPPPING LINES, INDIVIDUAL LOCATIONS
-    $: if (colonies_1885 && shipping_json && countryNames && map) {
+    $: if (colonies_1885 && shipping_json && suez && countryNames && map) {
         // Ensure this block runs only after the map has fully loaded
         map.on("load", () => {
             // Check if the source already exists
@@ -325,7 +333,7 @@
                 //// SHIPPING LINES
                 map.addSource("shipping", {
                     type: "geojson",
-                    data: shipping_json,
+                    data: suez,
                     generateId: true, // Ensures all features have unique IDs
                 });
 

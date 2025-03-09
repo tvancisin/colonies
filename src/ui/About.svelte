@@ -2,7 +2,6 @@
   <h3 style="position: absolute; left: 10px; top: 0px">About</h3>
   <div id="about">
     <div class="content">
-      <img src="./reports_2.png" alt="Report Image" class="float-image" />
       <p>
         Investigations into universities' historical connections to enslavement
         and the slave trade began in the USA – at Brown University in 2005 – and
@@ -17,6 +16,14 @@
         enslavement and/or colonialism, they discuss just a handful of selected
         individuals and focus predominantly on the Transatlantic trade.
       </p>
+      <figure class="image-container">
+        <img src="./colonies.png" alt="Report Image" class="float-image" />
+        <figcaption class="image-caption">
+          UK universities studying their colonial past. White font
+          and a page icon indicate published reports. Visualization
+          icon indicates using information visulization techniques as a research method.
+        </figcaption>
+      </figure>
       <p>
         In St Andrews, we tried a different and much broader approach. We looked
         at all our colonial/imperial connections including North America,
@@ -26,24 +33,6 @@
         the colonies. Lastly, we used interactive visual interfaces as a means
         to explore/look at our data from new perspectives and present it in an
         engaging way.
-
-        <!-- The existence of a digital version of the Biographical
-        Register of the University of St Andrews, containing records from the
-        University’s matriculation registers from 1579-1897, gives us the
-        opportunity to generate some high-level statistics on the student body.
-        Analysis of the Biographical Register has enabled us to identify some of
-        the students who were born in the colonies (though we do not know where
-        they were brought up). These figures offer some insight into the
-        diversity (or not) of experiences and attitudes that would have been
-        present in the student community. They also point to another way in
-        which the University benefited financially from colonialism, via the
-        fees paid by the parents of students from (or associated with) the
-        colonies. We have also been able to identify some of the alumni who
-        later spent time in the colonies, for personal or professional reasons.
-        These figures reveal the ways in which St Andrews helped educate people
-        who became part of the military or administrative systems underpinning
-        empire, or who used the opportunities offered by empire to find outlets
-        for their professional or business skills. -->
       </p>
     </div>
   </div>
@@ -66,14 +55,24 @@
     line-height: 1.5;
   }
 
+  .image-container {
+    width: 70%; /* Match the image width */
+    margin: 50px auto; /* Center the figure element */
+    text-align: center; /* Center the caption */
+  }
+
   .float-image {
-    width: 70%; /* 80% width of the parent */
-    margin: 0 auto; /* Center horizontally */
-    margin-top: 50px;
-    display: block; /* Ensure it's treated as a block element */
+    width: 100%; /* Make image fill the container */
+    display: block;
     border-radius: 2px;
-    /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.576); */
-    position: relative; /* Allow centering with flex or other techniques */
+  }
+
+  .image-caption {
+    font-size: 13px;
+    color: gray;
+    margin-top: 8px;
+    line-height: 1;
+    font-style: italic;
   }
 
   #about {
@@ -94,5 +93,11 @@
     .float-image {
       width: 100%; /* Full width for smaller screens */
     }
+  }
+
+  p {
+    text-indent: 20px;
+    font-size: 14px;
+    line-height: 1.3;
   }
 </style>

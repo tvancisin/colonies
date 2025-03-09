@@ -199,7 +199,7 @@ export function year_filter(data, startYear, endYear) {
 }
 
 // Width scale
-const widthScale = d3.scaleLinear().domain([0, 350]).range([0, 15]);
+const widthScale = d3.scaleLinear().domain([0, 350]).range([0, 5]);
 
 export function width_generator(data) {
     if (data.length == 0) {

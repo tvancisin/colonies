@@ -135,6 +135,7 @@
   let colonies_1750;
   let colonies_1820;
   let colonies_1885;
+  let suez;
   const json_paths = [
     "./data/colony_divisions.json",
     "./data/shipping_routes.json",
@@ -142,6 +143,7 @@
     "./data/colonies_1750.json",
     "./data/colonies_1820.json",
     "./data/colonies_1885.json",
+    "./data/suez.json",
   ];
   getGeo(json_paths).then((geo) => {
     countries_json = geo[0];
@@ -150,6 +152,7 @@
     colonies_1750 = geo[3];
     colonies_1820 = geo[4];
     colonies_1885 = geo[5];
+    suez = geo[6];
   });
 
   function handlePolygonClick(event) {
@@ -224,6 +227,7 @@
         {colonies_1750}
         {colonies_1820}
         {colonies_1885}
+        {suez}
         {selected_country}
         bind:this={mapRef}
         bind:map

@@ -30,8 +30,8 @@
                 <p><strong>Period</strong>: 1747-1897 (150 years)</p>
                 <p><strong>Labor Duration</strong>: 1888-1905 (17 years)</p>
                 <p>
-                    <strong>Author</strong>: James Maitland-Anderson (1852-1927)
-                    and family
+                    <strong>Authors</strong>: James Maitland-Anderson
+                    (1852-1927) and family
                 </p>
             </div>
             <div class="event-image">
@@ -52,8 +52,8 @@
                 <p><strong>Period</strong>: 1413-1579 (166 years)</p>
                 <p><strong>Labor Duration</strong>: 1888-1926 (38 years)</p>
                 <p>
-                    <strong>Author</strong>: James Maitland-Anderson (1852-1927)
-                    and family
+                    <strong>Authors</strong>: James Maitland-Anderson
+                    (1852-1927) and family
                 </p>
             </div>
             <div class="event-image">
@@ -74,8 +74,8 @@
                 <p><strong>Period</strong>: 1579-1747 (168 years)</p>
                 <p><strong>Labor Duration</strong>: 1888-1927 (39 years)</p>
                 <p>
-                    <strong>Author</strong>: James Maitland-Anderson (1852-1927)
-                    and family, Ronald Cant (1908 - 1999)
+                    <strong>Authors</strong>: James Maitland-Anderson
+                    (1852-1927) and family, Ronald Cant (1908 - 1999)
                 </p>
             </div>
             <div class="event-image">
@@ -96,7 +96,8 @@
                 <p><strong>Period</strong>: 1747-1897 (150 years)</p>
                 <p><strong>Labor Duration</strong>: 1960-2004 (44 years)</p>
                 <p>
-                    <strong>Author</strong>: Robert Smart (1931-2019) and family
+                    <strong>Authors</strong>: Robert Smart (1931-2019) and
+                    family
                 </p>
             </div>
             <div class="event-image">
@@ -118,7 +119,8 @@
                 <p><strong>Period</strong>: 1579-1747 (168 years)</p>
                 <p><strong>Labor Duration</strong>: 1960-2012 (52 years)</p>
                 <p>
-                    <strong>Author</strong>: Robert Smart (1931-2019) and family
+                    <strong>Authors</strong>: Robert Smart (1931-2019) and
+                    family
                 </p>
             </div>
             <div class="event-image">
@@ -131,7 +133,18 @@
         <div class="event-content">
             <div class="event-text">
                 <h3>2016</h3>
-                <p>Digitization of 1747-1897 records</p>
+                <p><strong>Transformation</strong>: XML:TEI Digitization</p>
+                <p>
+                    <strong>Name</strong>: Biographical Register of the
+                    University of St Andrews 1747-1897
+                </p>
+                <p><strong>Period</strong>: 1747-1897 (150 years)</p>
+                <p><strong>Labor Duration</strong>: 2013-2016 (3 years)</p>
+                <p>
+                    <strong>Authors</strong>: Alice Crawford, Swithun Crowe,
+                    Patrick McCann, Mary Woodcock Kroble, Emma Lewsley, Hrileena
+                    Ghosh, Siri Hjelsvold
+                </p>
             </div>
             <div class="event-image">
                 <img src="digital.png" alt="1888 Event" />
@@ -143,7 +156,17 @@
         <div class="event-content">
             <div class="event-text">
                 <h3>2020</h3>
-                <p>Digitization of 1579-1746 records</p>
+                <p><strong>Transformation</strong>: XML:TEI Digitization</p>
+                <p>
+                    <strong>Name</strong>: Biographical Register of the
+                    University of St Andrews 1579-1747
+                </p>
+                <p><strong>Period</strong>: 1579-1747 (168 years)</p>
+                <p><strong>Labor Duration</strong>: 2017-2020 (3 years)</p>
+                <p>
+                    <strong>Authors</strong>: Tomas Vancisin, Swithun Crowe,
+                    Sarah Rodriguez
+                </p>
             </div>
             <div class="event-image">
                 <img src="digital2.png" alt="1888 Event" />
