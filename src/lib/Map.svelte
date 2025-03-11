@@ -223,6 +223,7 @@
     }
 
 
+    //// CHANGE SHIPPING LINES in 1869
     $: if (map && selectedYears[1] > 1869 && map.getSource("shipping")) {
         map.getSource("shipping").setData(suez);
     } else if (map && selectedYears[1] <= 1869 && map.getSource("shipping")) {
@@ -307,10 +308,10 @@
                             "match",
                             ["get", "ADMIN"],
                             "Britain",
-                            "gray",
-                            "gray",
+                            "white",
+                            "white",
                         ],
-                        "fill-opacity": 0.7,
+                        "fill-opacity": 0.4,
                     },
                     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
                 });
@@ -347,17 +348,17 @@
                             "match",
                             ["get", "ADMIN"],
                             "India",
-                            3.65,
+                            0.92,
                             "Australia",
-                            0.97,
+                            0.24,
                             "Asia",
-                            0.22,
+                            0.06,
                             "Africa",
-                            2.68,
+                            0.67,
                             "Caribbean",
-                            1.54,
+                            0.39,
                             "America",
-                            2.8,
+                            0.71,
                             0,
                         ],
                         // "line-dasharray": [3, 0.5],
@@ -372,7 +373,7 @@
                     source: "countries",
                     layout: {},
                     paint: {
-                        "line-color": "#a6a6a6",
+                        "line-color": "white",
                         "line-width": [
                             "case",
                             ["boolean", ["feature-state", "hover"], false],
@@ -559,7 +560,7 @@
                 type: "circle",
                 source: "locations",
                 paint: {
-                    "circle-opacity": 0.5,
+                    "circle-opacity": 1,
                     "circle-radius": [
                         "interpolate",
                         ["linear"],
