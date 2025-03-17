@@ -175,6 +175,11 @@
     }
   }
 
+  function handleCityClick(event) {
+    console.log(event);
+    
+  }
+
   function handleClose() {
     //reset data on details close
     if (current_data_string == "birth") {
@@ -232,6 +237,7 @@
         bind:this={mapRef}
         bind:map
         on:polygonClick={handlePolygonClick}
+        on:cityClick={handleCityClick}
       />
       <div id="buttons">
         <button

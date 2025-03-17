@@ -150,6 +150,7 @@
     $: if (data) {
         parallel_data = constructParallelData(data);
     }
+
 </script>
 
 <div

@@ -36,6 +36,7 @@
     let clicked_country;
     let countryNames;
     let hoveredPolygonId = null;
+    let hoveredPolygonIdFatal = null;
     let selectedYears = [1700, 1900];
     let selectedCareer;
     let selectedDegree;
@@ -64,7 +65,14 @@
     $: if (data && map && map.getSource("locations")) {
         map.removeLayer("population");
         map.removeSource("locations");
-        drawLocations(data, current_data_string);
+        map.off("click", "population");
+        map.off("mousemove", "population");
+        map.off("mouseleave", "population");
+        drawLocations(
+            data,
+            current_data_string,
+            "redrawing if current_data changes",
+        );
     }
 
     // assign current_data to default and data
@@ -83,7 +91,7 @@
             selectedYears[1],
         );
         // update map locations
-        drawLocations(filtered_country, current_data_string);
+        drawLocations(filtered_country, current_data_string, "year filter");
     }
 
     //// CAREER FILTER
@@ -101,7 +109,7 @@
         data = fin_career;
 
         // update map locations
-        drawLocations(fin_career, current_data_string);
+        drawLocations(fin_career, current_data_string, "career filter");
     } else if (selectedCareer.length == 0 && selected_country !== null) {
         // drawLocations(def_data, current_data_string);
         // data = def_data;
@@ -123,22 +131,22 @@
         data = fin_degree;
 
         // update map locations
-        drawLocations(fin_degree, current_data_string);
+        drawLocations(fin_degree, current_data_string, "degree filter");
     } else if (selectedDegree.length == 0 && selected_country !== null) {
         // drawLocations(def_data, current_data_string);
         // data = def_data;
         // console.log("degree filter log");
     }
 
-    $: if (
-        selectedCareer.length == 0 &&
-        selectedDegree.length == 0 &&
-        selectedCollege.length == 0 &&
-        selected_country !== null
-    ) {
-        drawLocations(def_data, current_data_string);
-        data = def_data;
-    }
+    // $: if (
+    //     selectedCareer.length == 0 &&
+    //     selectedDegree.length == 0 &&
+    //     selectedCollege.length == 0 &&
+    //     selected_country !== null
+    // ) {
+    //     drawLocations(def_data, current_data_string, "all filters are zero");
+    //     data = def_data;
+    // }
 
     //// COLLEGE FILTER
     $: if (selectedCollege.length != 0) {
@@ -155,14 +163,12 @@
         data = fin_college;
 
         // update map locations
-        drawLocations(fin_college, current_data_string);
+        drawLocations(fin_college, current_data_string, "college filter");
     } else if (selectedCollege.length == 0 && selected_country !== null) {
         // drawLocations(def_data, current_data_string);
         // data = def_data;
         // console.log("college filter log");
     }
-
-    $: console.log(data, selected_country, selectedCollege.length);
 
     //// SHIPPING LINES
     // restrict to the selected years
@@ -181,27 +187,61 @@
         );
     }
 
+    $: before1869 = [];
+    $: after1869 = [];
+
+    function divideByYear(data, threshold = 1869) {
+        before1869 = [];
+        after1869 = [];
+
+        data.forEach((person) => {
+            let year = null;
+
+            // Check study.colleges
+            if (person.study?.colleges?.length > 0) {
+                year = parseInt(person.study.colleges[0].from, 10);
+            }
+            // If no valid year in colleges, check study.degrees
+            else if (person.study?.degrees?.length > 0) {
+                year = parseInt(person.study.degrees[0].date, 10);
+            }
+
+            // Categorize the person based on the extracted year
+            if (year) {
+                if (year > threshold) {
+                    after1869.push(person);
+                } else {
+                    before1869.push(person);
+                }
+            } else {
+                // If no year is found, optionally handle it (e.g., log it or put it in a separate array)
+                console.warn("No valid year found for:", person);
+            }
+        });
+    }
+
+    $: divideByYear(filteredData);
+
+    // $: console.log("Filtered data:", filteredData);
+    // $: console.log("Before 1869:", before1869);
+    // $: console.log("After 1869:", after1869);
+
     // Conditional grouping based on current_data_string
-    $: filtered_grouped_colonies =
+    $: filtered_grouped_colonies_before1869 =
         current_data_string === "birth"
-            ? d3.groups(filteredData, (d) => d.birth_location.colony)
+            ? d3.groups(before1869, (d) => d.birth_location.colony)
             : d3.groups(
-                  flattenFloruit(filteredData),
+                  flattenFloruit(before1869),
                   (d) => d.floruit.location.colony,
               );
 
-    // mapbox expresssion for width changes
-    $: filtered_width = width_generator(filtered_grouped_colonies);
-    $: width_mapbox_expression = getWidthExpression(filtered_width);
-    $: countryNames = filtered_width
-        .filter((item) => item[0] !== undefined) // Ignore undefined values
-        .map((item) => item[0]); // Extract the country names
-
-    // change line width
-    $: if (map && countryNames && map.getSource("countries")) {
-        countryNames.push("Britain");
-        map.setPaintProperty("shipline", "line-width", width_mapbox_expression);
-    }
+    $: filtered_grouped_colonies_after1869 =
+        current_data_string === "birth"
+            ? d3.groups(after1869, (d) => d.birth_location.colony)
+            : d3.groups(
+                  flattenFloruit(after1869),
+                  (d) => d.floruit.location.colony,
+              );
 
     //// CHANGE COLONIES GEOJSON FOR DIFFERENT PERIODS
     $: if (selectedYears[1] < 1750) {
@@ -222,13 +262,43 @@
         map.getSource("countries").setData(colonies_1885);
     }
 
+    // mapbox expresssion for width changes
+    $: filtered_width_before1869 = width_generator(
+        filtered_grouped_colonies_before1869,
+    );
+    $: filtered_width_after1869 = width_generator(
+        filtered_grouped_colonies_after1869,
+    );
+    $: width_mapbox_expression_before1869 = getWidthExpression(
+        filtered_width_before1869,
+    );
+    $: width_mapbox_expression_after1869 = getWidthExpression(
+        filtered_width_after1869,
+    );
+    $: countryNames = filtered_width_before1869
+        .filter((item) => item[0] !== undefined) // Ignore undefined values
+        .map((item) => item[0]); // Extract the country names
 
-    //// CHANGE SHIPPING LINES in 1869
-    $: if (map && selectedYears[1] > 1869 && map.getSource("shipping")) {
-        map.getSource("shipping").setData(suez);
-    } else if (map && selectedYears[1] <= 1869 && map.getSource("shipping")) {
-        map.getSource("shipping").setData(shipping_json);
+    // change line width
+    $: if (map && countryNames && map.getSource("countries")) {
+        countryNames.push("Britain");
+        map.setPaintProperty(
+            "shipline_before1869",
+            "line-width",
+            width_mapbox_expression_before1869,
+        );
+        map.setPaintProperty(
+            "shipline_after1869",
+            "line-width",
+            width_mapbox_expression_after1869,
+        );
     }
+    // shipping lines in 1869
+    // $: if (map && selectedYears[1] > 1869 && map.getSource("shipping")) {
+    //     map.getSource("shipping").setData(suez);
+    // } else if (map && selectedYears[1] <= 1869 && map.getSource("shipping")) {
+    //     map.getSource("shipping").setData(shipping_json);
+    // }
 
     //// ZOOM ADJUSTMENT
     function adjustMapForWindowSize() {
@@ -308,10 +378,17 @@
                             "match",
                             ["get", "ADMIN"],
                             "Britain",
-                            "white",
-                            "white",
+                            "#F17822",
+                            "#33d3ff",
                         ],
-                        "fill-opacity": 0.4,
+                        "fill-opacity": [
+                            "match",
+                            ["get", "ADMIN"],
+                            "Britain",
+                            0.8,
+                            0.4,
+                        ],
+                        // "fill-opacity": 0.4,
                     },
                     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
                 });
@@ -332,33 +409,65 @@
                 });
 
                 //// SHIPPING LINES
-                map.addSource("shipping", {
+                map.addSource("shipping_after1869", {
                     type: "geojson",
                     data: suez,
                     generateId: true, // Ensures all features have unique IDs
                 });
+                map.addSource("shipping_before1869", {
+                    type: "geojson",
+                    data: shipping_json,
+                    generateId: true, // Ensures all features have unique IDs
+                });
 
                 map.addLayer({
-                    id: "shipline",
+                    id: "shipline_after1869",
                     type: "line",
-                    source: "shipping",
+                    source: "shipping_after1869",
                     paint: {
                         "line-color": "white",
                         "line-width": [
                             "match",
                             ["get", "ADMIN"],
                             "India",
-                            0.92,
+                            0.271,
                             "Australia",
-                            0.24,
+                            0.2,
                             "Asia",
-                            0.06,
+                            0.042,
                             "Africa",
-                            0.67,
+                            0.614,
                             "Caribbean",
-                            0.39,
+                            0.114,
                             "America",
-                            0.71,
+                            0.328,
+                            0,
+                        ],
+                        // "line-dasharray": [3, 0.5],
+                    },
+                });
+
+                map.addLayer({
+                    id: "shipline_before1869",
+                    type: "line",
+                    source: "shipping_before1869",
+                    paint: {
+                        "line-color": "white",
+                        "line-width": [
+                            "match",
+                            ["get", "ADMIN"],
+                            "India",
+                            0.642,
+                            "Australia",
+                            0.042,
+                            "Asia",
+                            0.014,
+                            "Africa",
+                            0.057,
+                            "Caribbean",
+                            0.271,
+                            "America",
+                            0.385,
                             0,
                         ],
                         // "line-dasharray": [3, 0.5],
@@ -377,7 +486,7 @@
                         "line-width": [
                             "case",
                             ["boolean", ["feature-state", "hover"], false],
-                            1,
+                            0.5,
                             0,
                         ],
                     },
@@ -414,17 +523,35 @@
                     hoveredPolygonId = null;
                 });
 
-                // draw individual locations
-                drawLocations(data, current_data_string);
+                // clicking events and checking if circle was clicked
+                map.on("click", (e) => {
+                    // Check if a circle was clicked
+                    let circleFeatures = map.queryRenderedFeatures(e.point, {
+                        layers: ["population"],
+                    });
 
-                // clicking events
-                map.on("click", "countries_fill", (e) => {
-                    clicked_country = e.features[0].properties.ADMIN;
-                    if (clicked_country != "Britain") {
-                        zoomToCountry(clicked_country);
-                        dispatch("polygonClick", clicked_country);
+                    if (circleFeatures.length > 0) {
+                        e.originalEvent.stopPropagation();
+                        return;
+                    }
+
+                    // Otherwise, handle the polygon click event
+                    let polygonFeatures = map.queryRenderedFeatures(e.point, {
+                        layers: ["countries_fill"],
+                    });
+
+                    if (polygonFeatures.length > 0) {
+                        let clicked_country =
+                            polygonFeatures[0].properties.ADMIN;
+                        if (clicked_country !== "Britain") {
+                            zoomToCountry(clicked_country);
+                            dispatch("polygonClick", clicked_country);
+                        }
                     }
                 });
+
+                // draw individual locations
+                drawLocations(data, current_data_string, "initial draw");
 
                 // animateShipping();
                 window.addEventListener("resize", adjustMapForWindowSize);
@@ -490,9 +617,47 @@
         return outputArray;
     }
 
+    let fatal_popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+    });
+
+    // Function to create HTML content from an array of people
+    function createPopupContent(peopleArray) {
+        return `
+                <p style="margin: 2px"> ${peopleArray}</p>
+        `;
+    }
+    function handleMouseMove(e) {
+        let city = e.features[0].properties.id;
+
+        let popupContent = `<div style="color: black; font-family:Montserrat; font-weight:500;">
+                ${createPopupContent(city)}</div>`;
+
+        map.getCanvas().style.cursor = "pointer";
+        if (e.features.length > 0) {
+            if (hoveredPolygonIdFatal !== null) {
+                map.setFeatureState(
+                    { source: "locations", id: hoveredPolygonIdFatal },
+                    { hover: false },
+                );
+            }
+            hoveredPolygonIdFatal = e.features[0].id;
+            map.setFeatureState(
+                { source: "locations", id: hoveredPolygonIdFatal },
+                { hover: true },
+            );
+
+            fatal_popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
+        }
+    }
+
+    let populationClickListenerAdded = false;
+
     //DRAW INDIVIDUAL LOCATIONS WHEN COLONY CLICKED
-    function drawLocations(data, which) {
-        // console.log(data, which);
+    function drawLocations(data, which, reason) {
+        console.log("🔄 drawLocations called", reason);
+
         let local_conflict_geojson = [];
         if (which == "birth") {
             let group_by_location = d3.groups(data, (d) => {
@@ -575,82 +740,35 @@
                     "circle-stroke-width": 1,
                 },
             });
+
+            map.on("mousemove", "population", handleMouseMove);
+
+            // When the mouse leaves the state-fill layer, update the feature state of the
+            // previously hovered feature.
+            map.on("mouseleave", `population`, () => {
+                map.getCanvas().style.cursor = "";
+                if (hoveredPolygonIdFatal !== null) {
+                    map.setFeatureState(
+                        { source: "locations", id: hoveredPolygonIdFatal },
+                        { hover: false },
+                    );
+                }
+                hoveredPolygonIdFatal = null;
+                fatal_popup.remove();
+            });
+
+            // Only add click listener ONCE
+            if (!populationClickListenerAdded) {
+                populationClickListenerAdded = true;
+                console.log("✅ Attaching population click event listener...");
+
+                map.on("click", "population", (e) => {
+                    e.originalEvent.stopPropagation();
+                    let city = e.features[0].properties.id;
+                    dispatch("cityClick", city);
+                });
+            }
         }
-
-        // let fatal_popup = new mapboxgl.Popup({
-        //     closeButton: false,
-        //     closeOnClick: false,
-        // });
-
-        // // Function to create HTML content from an array of people
-        // function createPopupContent(peopleArray) {
-        //     return peopleArray
-        //         .map((person) => {
-        //             // Destructure with defaults for missing values
-        //             const {
-        //                 forename = "Unknown",
-        //                 surname = "Unknown",
-        //                 birth_date = "Unknown",
-        //                 death_date = "Unknown",
-        //             } = person;
-
-        //             return `
-        //     <div style="margin-bottom:10px; line-height: 0.5">
-        //         <p> ${forename} ${surname}</p>
-        //     </div>
-        // `;
-        //         })
-        //         .join(""); // Join each person's HTML into a single string
-        // }
-
-        // function handleMouseMove(e) {
-        //     let peopleArray = JSON.parse(
-        //         e.features[0].properties.people_array,
-        //     );
-
-        //     let popupContent = `<div style="color:black; font-family:Montserrat; font-weight:500;">
-        //         ${createPopupContent(peopleArray)}</div>`;
-
-        //     // let forename = e.features[0].properties.forename;
-        //     // let surname = e.features[0].properties.surname;
-        //     // let birth = e.features[0].properties.birth;
-
-        //     map.getCanvas().style.cursor = "pointer";
-        //     if (e.features.length > 0) {
-        //         if (hoveredPolygonIdFatal !== null) {
-        //             map.setFeatureState(
-        //                 { source: "locations", id: hoveredPolygonIdFatal },
-        //                 { hover: false },
-        //             );
-        //         }
-        //         hoveredPolygonIdFatal = e.features[0].id;
-        //         map.setFeatureState(
-        //             { source: "locations", id: hoveredPolygonIdFatal },
-        //             { hover: true },
-        //         );
-
-        //         fatal_popup
-        //             .setLngLat(e.lngLat)
-        //             .setHTML(popupContent)
-        //             .addTo(map);
-        //     }
-        // }
-
-        // map.on("mousemove", "population", handleMouseMove);
-
-        // // When the mouse leaves the state-fill layer, update the feature state of the
-        // // previously hovered feature.
-        // map.on("mouseleave", `population`, () => {
-        //     map.getCanvas().style.cursor = "";
-        //     if (hoveredPolygonIdFatal !== null) {
-        //         map.setFeatureState(
-        //             { source: "locations", id: hoveredPolygonIdFatal },
-        //             { hover: false },
-        //         );
-        //     }
-        //     hoveredPolygonIdFatal = null;
-        //     fatal_popup.remove();
-        // });
     }
 
     //ZOOM IN TO CLICKED COUNTRY
@@ -796,5 +914,8 @@
         font-family: "Montserrat";
         font-weight: 400;
         color: #ffffff;
+    }
+    :global(.mapboxgl-popup-content) {
+        padding: 5px;
     }
 </style>

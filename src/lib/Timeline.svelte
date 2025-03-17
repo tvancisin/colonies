@@ -414,7 +414,7 @@
                 y={yScale(d[1])}
                 width={xScale.bandwidth()}
                 height={yScale(0) - yScale(d[1])}
-                fill="white"
+                fill=" #F17822"
                 class="bar"
             />
         {/each}
@@ -487,6 +487,7 @@
 
     :global(.brush .selection) {
         stroke: none;
+        fill-opacity: 0.2;
     }
 
     #year_detail {
