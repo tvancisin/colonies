@@ -1208,3 +1208,39 @@ export function groupByColony(data) {
 
     return outputArray;
 }
+
+export function groupByCity(data) {
+    const groupedByCity = {};
+
+    data.forEach((item) => {
+        if (item.floruit) {
+            item.floruit.forEach((floruitEntry) => {
+                const city = floruitEntry.location.original_name || "unknown";
+
+                // Initialize the colony group if it doesn't exist
+                if (!groupedByCity[city]) {
+                    groupedByCity[city] = {
+                        items: [],
+                        ids: new Set(),
+                    };
+                }
+
+                // Only add the item if it hasn't been added already
+                if (!groupedByCity[city].ids.has(item.id)) {
+                    groupedByCity[city].items.push(item);
+                    groupedByCity[city].ids.add(item.id); // Mark the item as added
+                }
+            });
+        }
+    });
+
+    // Prepare the output structure
+    const outputArray = Object.keys(groupedByCity).map((city) => {
+        return [
+            city === "unknown" ? undefined : city,
+            groupedByCity[city].items,
+        ];
+    });
+
+    return outputArray;
+}

@@ -37,6 +37,7 @@
     let countryNames;
     let hoveredPolygonId = null;
     let hoveredPolygonIdFatal = null;
+    let hoveredClusterId = null;
     let selectedYears = [1700, 1900];
     let selectedCareer;
     let selectedDegree;
@@ -63,11 +64,11 @@
 
     // redrawing locations if current_data changes [used on exit also]
     $: if (data && map && map.getSource("locations")) {
-        map.removeLayer("population");
-        map.removeSource("locations");
-        map.off("click", "population");
-        map.off("mousemove", "population");
-        map.off("mouseleave", "population");
+        // map.removeLayer("population");
+        // map.removeSource("locations");
+        // map.off("click", "population");
+        // map.off("mousemove", "population");
+        // map.off("mouseleave", "population");
         drawLocations(
             data,
             current_data_string,
@@ -98,16 +99,13 @@
     $: if (selectedCareer.length != 0) {
         // career groups
         let career_groups = career(data);
-
         // only selected career
         let fin_career = career_groups[selectedCareer].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
-
         // update data
         data = fin_career;
-
         // update map locations
         drawLocations(fin_career, current_data_string, "career filter");
     } else if (selectedCareer.length == 0 && selected_country !== null) {
@@ -120,16 +118,13 @@
     $: if (selectedDegree.length != 0) {
         // degree groups
         let degree_groups = degree(data);
-
         // only selected degree
         let fin_degree = degree_groups[selectedDegree].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
-
         // update data
         data = fin_degree;
-
         // update map locations
         drawLocations(fin_degree, current_data_string, "degree filter");
     } else if (selectedDegree.length == 0 && selected_country !== null) {
@@ -152,16 +147,13 @@
     $: if (selectedCollege.length != 0) {
         // college groups
         let college_groups = college(data);
-
         // only selected college
         let fin_college = college_groups[selectedCollege].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
-
         // update data
         data = fin_college;
-
         // update map locations
         drawLocations(fin_college, current_data_string, "college filter");
     } else if (selectedCollege.length == 0 && selected_country !== null) {
@@ -196,7 +188,6 @@
 
         data.forEach((person) => {
             let year = null;
-
             // Check study.colleges
             if (person.study?.colleges?.length > 0) {
                 year = parseInt(person.study.colleges[0].from, 10);
@@ -222,10 +213,6 @@
 
     $: divideByYear(filteredData);
 
-    // $: console.log("Filtered data:", filteredData);
-    // $: console.log("Before 1869:", before1869);
-    // $: console.log("After 1869:", after1869);
-
     // Conditional grouping based on current_data_string
     $: filtered_grouped_colonies_before1869 =
         current_data_string === "birth"
@@ -243,7 +230,7 @@
                   (d) => d.floruit.location.colony,
               );
 
-    //// CHANGE COLONIES GEOJSON FOR DIFFERENT PERIODS
+    //// COLONIES GEOJSON FOR DIFFERENT PERIODS
     $: if (selectedYears[1] < 1750) {
         map.getSource("countries").setData(colonies_1680);
     } else if (
@@ -302,8 +289,6 @@
 
     //// ZOOM ADJUSTMENT
     function adjustMapForWindowSize() {
-        // console.log(map);
-
         if (window.innerWidth <= 1000) {
             map.flyTo({
                 center: [20, 0],
@@ -324,7 +309,7 @@
 
     let imageURL = new URL("/uni_logo.png", import.meta.url).href;
 
-    //// INIT FUNCTION
+    //// INIT
     onMount(() => {
         mapboxgl.accessToken =
             "pk.eyJ1IjoidG9tYXN2YW5jaXNpbiIsImEiOiJjbTN1OXUzODUwZTEwMnFxdHd5NzA3cmNuIn0.vz2M0cTMfPvLAQ-wKMKbQA";
@@ -495,7 +480,10 @@
 
                 // highlight polygon on hover
                 map.on("mousemove", "countries_fill", (e) => {
+                    if (hoveredClusterId !== null) return; // Prevent highlighting when over a cluster
+
                     map.getCanvas().style.cursor = "pointer";
+
                     if (e.features.length > 0) {
                         if (hoveredPolygonId !== null) {
                             map.setFeatureState(
@@ -527,7 +515,7 @@
                 map.on("click", (e) => {
                     // Check if a circle was clicked
                     let circleFeatures = map.queryRenderedFeatures(e.point, {
-                        layers: ["population"],
+                        layers: ["clusters"],
                     });
 
                     if (circleFeatures.length > 0) {
@@ -558,7 +546,6 @@
                 adjustMapForWindowSize();
             }
 
-            //
             dispatch("mapLoaded");
         });
     }
@@ -572,8 +559,8 @@
                     // Only proceed if floruitEntry.location.colony exists
                     if (floruitEntry.location.colony) {
                         const colony =
-                            floruitEntry.location.official_name ||
-                            floruitEntry.location.original_name; // Group by colony
+                            floruitEntry.location.original_name ||
+                            floruitEntry.location.official_name; // Group by colony
 
                         const latitude = floruitEntry.location.latitude;
                         const longitude = floruitEntry.location.longitude;
@@ -662,8 +649,8 @@
         if (which == "birth") {
             let group_by_location = d3.groups(data, (d) => {
                 return (
-                    d.birth_location.official_name ||
-                    d.birth_location.original_name
+                    d.birth_location.original_name ||
+                    d.birth_location.official_name
                 );
             });
             group_by_location.forEach(function (d) {
@@ -671,7 +658,7 @@
                     type: "Feature",
                     properties: {
                         id: d[0],
-                        people_array: JSON.stringify(d[1]),
+                        people_array: d[1],
                         no_of_ppl: d[1].length,
                     },
                     geometry: {
@@ -716,62 +703,181 @@
             map.addSource("locations", {
                 type: "geojson",
                 data: geojson_data,
-                generateId: true, // Ensures that all features have unique IDs
+                cluster: true, // Enable clustering
+                clusterMaxZoom: 14, // Clusters disappear after zoom level 14
+                clusterRadius: 50, // Controls how close points must be to form a cluster
+                clusterProperties: {
+                    total_people: ["+", ["get", "no_of_ppl"]], // Sum 'no_of_ppl' in each cluster
+                },
             });
 
-            // Add the circle layer
             map.addLayer({
-                id: "population",
+                id: "clusters",
                 type: "circle",
                 source: "locations",
+                filter: ["has", "point_count"], // Show only clusters
                 paint: {
-                    "circle-opacity": 1,
+                    "circle-color": "white",
+                    "circle-radius": [
+                        "step",
+                        ["get", "total_people"],
+                        10,
+                        10,
+                        15,
+                        50,
+                        25,
+                        100,
+                        35,
+                    ],
+                    "circle-opacity": 0.8,
+                    "circle-stroke-width": [
+                        "case",
+                        ["boolean", ["feature-state", "hover"], false],
+                        3, // Stroke width when hovered
+                        0.5, // Default stroke width
+                    ],
+                    "circle-stroke-color": "#FFD700", // Highlight color (gold)
+                },
+            });
+
+            map.addLayer({
+                id: "cluster-count",
+                type: "symbol",
+                source: "locations",
+                filter: ["has", "point_count"],
+                layout: {
+                    "text-field": "{total_people}", // Show the sum of 'no_of_ppl' instead of the number of points
+                    "text-font": ["Open Sans Bold"],
+                    "text-size": 12,
+                },
+            });
+
+            map.addLayer({
+                id: "unclustered-point",
+                type: "circle",
+                source: "locations",
+                filter: ["!", ["has", "point_count"]], // Show only non-clustered points
+                paint: {
+                    "circle-color": "white",
                     "circle-radius": [
                         "interpolate",
                         ["linear"],
                         ["get", "no_of_ppl"],
                         1,
-                        2, // Radius for 1 person
+                        3, // 3px radius for 1 person
                         10,
-                        10, // Radius for 10 people (adjust as needed)
+                        10,
                     ],
-                    "circle-color": "black",
-                    "circle-stroke-color": "white",
                     "circle-stroke-width": 1,
+                    "circle-stroke-color": "gray",
                 },
             });
 
-            map.on("mousemove", "population", handleMouseMove);
+            map.on("click", "clusters", function (e) {
+                const features = map.queryRenderedFeatures(e.point, {
+                    layers: ["clusters"],
+                });
+                if (!features.length) return;
 
-            // When the mouse leaves the state-fill layer, update the feature state of the
-            // previously hovered feature.
-            map.on("mouseleave", `population`, () => {
-                map.getCanvas().style.cursor = "";
-                if (hoveredPolygonIdFatal !== null) {
+                const clusterId = features[0].properties.cluster_id;
+
+                // Get all points inside the clicked cluster
+                map.getSource("locations").getClusterLeaves(
+                    clusterId,
+                    100,
+                    0,
+                    function (err, leaves) {
+                        if (err) {
+                            console.error(
+                                "Error retrieving cluster leaves:",
+                                err,
+                            );
+                            return;
+                        }
+
+                        // Extract, parse, and flatten all people_array values
+                        const allPeople = leaves
+                            .map((leaf) => leaf.properties.people_array) // Extract people_array (each entry is an array)
+                            .flat(); // Flatten into a single array
+                        // pass the array to App.svelte
+                        dispatch("clusterClick", allPeople);
+                    },
+                );
+            });
+
+            // Highlight cluster on hover
+            map.on("mousemove", "clusters", (e) => {
+                map.getCanvas().style.cursor = "pointer";
+
+                // Remove polygon highlight when hovering over a cluster
+                if (hoveredPolygonId !== null) {
                     map.setFeatureState(
-                        { source: "locations", id: hoveredPolygonIdFatal },
+                        { source: "countries", id: hoveredPolygonId },
+                        { hover: false },
+                    );
+                    hoveredPolygonId = null; // Reset
+                }
+
+                // Highlight the cluster
+                if (hoveredClusterId !== null) {
+                    map.setFeatureState(
+                        { source: "locations", id: hoveredClusterId },
                         { hover: false },
                     );
                 }
-                hoveredPolygonIdFatal = null;
-                fatal_popup.remove();
+
+                hoveredClusterId = e.features[0].id;
+
+                map.setFeatureState(
+                    { source: "locations", id: hoveredClusterId },
+                    { hover: true },
+                );
             });
 
-            // Only add click listener ONCE
-            if (!populationClickListenerAdded) {
-                populationClickListenerAdded = true;
-                console.log("✅ Attaching population click event listener...");
+            // Remove highlight when mouse leaves
+            map.on("mouseleave", "clusters", () => {
+                map.getCanvas().style.cursor = "";
 
-                map.on("click", "population", (e) => {
-                    e.originalEvent.stopPropagation();
-                    let city = e.features[0].properties.id;
-                    dispatch("cityClick", city);
-                });
-            }
+                if (hoveredClusterId !== null) {
+                    map.setFeatureState(
+                        { source: "locations", id: hoveredClusterId },
+                        { hover: false },
+                    );
+                }
+                hoveredClusterId = null;
+            });
+
+            // map.on("mousemove", "population", handleMouseMove);
+
+            // // When the mouse leaves the state-fill layer, update the feature state of the
+            // // previously hovered feature.
+            // map.on("mouseleave", `population`, () => {
+            //     map.getCanvas().style.cursor = "";
+            //     if (hoveredPolygonIdFatal !== null) {
+            //         map.setFeatureState(
+            //             { source: "locations", id: hoveredPolygonIdFatal },
+            //             { hover: false },
+            //         );
+            //     }
+            //     hoveredPolygonIdFatal = null;
+            //     fatal_popup.remove();
+            // });
+
+            // // Only add click listener ONCE
+            // if (!populationClickListenerAdded) {
+            //     populationClickListenerAdded = true;
+            //     console.log("✅ Attaching population click event listener...");
+
+            //     map.on("click", "population", (e) => {
+            //         e.originalEvent.stopPropagation();
+            //         let city = e.features[0].properties.id;
+            //         dispatch("cityClick", city);
+            //     });
+            // }
         }
     }
 
-    //ZOOM IN TO CLICKED COUNTRY
+    //ZOOM IN TO CLICKED COLONY
     function zoomToCountry(clicked_colony) {
         if (clicked_colony == "America") {
             map.flyTo({ center: [-90, 50], zoom: 3 });

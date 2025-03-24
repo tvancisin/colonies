@@ -10,6 +10,7 @@
     asian_colonies,
     caribbean_colonies,
     groupByColony,
+    groupByCity,
     career,
   } from "./utils.js";
   import * as d3 from "d3";
@@ -59,7 +60,9 @@
   let birth_data;
   let floruit_data;
   let births_per_colony;
+  let births_per_city;
   let floruit_per_colony;
+  let floruit_per_city;
 
   // remove initial div
   function removeOverlay() {
@@ -93,6 +96,11 @@
       (d) => d.birth_location.colony,
     );
 
+    births_per_city = d3.groups(
+      birth_colony_division,
+      (d) => d.birth_location.original_name,
+    );
+
     floruit_data.forEach(function (person) {
       // If floruit is not an array, convert it into one
       if (!Array.isArray(person.floruit)) {
@@ -124,6 +132,8 @@
     });
 
     floruit_per_colony = groupByColony(floruit_data);
+    floruit_per_city = groupByCity(floruit_data);
+
     current_data = birth_data;
     current_data_string = "birth";
   });
@@ -158,7 +168,6 @@
   function handlePolygonClick(event) {
     selected_country = event.detail;
     let new_data;
-
     if (current_data_string == "birth") {
       new_data = births_per_colony.find(
         (item) => item[0] === selected_country,
@@ -168,7 +177,14 @@
         (item) => item[0] === selected_country,
       )?.[1];
     }
+    if (new_data !== current_data) {
+      // Only update if value changes
+      current_data = new_data;
+    }
+  }
 
+  function handleClusterClick(event) {
+    let new_data = event.detail;
     if (new_data !== current_data) {
       // Only update if value changes
       current_data = new_data;
@@ -176,8 +192,17 @@
   }
 
   function handleCityClick(event) {
-    console.log(event);
-    
+    let selected_city = event.detail;
+    let new_data;
+    if (current_data_string == "birth") {
+      new_data = births_per_city.find((city) => city[0] === selected_city);
+    } else if (current_data_string == "floruit") {
+      new_data = floruit_per_city.find((city) => city[0] === selected_city);
+    }
+    // Only update if value changes
+    if (new_data !== current_data) {
+      current_data = new_data[1];
+    }
   }
 
   function handleClose() {
@@ -237,6 +262,7 @@
         bind:this={mapRef}
         bind:map
         on:polygonClick={handlePolygonClick}
+        on:clusterClick={handleClusterClick}
         on:cityClick={handleCityClick}
       />
       <div id="buttons">
