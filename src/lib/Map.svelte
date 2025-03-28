@@ -319,6 +319,7 @@
             attributionControl: false,
             container: "map",
             style: "mapbox://styles/tomasvancisin/cm63qqxy1004j01s7bp770wpf",
+            // style: "mapbox://styles/tomasvancisin/cm0i5fpy4004b01qodg9g2awr",
             maxZoom: 8,
             projection: "naturalEarth",
             logoPosition: "top-right",
@@ -364,7 +365,7 @@
                             ["get", "ADMIN"],
                             "Britain",
                             "#F17822",
-                            "#33d3ff",
+                            "#00b4e6",
                         ],
                         "fill-opacity": [
                             "match",
@@ -729,14 +730,14 @@
                         100,
                         35,
                     ],
-                    "circle-opacity": 0.8,
+                    "circle-opacity": 0.6,
                     "circle-stroke-width": [
                         "case",
                         ["boolean", ["feature-state", "hover"], false],
-                        3, // Stroke width when hovered
-                        0.5, // Default stroke width
+                        2, // Stroke width when hovered
+                        0, // Default stroke width
                     ],
-                    "circle-stroke-color": "#FFD700", // Highlight color (gold)
+                    "circle-stroke-color": "white", // Highlight color (gold)
                 },
             });
 

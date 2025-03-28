@@ -30,7 +30,7 @@ export let degrees = [
     "D.Mus.",
     "LLA",
     "M.B. C.M.",
-    "N/A",
+    "unk",
 ];
 export let careers = [
     "trade",
@@ -51,7 +51,7 @@ export let careers = [
     "land",
     "local_government",
     "unclear",
-    "N/A",
+    "unk",
 ];
 
 export function constructParallelData(data) {
@@ -70,21 +70,21 @@ export function constructParallelData(data) {
             college = "UNC"
         }
 
-        const degree = item.study?.degrees?.[0]?.name || "N/A";
+        const degree = item.study?.degrees?.[0]?.name || "unk";
         const id = item.id;
 
         // Handle career extraction
-        let career = "N/A";
+        let career = "unk";
         if (item.floruit?.[0]?.occupation) {
             const occupation = item.floruit[0].occupation;
             if (Array.isArray(occupation)) {
-                career = occupation[0] || "N/A";
+                career = occupation[0] || "unk";
             } else {
-                career = occupation || "N/A";
+                career = occupation || "unk";
             }
         }
 
-        if (career != "N/A") {
+        if (career != "unk") {
             career = career.toLowerCase();
         }
 
@@ -123,7 +123,7 @@ export function constructParallelData(data) {
             career = "forestry"
         } else if (occupations.sport.includes(career)) {
             career = "sport"
-        } else if (occupations.unknown.includes(career)) {
+        } else if (occupations.unclear.includes(career)) {
             career = "unclear"
         }
 
@@ -741,7 +741,7 @@ export const occupations = {
 
     sport: ["amateur golf champion"],
 
-    unknown: [
+    unclear: [
         "assistant",
         "retired",
         "member",
@@ -856,7 +856,7 @@ export function degree(degree_data) {
         "LL.D.": [],
         "M.A.": [],
         "M.D.": [],
-        "unknown": [],
+        "unk": [],
     };
 
     // Filter objects with degree 
@@ -885,7 +885,7 @@ export function degree(degree_data) {
 
         // If no valid degree was found, push to the unknown group
         if (!hasValidDegree) {
-            grps.unknown.push(item);
+            grps["unk"].push(item);
         }
     });
 
@@ -894,7 +894,7 @@ export function degree(degree_data) {
     );
 
     without_degree.forEach((item) => {
-        grps.unknown.push(item); // If no degree information, add to 'unknown'
+        grps["unk"].push(item);
     });
 
     return grps;
@@ -922,7 +922,8 @@ export function career(career_data) {
         farm: [],
         forestry: [],
         sport: [],
-        unknown: [],
+        unclear: [],
+        unk: [],
     };
 
     // Filter objects with floruit (career information)
@@ -997,12 +998,16 @@ export function career(career_data) {
             } else if (occupations.sport.includes(occupation)) {
                 grps.sport.push(item);
                 hasValidOccupation = true;
+            } else if (occupations.unclear.includes(occupation)) {
+                grps.unclear.push(item);
+                hasValidOccupation = true;
             }
+
         });
 
         // If no valid occupation was found, push to the unknown group
         if (!hasValidOccupation) {
-            grps.unknown.push(item);
+            grps.unk.push(item);
         }
     });
 
@@ -1011,7 +1016,7 @@ export function career(career_data) {
         (item) => !item.floruit || item.floruit.length === 0,
     );
     without_careers.forEach((item) => {
-        grps.unknown.push(item); // If no career information, add to 'unknown'
+        grps.unk.push(item); // If no career information, add to 'unknown'
     });
 
     return grps
