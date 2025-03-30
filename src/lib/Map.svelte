@@ -307,7 +307,12 @@
         }
     }
 
-    let imageURL = new URL("/uni_logo.png", import.meta.url).href;
+    // Reactive declaration for image URL
+    $: imageURL =
+        current_data_string === "birth"
+            ? new URL("/birth.png", import.meta.url).href
+            : new URL("/floruit.png", import.meta.url).href;
+    let markerElement;
 
     //// INIT
     onMount(() => {
@@ -325,22 +330,24 @@
             logoPosition: "top-right",
         });
 
-        const el = document.createElement("div");
-        const width = 100;
-        const height = 30;
-        el.className = "marker";
-        el.style.backgroundImage = `url(${imageURL})`;
-        el.style.width = `${width}px`;
-        el.style.height = `${height}px`;
-        el.style.backgroundSize = "100%";
+        markerElement = document.createElement("div");
+        const width = 20;
+        const height = 20;
+        markerElement.className = "marker";
+        markerElement.style.width = `${width}px`;
+        markerElement.style.height = `${height}px`;
+        markerElement.style.backgroundSize = "100%";
+        markerElement.style.backgroundImage = `url(${imageURL})`; // Initial image
 
-        // Create a default Marker, colored black, rotated 45 degrees.
-        new mapboxgl.Marker(el, {
+        new mapboxgl.Marker(markerElement, {
             offset: [width / 3, 0],
         })
-            .setLngLat([-2.7967, 56.3398])
+            .setLngLat([-18.378063, 43.546441])
             .addTo(map);
     });
+    $: if (markerElement) {
+        markerElement.style.backgroundImage = `url(${imageURL})`;
+    }
 
     //// DRAW POLYGONS, SHIPPPING LINES, INDIVIDUAL LOCATIONS
     $: if (colonies_1885 && shipping_json && suez && countryNames && map) {
@@ -429,7 +436,7 @@
                             0.328,
                             0,
                         ],
-                        // "line-dasharray": [3, 0.5],
+                        // 'line-dasharray': [0, 4, 3]
                     },
                 });
 
@@ -938,7 +945,7 @@
 <style>
     .map-container {
         position: relative;
-        width: calc(100% - 500px);
+        width: calc(100% - 550px);
         height: 100%;
         display: flex;
         justify-content: center;

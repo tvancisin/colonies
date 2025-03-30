@@ -148,12 +148,12 @@
   let suez;
   const json_paths = [
     "./data/colony_divisions.json",
-    "./data/shipping_routes.json",
+    "./data/test.json",
     "./data/colonies_1680.json",
     "./data/colonies_1750.json",
     "./data/colonies_1820.json",
     "./data/colonies_1885.json",
-    "./data/suez.json",
+    "./data/test1.json",
   ];
   getGeo(json_paths).then((geo) => {
     countries_json = geo[0];
@@ -190,6 +190,7 @@
       current_data = new_data;
     }
   }
+  
 
   function handleCityClick(event) {
     let selected_city = event.detail;

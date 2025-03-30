@@ -113,11 +113,11 @@ export function constructParallelData(data) {
             career = "justice"
         } else if (occupations.art.includes(career)) {
             career = "art"
-        } else if (occupations.printed.includes(career)) {
+        } else if (occupations.print.includes(career)) {
             career = "print"
         } else if (occupations.engineer.includes(career)) {
             career = "engineering"
-        } else if (occupations.farm.includes(career)) {
+        } else if (occupations.farming.includes(career)) {
             career = "farming"
         } else if (occupations.forestry.includes(career)) {
             career = "forestry"
@@ -706,7 +706,7 @@ export const occupations = {
 
     art: ["author", "curator"],
 
-    printed: [
+    print: [
         "journalist",
         "editor",
         "assistant editor",
@@ -724,7 +724,7 @@ export const occupations = {
         "engineer officer"
     ],
 
-    farm: [
+    farming: [
         "sheep farmer",
         "practitioner and farmer",
         "farm labourer",
@@ -917,9 +917,9 @@ export function career(career_data) {
         politics: [],
         justice: [],
         art: [],
-        printed: [],
+        print: [],
         engineer: [],
-        farm: [],
+        farming: [],
         forestry: [],
         sport: [],
         unclear: [],
@@ -983,14 +983,14 @@ export function career(career_data) {
             } else if (occupations.art.includes(occupation)) {
                 grps.art.push(item);
                 hasValidOccupation = true;
-            } else if (occupations.printed.includes(occupation)) {
-                grps.printed.push(item);
+            } else if (occupations.print.includes(occupation)) {
+                grps.print.push(item);
                 hasValidOccupation = true;
             } else if (occupations.engineer.includes(occupation)) {
                 grps.engineer.push(item);
                 hasValidOccupation = true;
-            } else if (occupations.farm.includes(occupation)) {
-                grps.farm.push(item);
+            } else if (occupations.farming.includes(occupation)) {
+                grps.farming.push(item);
                 hasValidOccupation = true;
             } else if (occupations.forestry.includes(occupation)) {
                 grps.forestry.push(item);

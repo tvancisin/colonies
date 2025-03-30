@@ -28,7 +28,7 @@
         selectedYearStart = null,
         selectedYearEnd = null;
     //create array with all years. some may be empty
-    let allYears = Array.from({ length: 1970 - 1650 + 1 }, (_, i) => 1650 + i);
+    let allYears = Array.from({ length: 1900 - 1700 + 1 }, (_, i) => 1700 + i);
 
     // assign clicked country data to data_to_draw
     $: if (current_data) {
@@ -127,7 +127,7 @@
         } else {
             width = containerWidth; // Full width when selected_country is null
             d3.selectAll("#timeline, #year_detail")
-                .style("width", "calc(100% - 500px)")
+                .style("width", "calc(100% - 550px)")
                 .style("left", "0%");
         }
     }
@@ -277,53 +277,53 @@
         }
     }
 
-    let one_year;
-    $: if (selected_years[0] == selected_years[1]) {
-        //filter data to selected years
-        one_year = year_filter(
-            current_data,
-            selected_years[0],
-            selected_years[1],
-        );
+    // let one_year;
+    // $: if (selected_years[0] == selected_years[1]) {
+    //     //filter data to selected years
+    //     one_year = year_filter(
+    //         current_data,
+    //         selected_years[0],
+    //         selected_years[1],
+    //     );
 
-        one_year.forEach((d) => {
-            if (d.birth_date) {
-                if (d.birth_date.length > 4) {
-                    d.birth_date = +d.birth_date.slice(0, 4);
-                } else {
-                    d.birth_date = +d.birth_date;
-                }
-            }
+    //     one_year.forEach((d) => {
+    //         if (d.birth_date) {
+    //             if (d.birth_date.length > 4) {
+    //                 d.birth_date = +d.birth_date.slice(0, 4);
+    //             } else {
+    //                 d.birth_date = +d.birth_date;
+    //             }
+    //         }
 
-            if (d.death_date) {
-                if (d.death_date.length > 4) {
-                    d.death_date = +d.death_date.slice(0, 4);
-                } else {
-                    d.death_date = +d.death_date;
-                }
-            }
+    //         if (d.death_date) {
+    //             if (d.death_date.length > 4) {
+    //                 d.death_date = +d.death_date.slice(0, 4);
+    //             } else {
+    //                 d.death_date = +d.death_date;
+    //             }
+    //         }
 
-            if (d.floruit) {
-                d.floruit.forEach((x) => {
-                    if (x.from) {
-                        if (x.from.length > 4) {
-                            x.from = +x.from.slice(0, 4);
-                        } else {
-                            x.from = +x.from;
-                        }
-                    } else {
-                        x.from = selected_years[0] + 10;
-                    }
-                });
-            }
-        });
-        d3.select("#year_detail").style("visibility", "visible");
-    } else {
-        d3.select("#year_detail").style("visibility", "hidden");
-    }
+    //         if (d.floruit) {
+    //             d.floruit.forEach((x) => {
+    //                 if (x.from) {
+    //                     if (x.from.length > 4) {
+    //                         x.from = +x.from.slice(0, 4);
+    //                     } else {
+    //                         x.from = +x.from;
+    //                     }
+    //                 } else {
+    //                     x.from = selected_years[0] + 10;
+    //                 }
+    //             });
+    //         }
+    //     });
+    //     d3.select("#year_detail").style("visibility", "visible");
+    // } else {
+    //     d3.select("#year_detail").style("visibility", "hidden");
+    // }
 </script>
 
-<div id="year_detail">
+<!-- <div id="year_detail">
     {#if one_year}
         <svg {width} height="110px">
             {#each one_year as year, i}
@@ -390,7 +390,7 @@
                     stroke="black"
                     stroke-width="0.5"
                 />
-                <!-- {#each year.floruit as flor}
+                {#each year.floruit as flor}
                     <circle
                         cx={xScale(flor.from)}
                         cy={105 - i * 5}
@@ -399,11 +399,11 @@
                         stroke="black"
                         stroke-width="0.5"
                     />
-                {/each} -->
+                {/each}
             {/each}
         </svg>
     {/if}
-</div>
+</div> -->
 <div id="timeline" bind:clientWidth={containerWidth} bind:clientHeight={height}>
     <svg {width} {height} bind:this={svg}>
         <!-- Bars -->
@@ -481,7 +481,7 @@
         position: absolute;
         border-radius: 5px;
         bottom: 0px;
-        width: calc(100% - 500px);
+        width: calc(100% - 550px);
         height: 160px;
     }
 

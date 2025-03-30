@@ -52,7 +52,7 @@
         selectedCollege = value;
     });
 
-    //// COUNTRY FILTER
+    //// COLONY FILTER
     $: if (selected_country != null) {
         // default data
         filteredCountry = (
@@ -63,7 +63,13 @@
 
         // data to operate with
         data = filteredCountry;
+        console.log("one");
     } else {
+        console.log("three");
+        data = current_data;
+    }
+
+    $: if (current_data) {
         data = current_data;
     }
 
@@ -150,7 +156,6 @@
     $: if (data) {
         parallel_data = constructParallelData(data);
     }
-
 </script>
 
 <div
@@ -308,7 +313,7 @@
         position: absolute;
         right: 0px;
         bottom: 0px;
-        width: 500px;
+        width: 550px;
         height: 100%;
         transition: right 0.3s ease;
         background-color: #003847;
