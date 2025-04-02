@@ -36,7 +36,7 @@
     let clicked_country;
     let countryNames;
     let hoveredPolygonId = null;
-    let hoveredPolygonIdFatal = null;
+    let hoveredUnclusteredId = null;
     let hoveredClusterId = null;
     let selectedYears = [1700, 1900];
     let selectedCareer;
@@ -280,12 +280,6 @@
             width_mapbox_expression_after1869,
         );
     }
-    // shipping lines in 1869
-    // $: if (map && selectedYears[1] > 1869 && map.getSource("shipping")) {
-    //     map.getSource("shipping").setData(suez);
-    // } else if (map && selectedYears[1] <= 1869 && map.getSource("shipping")) {
-    //     map.getSource("shipping").setData(shipping_json);
-    // }
 
     //// ZOOM ADJUSTMENT
     function adjustMapForWindowSize() {
@@ -355,13 +349,17 @@
         map.on("load", () => {
             // Check if the source already exists
             if (!map.getSource("countries")) {
-                //// COUNTRY POLYGONS
+                //add UK
+                countryNames.push("Britain");
+
+                //// country polygons
                 map.addSource("countries", {
                     type: "geojson",
                     data: colonies_1885,
                     generateId: true, // Ensures all features have unique IDs
                 });
 
+                // polygon fills
                 map.addLayer({
                     id: "countries_fill",
                     type: "fill",
@@ -386,89 +384,7 @@
                     filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
                 });
 
-                // HISTORICAL LAYER
-                map.addSource("portland", {
-                    type: "raster",
-                    url: "mapbox://tomasvancisin.30mip8ve",
-                });
-
-                map.addLayer({
-                    id: "portland",
-                    source: "portland",
-                    type: "raster",
-                    layout: {
-                        visibility: "none", // Set the initial visibility explicitly
-                    },
-                });
-
-                //// SHIPPING LINES
-                map.addSource("shipping_after1869", {
-                    type: "geojson",
-                    data: suez,
-                    generateId: true, // Ensures all features have unique IDs
-                });
-                map.addSource("shipping_before1869", {
-                    type: "geojson",
-                    data: shipping_json,
-                    generateId: true, // Ensures all features have unique IDs
-                });
-
-                map.addLayer({
-                    id: "shipline_after1869",
-                    type: "line",
-                    source: "shipping_after1869",
-                    paint: {
-                        "line-color": "white",
-                        "line-width": [
-                            "match",
-                            ["get", "ADMIN"],
-                            "India",
-                            0.271,
-                            "Australia",
-                            0.2,
-                            "Asia",
-                            0.042,
-                            "Africa",
-                            0.614,
-                            "Caribbean",
-                            0.114,
-                            "America",
-                            0.328,
-                            0,
-                        ],
-                        // 'line-dasharray': [0, 4, 3]
-                    },
-                });
-
-                map.addLayer({
-                    id: "shipline_before1869",
-                    type: "line",
-                    source: "shipping_before1869",
-                    paint: {
-                        "line-color": "white",
-                        "line-width": [
-                            "match",
-                            ["get", "ADMIN"],
-                            "India",
-                            0.642,
-                            "Australia",
-                            0.042,
-                            "Asia",
-                            0.014,
-                            "Africa",
-                            0.057,
-                            "Caribbean",
-                            0.271,
-                            "America",
-                            0.385,
-                            0,
-                        ],
-                        // "line-dasharray": [3, 0.5],
-                    },
-                });
-
-                countryNames.push("Britain");
-
+                // polygon outlines
                 map.addLayer({
                     id: "countries_outline",
                     type: "line",
@@ -521,13 +437,30 @@
 
                 // clicking events and checking if circle was clicked
                 map.on("click", (e) => {
-                    // Check if a circle was clicked
-                    let circleFeatures = map.queryRenderedFeatures(e.point, {
+                    // Check if a cluster was clicked
+                    let clusterFeatures = map.queryRenderedFeatures(e.point, {
                         layers: ["clusters"],
                     });
 
-                    if (circleFeatures.length > 0) {
+                    if (clusterFeatures.length > 0) {
                         e.originalEvent.stopPropagation();
+                        return;
+                    }
+
+                    // Check if an unclustered point was clicked
+                    let unclusteredFeatures = map.queryRenderedFeatures(
+                        e.point,
+                        {
+                            layers: ["unclustered-point"],
+                        },
+                    );
+
+                    if (unclusteredFeatures.length > 0) {
+                        e.originalEvent.stopPropagation();
+
+                        // Handle unclustered point click event
+                        const clickedPerson = unclusteredFeatures[0].properties;
+                        dispatch("pointClick", clickedPerson); // Dispatch event for Svelte
                         return;
                     }
 
@@ -546,14 +479,96 @@
                     }
                 });
 
-                // draw individual locations
+                //// draw shipping lines
+                map.addSource("shipping_after1869", {
+                    type: "geojson",
+                    data: suez,
+                    generateId: true, // Ensures all features have unique IDs
+                });
+                map.addSource("shipping_before1869", {
+                    type: "geojson",
+                    data: shipping_json,
+                    generateId: true, // Ensures all features have unique IDs
+                });
+
+                // pre suez lines
+                map.addLayer({
+                    id: "shipline_before1869",
+                    type: "line",
+                    source: "shipping_before1869",
+                    paint: {
+                        "line-color": "white",
+                        "line-width": [
+                            "match",
+                            ["get", "ADMIN"],
+                            "India",
+                            0.642,
+                            "Australia",
+                            0.042,
+                            "Asia",
+                            0.014,
+                            "Africa",
+                            0.057,
+                            "Caribbean",
+                            0.271,
+                            "America",
+                            0.385,
+                            0,
+                        ],
+                    },
+                });
+
+                // suez lines
+                map.addLayer({
+                    id: "shipline_after1869",
+                    type: "line",
+                    source: "shipping_after1869",
+                    paint: {
+                        "line-color": "white",
+                        "line-width": [
+                            "match",
+                            ["get", "ADMIN"],
+                            "India",
+                            0.271,
+                            "Australia",
+                            0.2,
+                            "Asia",
+                            0.042,
+                            "Africa",
+                            0.614,
+                            "Caribbean",
+                            0.114,
+                            "America",
+                            0.328,
+                            0,
+                        ],
+                    },
+                });
+
+                //// historical map layer
+                map.addSource("portland", {
+                    type: "raster",
+                    url: "mapbox://tomasvancisin.30mip8ve",
+                });
+
+                map.addLayer({
+                    id: "portland",
+                    source: "portland",
+                    type: "raster",
+                    layout: {
+                        visibility: "none", // Set the initial visibility explicitly
+                    },
+                });
+
+                //// draw clusters
                 drawLocations(data, current_data_string, "initial draw");
 
-                // animateShipping();
+                // screen adjustment
                 window.addEventListener("resize", adjustMapForWindowSize);
                 adjustMapForWindowSize();
             }
 
+            // dispatch when all loaded
             dispatch("mapLoaded");
         });
     }
@@ -612,47 +627,11 @@
         return outputArray;
     }
 
-    let fatal_popup = new mapboxgl.Popup({
-        closeButton: false,
-        closeOnClick: false,
-    });
-
-    // Function to create HTML content from an array of people
-    function createPopupContent(peopleArray) {
-        return `
-                <p style="margin: 2px"> ${peopleArray}</p>
-        `;
-    }
-    function handleMouseMove(e) {
-        let city = e.features[0].properties.id;
-
-        let popupContent = `<div style="color: black; font-family:Montserrat; font-weight:500;">
-                ${createPopupContent(city)}</div>`;
-
-        map.getCanvas().style.cursor = "pointer";
-        if (e.features.length > 0) {
-            if (hoveredPolygonIdFatal !== null) {
-                map.setFeatureState(
-                    { source: "locations", id: hoveredPolygonIdFatal },
-                    { hover: false },
-                );
-            }
-            hoveredPolygonIdFatal = e.features[0].id;
-            map.setFeatureState(
-                { source: "locations", id: hoveredPolygonIdFatal },
-                { hover: true },
-            );
-
-            fatal_popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
-        }
-    }
-
-    let populationClickListenerAdded = false;
-
     //DRAW INDIVIDUAL LOCATIONS WHEN COLONY CLICKED
     function drawLocations(data, which, reason) {
         console.log("🔄 drawLocations called", reason);
 
+        // construct geojson of locations
         let local_conflict_geojson = [];
         if (which == "birth") {
             let group_by_location = d3.groups(data, (d) => {
@@ -698,19 +677,21 @@
             });
         }
 
+        // final geojson
         const geojson_data = {
             type: "FeatureCollection",
             features: local_conflict_geojson,
         };
 
-        // If source exists, update it
+        // if source exists, update it
         if (map.getSource("locations")) {
             map.getSource("locations").setData(geojson_data);
         } else {
-            // If source doesn't exist, add it and the layer
+            // if source doesn't exist, add it and the layer
             map.addSource("locations", {
                 type: "geojson",
                 data: geojson_data,
+                generateId: true, // Ensures all features have unique IDs
                 cluster: true, // Enable clustering
                 clusterMaxZoom: 14, // Clusters disappear after zoom level 14
                 clusterRadius: 50, // Controls how close points must be to form a cluster
@@ -719,6 +700,7 @@
                 },
             });
 
+            // clusters
             map.addLayer({
                 id: "clusters",
                 type: "circle",
@@ -744,10 +726,11 @@
                         2, // Stroke width when hovered
                         0, // Default stroke width
                     ],
-                    "circle-stroke-color": "white", // Highlight color (gold)
+                    "circle-stroke-color": "white",
                 },
             });
 
+            // cluster text
             map.addLayer({
                 id: "cluster-count",
                 type: "symbol",
@@ -757,27 +740,6 @@
                     "text-field": "{total_people}", // Show the sum of 'no_of_ppl' instead of the number of points
                     "text-font": ["Open Sans Bold"],
                     "text-size": 12,
-                },
-            });
-
-            map.addLayer({
-                id: "unclustered-point",
-                type: "circle",
-                source: "locations",
-                filter: ["!", ["has", "point_count"]], // Show only non-clustered points
-                paint: {
-                    "circle-color": "white",
-                    "circle-radius": [
-                        "interpolate",
-                        ["linear"],
-                        ["get", "no_of_ppl"],
-                        1,
-                        3, // 3px radius for 1 person
-                        10,
-                        10,
-                    ],
-                    "circle-stroke-width": 1,
-                    "circle-stroke-color": "gray",
                 },
             });
 
@@ -855,33 +817,83 @@
                 hoveredClusterId = null;
             });
 
-            // map.on("mousemove", "population", handleMouseMove);
+            // unclustered circles
+            map.addLayer({
+                id: "unclustered-point",
+                type: "circle",
+                source: "locations",
+                filter: ["!", ["has", "point_count"]], // Show only non-clustered points
+                paint: {
+                    "circle-color": "white",
+                    "circle-radius": [
+                        "interpolate",
+                        ["linear"],
+                        ["get", "no_of_ppl"],
+                        1,
+                        3, // 3px radius for 1 person
+                        10,
+                        10,
+                    ],
+                    "circle-stroke-width": [
+                        "case",
+                        ["boolean", ["feature-state", "hover"], false],
+                        2, // Stroke width when hovered
+                        0, // Default stroke width
+                    ],
+                    "circle-stroke-color": "white",
+                },
+            });
 
-            // // When the mouse leaves the state-fill layer, update the feature state of the
-            // // previously hovered feature.
-            // map.on("mouseleave", `population`, () => {
-            //     map.getCanvas().style.cursor = "";
-            //     if (hoveredPolygonIdFatal !== null) {
-            //         map.setFeatureState(
-            //             { source: "locations", id: hoveredPolygonIdFatal },
-            //             { hover: false },
-            //         );
-            //     }
-            //     hoveredPolygonIdFatal = null;
-            //     fatal_popup.remove();
-            // });
+            // Unclustered circle hover effect
+            map.on("mousemove", "unclustered-point", (e) => {
+                map.getCanvas().style.cursor = "pointer";
 
-            // // Only add click listener ONCE
-            // if (!populationClickListenerAdded) {
-            //     populationClickListenerAdded = true;
-            //     console.log("✅ Attaching population click event listener...");
+                // Prevent polygon highlight if hovering over an unclustered point
+                if (hoveredPolygonId !== null) {
+                    map.setFeatureState(
+                        { source: "countries", id: hoveredPolygonId },
+                        { hover: false },
+                    );
+                    hoveredPolygonId = null; // Reset
+                }
 
-            //     map.on("click", "population", (e) => {
-            //         e.originalEvent.stopPropagation();
-            //         let city = e.features[0].properties.id;
-            //         dispatch("cityClick", city);
-            //     });
-            // }
+                // Highlight the unclustered circle
+                if (hoveredUnclusteredId !== null) {
+                    map.setFeatureState(
+                        { source: "locations", id: hoveredUnclusteredId },
+                        { hover: false },
+                    );
+                }
+
+                hoveredUnclusteredId = e.features[0].id;
+                map.setFeatureState(
+                    { source: "locations", id: hoveredUnclusteredId },
+                    { hover: true },
+                );
+            });
+
+            // Remove highlight when leaving unclustered point
+            map.on("mouseleave", "unclustered-point", () => {
+                map.getCanvas().style.cursor = "";
+
+                if (hoveredUnclusteredId !== null) {
+                    map.setFeatureState(
+                        { source: "locations", id: hoveredUnclusteredId },
+                        { hover: false },
+                    );
+                }
+                hoveredUnclusteredId = null;
+            });
+
+            // Prevent polygon click when clicking an unclustered circle
+            map.on("click", "unclustered-point", (e) => {
+                e.originalEvent.stopPropagation(); // Prevent polygon click event from firing
+
+                console.log("here");
+
+                const clickedPerson = e.features[0].properties;
+                // dispatch("pointClick", clickedPerson); // Dispatch event for Svelte component
+            });
         }
     }
 
