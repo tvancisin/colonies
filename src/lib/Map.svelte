@@ -770,6 +770,7 @@
                             .map((leaf) => leaf.properties.people_array) // Extract people_array (each entry is an array)
                             .flat(); // Flatten into a single array
                         // pass the array to App.svelte
+
                         dispatch("clusterClick", allPeople);
                     },
                 );
@@ -889,9 +890,10 @@
             map.on("click", "unclustered-point", (e) => {
                 e.originalEvent.stopPropagation(); // Prevent polygon click event from firing
 
-                console.log("here");
+                const clickedPerson = e.features[0].properties.people_array;
+                const jsonObject = JSON.parse(clickedPerson);
 
-                const clickedPerson = e.features[0].properties;
+                dispatch("clusterClick", jsonObject);
                 // dispatch("pointClick", clickedPerson); // Dispatch event for Svelte component
             });
         }
