@@ -65,9 +65,9 @@
     $: x_scale = d3
         .scalePoint()
         .domain(dimensions)
-        .range([margin.left, width - margin.right]);
+        .range([margin.left + 15, width - margin.right - 15]);
 
-    $: x_bar_scale = d3.scaleLinear().domain([0, 180]).range([2, 35]);
+    $: x_bar_scale = d3.scaleLinear().domain([0, 400]).range([2, 40]);
 
     $: d3.select(gy_college)
         .call(d3.axisLeft(y["college"]))
@@ -109,7 +109,6 @@
         );
     };
 
-
     function college_click(college) {
         selectedCollegeStore.set(college);
     }
@@ -133,12 +132,20 @@
             .selectAll("path, .tick>line")
             .style("opacity", 0.5);
     }
+
+    $: console.log(collegeCounts);
+    
 </script>
 
 <svg {width} {height}>
     {#if parallel_data}
         {#each withoutCareer as data}
-            <path fill="none" stroke="orange" opacity="0.1" d={car_line(data)} />
+            <path
+                fill="none"
+                stroke="orange"
+                opacity="0.1"
+                d={car_line(data)}
+            />
         {/each}
         {#each withoutCollege as data}
             <path fill="none" stroke="gray" opacity="0.1" d={col_line(data)} />
@@ -178,6 +185,27 @@
                 }}
                 style="cursor: pointer;"
             />
+            <rect
+                x={x_scale("college") + x_bar_scale(count) + 2}
+                y={y["college"](college) - 8}
+                width={count.toString().length === 1
+                    ? 14
+                    : count.toString().length === 2
+                      ? 20
+                      : 22}
+                height="14"
+                fill="black"
+                opacity="0.5"
+                rx="2"
+            />
+            <text
+                x={x_scale("college") + x_bar_scale(count) + 5}
+                y={y["college"](college) + 3}
+                stroke="none"
+                fill="white"
+                font-size="10"
+                font-weight="500">{count}</text
+            >
         {/each}
         {#each Object.entries(degreeCounts) as [degree, count]}
             <rect
@@ -198,6 +226,28 @@
                 }}
                 style="cursor: pointer;"
             />
+
+            <rect
+                x={x_scale("degree") + x_bar_scale(count) + 2}
+                y={y["degree"](degree) - 8}
+                width={count.toString().length === 1
+                    ? 14
+                    : count.toString().length === 2
+                      ? 20
+                      : 22}
+                height="14"
+                fill="black"
+                opacity="0.5"
+                rx="2"
+            />
+            <text
+                x={x_scale("degree") + x_bar_scale(count) + 5}
+                y={y["degree"](degree) + 3}
+                stroke="none"
+                fill="white"
+                font-size="10"
+                font-weight="500">{count}</text
+            >
         {/each}
         {#each Object.entries(careerCounts) as [career, count]}
             <rect
@@ -218,6 +268,27 @@
                 }}
                 style="cursor: pointer;"
             />
+            <rect
+                x={x_scale("career") + x_bar_scale(count) + 2}
+                y={y["career"](career) - 8}
+                width={count.toString().length === 1
+                    ? 14
+                    : count.toString().length === 2
+                      ? 20
+                      : 22}
+                height="14"
+                fill="black"
+                opacity="0.5"
+                rx="2"
+            />
+            <text
+                x={x_scale("career") + x_bar_scale(count) + 5}
+                y={y["career"](career) + 3}
+                stroke="none"
+                fill="white"
+                font-size="10"
+                font-weight="500">{count}</text
+            >
         {/each}
     {/if}
 </svg>
