@@ -85,14 +85,6 @@
         .style("font-family", "Montserrat")
         .style("font-weight", 300);
 
-    // $: line = function path(d) {
-    //     return d3.line()(
-    //         dimensions.map(function (p) {
-    //             return [x_scale(p), y[p](d[p])];
-    //         }),
-    //     );
-    // };
-
     $: car_line = function path(d) {
         return d3.line()(
             withoutCareerDimensions.map(function (p) {
@@ -134,7 +126,6 @@
     }
 
     $: console.log(collegeCounts);
-    
 </script>
 
 <svg {width} {height}>
