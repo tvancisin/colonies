@@ -296,7 +296,7 @@
         } else if (window.innerWidth >= 1200) {
             map.flyTo({
                 center: [20, 0],
-                zoom: 1,
+                zoom: 1.4,
             });
         }
     }
@@ -959,7 +959,7 @@
 <style>
     .map-container {
         position: relative;
-        width: calc(100% - 550px);
+        width: 65%;
         height: 100%;
         display: flex;
         justify-content: center;

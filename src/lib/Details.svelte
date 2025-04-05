@@ -313,7 +313,7 @@
         position: absolute;
         right: 0px;
         bottom: 0px;
-        width: 550px;
+        width: 35%;
         height: 100%;
         transition: right 0.3s ease;
         background-color: #003847;

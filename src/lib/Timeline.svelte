@@ -127,7 +127,7 @@
         } else {
             width = containerWidth; // Full width when selected_country is null
             d3.selectAll("#timeline, #year_detail")
-                .style("width", "calc(100% - 550px)")
+                .style("width", "65%")
                 .style("left", "0%");
         }
     }
@@ -481,7 +481,7 @@
         position: absolute;
         border-radius: 5px;
         bottom: 0px;
-        width: calc(100% - 550px);
+        width: 65%;
         height: 160px;
     }
 
