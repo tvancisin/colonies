@@ -33,7 +33,6 @@
     let height;
     let def_data;
     let data;
-    let clicked_country;
     let countryNames;
     let hoveredPolygonId = null;
     let hoveredUnclusteredId = null;
