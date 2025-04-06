@@ -306,6 +306,9 @@
             ? new URL("/birth.png", import.meta.url).href
             : new URL("/floruit.png", import.meta.url).href;
     let markerElement;
+    let logoElement;
+
+    $: logoURL = new URL("/uni_logo.PNG", import.meta.url).href;
 
     //// INIT
     onMount(() => {
@@ -324,18 +327,31 @@
         });
 
         markerElement = document.createElement("div");
-        const width = 20;
         const height = 20;
+        const width = 20;
         markerElement.className = "marker";
         markerElement.style.width = `${width}px`;
         markerElement.style.height = `${height}px`;
         markerElement.style.backgroundSize = "100%";
         markerElement.style.backgroundImage = `url(${imageURL})`; // Initial image
 
+        logoElement = document.createElement("div");
+        logoElement.className = "logo"; 
+        logoElement.style.width = `100px`;
+        logoElement.style.height = `28px`;
+        logoElement.style.backgroundSize = "100%";
+        logoElement.style.backgroundImage = `url(${logoURL})`; // Initial image
+
         new mapboxgl.Marker(markerElement, {
             offset: [width / 3, 0],
         })
             .setLngLat([-18.378063, 43.546441])
+            .addTo(map);
+
+        new mapboxgl.Marker(logoElement, {
+            offset: [60, 0],
+        })
+            .setLngLat([-2.8063431, 56.335054])
             .addTo(map);
     });
     $: if (markerElement) {

@@ -63,6 +63,10 @@
   let births_per_city;
   let floruit_per_colony;
   let floruit_per_city;
+  let birth_male;
+  let birth_female;
+  let floruit_male;
+  let floruit_female;
 
   // remove initial div
   function removeOverlay() {
@@ -72,6 +76,14 @@
   getJSON(path).then((json) => {
     birth_data = json[0];
     floruit_data = json[1];
+
+    let birth_gender = d3.groups(birth_data, (d) => d.gender === "M");
+    birth_male = birth_gender[0][1];
+    birth_female = birth_gender[1][1];
+
+    let floruit_gender = d3.groups(floruit_data, (d) => d.gender === "M");
+    floruit_male = floruit_gender[0][1];
+    floruit_female = floruit_gender[1][1];
 
     //add colonies field to bio location data
     let birth_colony_division = birth_data.map((item) => {
@@ -190,7 +202,6 @@
       current_data = new_data;
     }
   }
-  
 
   function handleCityClick(event) {
     let selected_city = event.detail;
@@ -213,6 +224,8 @@
     } else if (current_data_string == "floruit") {
       current_data = floruit_data;
     }
+    d3.select("#all").style("background-color", "white");
+    d3.selectAll("#male, #female").style("background-color", "#808080");
     selected_country = null;
     selectedCareerStore.set([]);
     selectedYearsStore.set([]);
@@ -223,18 +236,52 @@
 
   //set variables based on selection (birth or floruit)
   function change_data(selected_data) {
+    d3.select("#all").style("background-color", "white");
+    d3.selectAll("#male, #female").style("background-color", "#808080");
     if (selected_data == "birth") {
       d3.select("#header").text("Student Births in the Colonies (1700-1897)");
-      d3.select("#floruit").style("background-color", "gray");
+      d3.select("#floruit").style("background-color", "#808080");
       d3.select("#birth").style("background-color", "white");
       current_data = birth_data;
       current_data_string = selected_data;
     } else if (selected_data == "floruit") {
       d3.select("#header").text("Student Careers in the Colonies (1700-1897)");
       d3.select("#floruit").style("background-color", "white");
-      d3.select("#birth").style("background-color", "gray");
+      d3.select("#birth").style("background-color", "#808080");
       current_data = floruit_data;
       current_data_string = selected_data;
+    }
+  }
+
+  function change_gender(gender) {
+    if (current_data_string == "birth") {
+      if (gender == "male") {
+        current_data = birth_male;
+        d3.select("#male").style("background-color", "white");
+        d3.selectAll("#female, #all").style("background-color", "#808080");
+      } else if (gender == "female") {
+        current_data = birth_female;
+        d3.select("#female").style("background-color", "white");
+        d3.selectAll("#male, #all").style("background-color", "#808080");
+      } else if (gender == "all") {
+        current_data = birth_data;
+        d3.select("#all").style("background-color", "white");
+        d3.selectAll("#male, #female").style("background-color", "#808080");
+      }
+    } else if (current_data_string == "floruit") {
+      if (gender == "male") {
+        current_data = floruit_male;
+        d3.select("#male").style("background-color", "white");
+        d3.selectAll("#female, #all").style("background-color", "#808080");
+      } else if (gender == "female") {
+        current_data = floruit_female;
+        d3.select("#female").style("background-color", "white");
+        d3.selectAll("#male, #all").style("background-color", "#808080");
+      } else if (gender == "all") {
+        current_data = floruit_data;
+        d3.select("#all").style("background-color", "white");
+        d3.selectAll("#male, #female").style("background-color", "#808080");
+      }
     }
   }
 </script>
@@ -281,6 +328,26 @@
         >
           Career
         </button>
+      </div>
+      <div id="gender">
+        <button
+          id="male"
+          on:click={() => {
+            change_gender("male");
+          }}
+        >
+          Male</button
+        ><button
+          id="female"
+          on:click={() => {
+            change_gender("female");
+          }}>Female</button
+        ><button
+          id="all"
+          on:click={() => {
+            change_gender("all");
+          }}>All</button
+        >
       </div>
       <div id="time_description">Students Entering University</div>
       <!-- Navigation Menu -->
@@ -367,19 +434,40 @@
     transition: top 0.3s ease;
   }
 
+  #gender {
+    z-index: 80;
+    position: absolute;
+    top: 40px;
+    left: 5px;
+    padding: 0px;
+    margin: 0px;
+    transition: top 0.3s ease;
+  }
+
+  #gender button {
+    margin: 2px;
+    color: black;
+    border: none;
+    border-radius: 2px;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 450;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
   #birth,
   #floruit {
     border: none;
     border-radius: 2px;
     color: black;
-    padding: 5px 0px;
+    padding: 3px 8px;
     width: 75px;
     text-align: center;
     font-family: "Montserrat", sans-serif;
     font-weight: 450;
+    font-size: 16px;
     text-decoration: none;
     display: inline-block;
-    font-size: 16px;
     margin: 0px;
     transition: box-shadow 0.2s ease-in-out; /* Smooth transition */
     cursor: pointer;
@@ -391,6 +479,15 @@
   }
 
   #floruit {
-    background-color: gray;
+    background-color: #808080;
+  }
+
+  #male,
+  #female {
+    background-color: #808080;
+  }
+
+  #all {
+    background-color: white;
   }
 </style>

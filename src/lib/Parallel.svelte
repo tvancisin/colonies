@@ -132,9 +132,6 @@
             .selectAll("path, .tick>line")
             .style("opacity", 0.5);
     }
-
-    $: console.log(collegeCounts);
-    
 </script>
 
 <svg {width} {height}>

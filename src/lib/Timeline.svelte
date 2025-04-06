@@ -434,7 +434,7 @@
             <!-- Start line and label -->
             <line
                 x1={selectedLineStart}
-                y1={margin.top - 7}
+                y1={margin.top - 5}
                 x2={selectedLineStart}
                 y2={height - margin.bottom}
                 stroke="white"
@@ -442,7 +442,7 @@
             />
             <text
                 x={selectedLineStart}
-                y={margin.top - 10}
+                y={margin.top - 8}
                 text-anchor="middle"
                 font-size="14px"
                 font-weight="300"
@@ -453,7 +453,7 @@
             <!-- End line -->
             <line
                 x1={selectedLineEnd}
-                y1={margin.top - 7}
+                y1={margin.top - 5}
                 x2={selectedLineEnd}
                 y2={height - margin.bottom}
                 stroke="white"
@@ -463,7 +463,7 @@
             {#if selectedYearStart !== selectedYearEnd}
                 <text
                     x={selectedLineEnd}
-                    y={margin.top - 10}
+                    y={margin.top - 8}
                     text-anchor="middle"
                     font-size="14px"
                     font-weight="300"
@@ -482,7 +482,7 @@
         border-radius: 5px;
         bottom: 0px;
         width: 65%;
-        height: 160px;
+        height: 165px;
     }
 
     :global(.brush .selection) {
