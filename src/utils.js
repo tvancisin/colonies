@@ -73,7 +73,8 @@ export function constructParallelData(data) {
         }) || ["unk"];
 
         // Normalize degrees
-        const degrees = item.study?.degrees?.map(deg => deg.name) || ["unk"];
+        const degrees = item.study?.degrees?.map(deg => deg.name || "unk") || ["unk"];
+        // "idp1379846380"
 
         // Normalize careers
         let careers = [];

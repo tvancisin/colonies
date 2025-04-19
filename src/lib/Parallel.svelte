@@ -176,6 +176,7 @@
 <svg {width} {height}>
     {#if parallel_data}
         {#each withoutCareer as data}
+        <!-- {console.log(data, car_line(data))} -->
             <path
                 fill="none"
                 stroke="orange"
