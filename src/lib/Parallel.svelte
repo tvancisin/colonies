@@ -14,29 +14,66 @@
     let withoutCareerDimensions = ["college", "degree"];
     let withoutCollegeDimensions = ["degree", "career"];
 
-    // Remove 'career' field
-    $: withoutCareer = parallel_data.map(({ career, ...rest }) => rest);
+    $: console.log(parallel_data);
 
-    // Remove 'college' field
-    $: withoutCollege = parallel_data.map(({ college, ...rest }) => rest);
+    // Remove 'career' field and remove duplicates
+    $: withoutCareer = Array.from(
+        new Set(
+            parallel_data.map(({ career, ...rest }) => JSON.stringify(rest)),
+        ),
+    ).map((str) => JSON.parse(str));
 
-    $: collegeCounts = parallel_data.reduce((acc, item) => {
-        const college = item.college;
-        acc[college] = (acc[college] || 0) + 1;
-        return acc;
-    }, {});
+    // Remove 'college' field and remove duplicates
+    $: withoutCollege = Array.from(
+        new Set(
+            parallel_data.map(({ college, ...rest }) => JSON.stringify(rest)),
+        ),
+    ).map((str) => JSON.parse(str));
 
-    $: degreeCounts = parallel_data.reduce((acc, item) => {
-        const degree = item.degree;
-        acc[degree] = (acc[degree] || 0) + 1;
-        return acc;
-    }, {});
+    $: collegeCounts = (() => {
+        const seen = new Set();
+        const counts = {};
 
-    $: careerCounts = parallel_data.reduce((acc, item) => {
-        const career = item.career;
-        acc[career] = (acc[career] || 0) + 1;
-        return acc;
-    }, {});
+        for (const entry of parallel_data) {
+            const key = `${entry.id}::${entry.college}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                counts[entry.college] = (counts[entry.college] || 0) + 1;
+            }
+        }
+
+        return counts;
+    })();
+
+    $: degreeCounts = (() => {
+        const seen = new Set();
+        const counts = {};
+
+        for (const entry of parallel_data) {
+            const key = `${entry.id}::${entry.degree}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                counts[entry.degree] = (counts[entry.degree] || 0) + 1;
+            }
+        }
+
+        return counts;
+    })();
+
+    $: careerCounts = (() => {
+        const seen = new Set();
+        const counts = {};
+
+        for (const entry of parallel_data) {
+            const key = `${entry.id}::${entry.career}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                counts[entry.career] = (counts[entry.career] || 0) + 1;
+            }
+        }
+
+        return counts;
+    })();
 
     let gy_college;
     let gy_degree;
@@ -110,6 +147,8 @@
     };
 
     function college_click(college) {
+        console.log(college);
+
         selectedCollegeStore.set(college);
     }
 
@@ -182,6 +221,7 @@
                 }}
                 style="cursor: pointer;"
             />
+
             <rect
                 x={x_scale("college") + x_bar_scale(count) + 2}
                 y={y["college"](college) - 8}
@@ -265,6 +305,7 @@
                 }}
                 style="cursor: pointer;"
             />
+
             <rect
                 x={x_scale("career") + x_bar_scale(count) + 2}
                 y={y["career"](career) - 8}

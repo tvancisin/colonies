@@ -54,87 +54,193 @@ export let careers = [
     "unk",
 ];
 
+
 export function constructParallelData(data) {
-    const transformedData = data.map(item => {
-        let college = item.study?.colleges?.[0]?.name || "unk";
+    const transformedData = [];
 
-        if (college == "St Leonard’s College") {
-            college = "SLC"
-        } else if (college == "St Salvator’s College") {
-            college = "SSC"
-        } else if (college == "St Mary’s College") {
-            college = "SMC"
-        } else if (college == "U.C.D.") {
-            college = "UCD"
-        } else if (college == "United College") {
-            college = "UNC"
-        }
-
-        const degree = item.study?.degrees?.[0]?.name || "unk";
+    data.forEach(item => {
         const id = item.id;
 
-        // Handle career extraction
-        let career = "unk";
-        if (item.floruit?.[0]?.occupation) {
-            const occupation = item.floruit[0].occupation;
-            if (Array.isArray(occupation)) {
-                career = occupation[0] || "unk";
-            } else {
-                career = occupation || "unk";
-            }
+        // Normalize colleges
+        const colleges = item.study?.colleges?.map(col => {
+            let college = col.name;
+            if (college === "St Leonard’s College") return "SLC";
+            if (college === "St Salvator’s College") return "SSC";
+            if (college === "St Mary’s College") return "SMC";
+            if (college === "U.C.D.") return "UCD";
+            if (college === "United College") return "UNC";
+            return college || "unk";
+        }) || ["unk"];
+
+        // Normalize degrees
+        const degrees = item.study?.degrees?.map(deg => deg.name) || ["unk"];
+
+        // Normalize careers
+        let careers = [];
+
+        if (Array.isArray(item.floruit)) {
+            item.floruit.forEach(f => {
+                const occupation = f.occupation;
+                if (Array.isArray(occupation)) {
+                    occupation.forEach(o => {
+                        if (typeof o === 'string') {
+                            careers.push(o);
+                        }
+                    });
+                } else if (typeof occupation === 'string') {
+                    careers.push(occupation);
+                }
+            });
         }
 
-        if (career != "unk") {
-            career = career.toLowerCase();
+        if (careers.length === 0) {
+            careers = ["unk"];
         }
 
-        // Assign to the appropriate group
-        if (occupations.medicine.includes(career)) {
-            career = "medicine"
-        } else if (occupations.religion.includes(career)) {
-            career = "religion"
-        } else if (occupations.education.includes(career)) {
-            career = "education"
-        } else if (occupations.noble.includes(career)) {
-            career = "noble"
-        } else if (occupations.trade.includes(career)) {
-            career = "trade"
-        } else if (occupations.land.includes(career)) {
-            career = "land"
-        } else if (occupations.military.includes(career)) {
-            career = "military"
-        } else if (occupations.government.includes(career)) {
-            career = "government"
-        } else if (occupations.local_government.includes(career)) {
-            career = "local_government"
-        } else if (occupations.politics.includes(career)) {
-            career = "politics"
-        } else if (occupations.justice.includes(career)) {
-            career = "justice"
-        } else if (occupations.art.includes(career)) {
-            career = "art"
-        } else if (occupations.print.includes(career)) {
-            career = "print"
-        } else if (occupations.engineer.includes(career)) {
-            career = "engineering"
-        } else if (occupations.farming.includes(career)) {
-            career = "farming"
-        } else if (occupations.forestry.includes(career)) {
-            career = "forestry"
-        } else if (occupations.sport.includes(career)) {
-            career = "sport"
-        } else if (occupations.unclear.includes(career)) {
-            career = "unclear"
-        }
+        // Normalize and group careers
+        careers = careers.map(raw => {
+            let career = raw.toLowerCase();
 
-        return {
-            college,
-            degree,
-            career
-        };
+            if (occupations.medicine.includes(career)) return "medicine";
+            if (occupations.religion.includes(career)) return "religion";
+            if (occupations.education.includes(career)) return "education";
+            if (occupations.noble.includes(career)) return "noble";
+            if (occupations.trade.includes(career)) return "trade";
+            if (occupations.land.includes(career)) return "land";
+            if (occupations.military.includes(career)) return "military";
+            if (occupations.government.includes(career)) return "government";
+            if (occupations.local_government.includes(career)) return "local_government";
+            if (occupations.politics.includes(career)) return "politics";
+            if (occupations.justice.includes(career)) return "justice";
+            if (occupations.art.includes(career)) return "art";
+            if (occupations.print.includes(career)) return "print";
+            if (occupations.engineer.includes(career)) return "engineering";
+            if (occupations.farming.includes(career)) return "farming";
+            if (occupations.forestry.includes(career)) return "forestry";
+            if (occupations.sport.includes(career)) return "sport";
+            if (occupations.unclear.includes(career)) return "unclear";
+
+            return "unk";
+        });
+
+        // console.log(id, colleges, degrees, careers);
+
+        // Combine all combinations
+        colleges.forEach(college => {
+            degrees.forEach(degree => {
+                careers.forEach(career => {
+                    transformedData.push({
+                        id,
+                        college,
+                        degree,
+                        career
+                    });
+                });
+            });
+        });
     });
-    return transformedData
+
+    const seen = new Set();
+    const deduplicatedData = transformedData.filter(entry => {
+        const key = JSON.stringify(entry);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+
+    return deduplicatedData;
 }
+
+
+// export function constructParallelData(data) {
+//     console.log(data);
+
+//     const transformedData = data.map(item => {
+
+//         // if (item.study?.colleges?.length > 1) {
+//         //     console.log(item,"---------------------");
+//         // }
+//         let college = item.study?.colleges?.[0]?.name || "unk";
+
+//         if (college == "St Leonard’s College") {
+//             college = "SLC"
+//         } else if (college == "St Salvator’s College") {
+//             college = "SSC"
+//         } else if (college == "St Mary’s College") {
+//             college = "SMC"
+//         } else if (college == "U.C.D.") {
+//             college = "UCD"
+//         } else if (college == "United College") {
+//             college = "UNC"
+//         }
+
+//         const degree = item.study?.degrees?.[0]?.name || "unk";
+//         const id = item.id;
+
+//         // Handle career extraction
+//         let career = "unk";
+//         if (item.floruit?.[0]?.occupation) {
+//             const occupation = item.floruit[0].occupation;
+//             if (Array.isArray(occupation)) {
+//                 career = occupation[0] || "unk";
+//             } else {
+//                 career = occupation || "unk";
+//             }
+//         }
+
+//         if (career != "unk") {
+//             career = career.toLowerCase();
+//         }
+
+//         // Assign to the appropriate group
+//         if (occupations.medicine.includes(career)) {
+//             career = "medicine"
+//         } else if (occupations.religion.includes(career)) {
+//             career = "religion"
+//         } else if (occupations.education.includes(career)) {
+//             career = "education"
+//         } else if (occupations.noble.includes(career)) {
+//             career = "noble"
+//         } else if (occupations.trade.includes(career)) {
+//             career = "trade"
+//         } else if (occupations.land.includes(career)) {
+//             career = "land"
+//         } else if (occupations.military.includes(career)) {
+//             career = "military"
+//         } else if (occupations.government.includes(career)) {
+//             career = "government"
+//         } else if (occupations.local_government.includes(career)) {
+//             career = "local_government"
+//         } else if (occupations.politics.includes(career)) {
+//             career = "politics"
+//         } else if (occupations.justice.includes(career)) {
+//             career = "justice"
+//         } else if (occupations.art.includes(career)) {
+//             career = "art"
+//         } else if (occupations.print.includes(career)) {
+//             career = "print"
+//         } else if (occupations.engineer.includes(career)) {
+//             career = "engineering"
+//         } else if (occupations.farming.includes(career)) {
+//             career = "farming"
+//         } else if (occupations.forestry.includes(career)) {
+//             career = "forestry"
+//         } else if (occupations.sport.includes(career)) {
+//             career = "sport"
+//         } else if (occupations.unclear.includes(career)) {
+//             career = "unclear"
+//         }
+
+//         return {
+//             id,
+//             college,
+//             degree,
+//             career,
+//         };
+//     });
+
+//     return transformedData
+// }
 
 //LOADING DATA FUNCTIONS
 export async function getJson(path) {
