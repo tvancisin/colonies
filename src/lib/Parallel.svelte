@@ -14,8 +14,6 @@
     let withoutCareerDimensions = ["college", "degree"];
     let withoutCollegeDimensions = ["degree", "career"];
 
-    $: console.log(parallel_data);
-
     // Remove 'career' field and remove duplicates
     $: withoutCareer = Array.from(
         new Set(
@@ -157,6 +155,8 @@
     }
 
     function career_click(career) {
+        console.log(career);
+        
         selectedCareerStore.set(career);
     }
 

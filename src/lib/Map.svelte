@@ -958,7 +958,7 @@
 
 <div class="map-container" bind:clientHeight={height}>
     <div id="map" bind:this={map}></div>
-    <div class="toggle-container">
+    <!-- <div class="toggle-container">
         <label class="toggle-switch">
             <input
                 type="checkbox"
@@ -968,7 +968,7 @@
             <span class="slider"></span>
         </label>
         <p class="toggle-text">Historical Layer</p>
-    </div>
+    </div> -->
 </div>
 
 <style>

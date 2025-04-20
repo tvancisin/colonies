@@ -132,9 +132,9 @@
         data = fin_college;
     }
 
-    function closeDetails() {
-        dispatch("close");
-    }
+    // function closeDetails() {
+    //     dispatch("close");
+    // }
 
     // if refreshed, reset to filteredCountry data
     let check = false;
@@ -164,14 +164,14 @@
     bind:clientHeight={details_height}
 >
     <div id="peace_title_div">
-        <button class="btn close" on:click={closeDetails}
+        <!-- <button class="btn close" on:click={closeDetails}
             ><i class="fa fa-close"></i></button
         >
         {#if selected_country !== null && selected_country !== undefined}
             <button class="btn refresh" on:click={refresh}>
                 <i class="fa fa-refresh"></i>
             </button>
-        {/if}
+        {/if} -->
         {#if selected_country == "America"}
             <h3>North America</h3>
         {:else if selected_country == "India"}
@@ -375,7 +375,7 @@
         }
     }
 
-    .btn.close {
+    /* .btn.close {
         position: absolute;
         right: 4px;
         background: none;
@@ -387,9 +387,9 @@
         font-size: 1.5em;
         font-family: "Montserrat";
         transition: border 0.3s ease;
-    }
+    } */
 
-    .btn.refresh {
+    /* .btn.refresh {
         position: absolute;
         left: 5px;
         background: none;
@@ -406,17 +406,17 @@
     .btn.close:hover,
     .btn.refresh:hover {
         color: red;
-    }
+    } */
 
     #peace_title_div {
         display: flex;
         align-items: stretch; /* Ensures all children take full height */
     }
 
-    #peace_title_div .btn {
-        flex-grow: 1; /* Makes buttons take up equal height */
-        height: 100%; /* Ensures they fill the parent */
-    }
+    /* #peace_title_div .btn {
+        flex-grow: 1; 
+        height: 100%;
+    } */
 
     #peace_content {
         height: 100%; /* Ensure that #peace_content takes full available height */

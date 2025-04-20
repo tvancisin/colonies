@@ -152,97 +152,6 @@ export function constructParallelData(data) {
     return deduplicatedData;
 }
 
-
-// export function constructParallelData(data) {
-//     console.log(data);
-
-//     const transformedData = data.map(item => {
-
-//         // if (item.study?.colleges?.length > 1) {
-//         //     console.log(item,"---------------------");
-//         // }
-//         let college = item.study?.colleges?.[0]?.name || "unk";
-
-//         if (college == "St Leonard’s College") {
-//             college = "SLC"
-//         } else if (college == "St Salvator’s College") {
-//             college = "SSC"
-//         } else if (college == "St Mary’s College") {
-//             college = "SMC"
-//         } else if (college == "U.C.D.") {
-//             college = "UCD"
-//         } else if (college == "United College") {
-//             college = "UNC"
-//         }
-
-//         const degree = item.study?.degrees?.[0]?.name || "unk";
-//         const id = item.id;
-
-//         // Handle career extraction
-//         let career = "unk";
-//         if (item.floruit?.[0]?.occupation) {
-//             const occupation = item.floruit[0].occupation;
-//             if (Array.isArray(occupation)) {
-//                 career = occupation[0] || "unk";
-//             } else {
-//                 career = occupation || "unk";
-//             }
-//         }
-
-//         if (career != "unk") {
-//             career = career.toLowerCase();
-//         }
-
-//         // Assign to the appropriate group
-//         if (occupations.medicine.includes(career)) {
-//             career = "medicine"
-//         } else if (occupations.religion.includes(career)) {
-//             career = "religion"
-//         } else if (occupations.education.includes(career)) {
-//             career = "education"
-//         } else if (occupations.noble.includes(career)) {
-//             career = "noble"
-//         } else if (occupations.trade.includes(career)) {
-//             career = "trade"
-//         } else if (occupations.land.includes(career)) {
-//             career = "land"
-//         } else if (occupations.military.includes(career)) {
-//             career = "military"
-//         } else if (occupations.government.includes(career)) {
-//             career = "government"
-//         } else if (occupations.local_government.includes(career)) {
-//             career = "local_government"
-//         } else if (occupations.politics.includes(career)) {
-//             career = "politics"
-//         } else if (occupations.justice.includes(career)) {
-//             career = "justice"
-//         } else if (occupations.art.includes(career)) {
-//             career = "art"
-//         } else if (occupations.print.includes(career)) {
-//             career = "print"
-//         } else if (occupations.engineer.includes(career)) {
-//             career = "engineering"
-//         } else if (occupations.farming.includes(career)) {
-//             career = "farming"
-//         } else if (occupations.forestry.includes(career)) {
-//             career = "forestry"
-//         } else if (occupations.sport.includes(career)) {
-//             career = "sport"
-//         } else if (occupations.unclear.includes(career)) {
-//             career = "unclear"
-//         }
-
-//         return {
-//             id,
-//             college,
-//             degree,
-//             career,
-//         };
-//     });
-
-//     return transformedData
-// }
-
 //LOADING DATA FUNCTIONS
 export async function getJson(path) {
     let loadedData = await d3.json(path);
@@ -1025,7 +934,7 @@ export function career(career_data) {
         justice: [],
         art: [],
         print: [],
-        engineer: [],
+        engineering: [],
         farming: [],
         forestry: [],
         sport: [],
@@ -1094,7 +1003,7 @@ export function career(career_data) {
                 grps.print.push(item);
                 hasValidOccupation = true;
             } else if (occupations.engineer.includes(occupation)) {
-                grps.engineer.push(item);
+                grps.engineering.push(item);
                 hasValidOccupation = true;
             } else if (occupations.farming.includes(occupation)) {
                 grps.farming.push(item);

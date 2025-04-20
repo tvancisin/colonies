@@ -39,21 +39,13 @@
     window.scrollTo({ top: 0, behavior: "auto" });
   });
 
-  let width, height, map;
+  let width, map;
   let mapRef;
+  let default_data;
   let current_data;
   let current_data_string;
   let selected_country = null;
-  let legend_height = 50;
-  let legend_width = 200;
   let isOverlayVisible = true; // Controls the visibility of the overlay
-  let sections = [
-    { id: "all", name: "All" },
-    { id: "education", name: "Education" },
-    { id: "religion", name: "Religion" },
-    { id: "medicine", name: "Medicine" },
-    { id: "military", name: "Military" },
-  ];
 
   //load biographical data
   let path = ["./data/birth_colonies.json", "./data/floruit_colonies.json"];
@@ -146,6 +138,7 @@
     floruit_per_colony = groupByColony(floruit_data);
     floruit_per_city = groupByCity(floruit_data);
 
+    default_data = birth_data;
     current_data = birth_data;
     current_data_string = "birth";
   });
@@ -191,6 +184,7 @@
     }
     if (new_data !== current_data) {
       // Only update if value changes
+      default_data = new_data;
       current_data = new_data;
     }
   }
@@ -199,6 +193,7 @@
     let new_data = event.detail;
     if (new_data !== current_data) {
       // Only update if value changes
+      default_data = new_data;
       current_data = new_data;
     }
   }
@@ -213,16 +208,19 @@
     }
     // Only update if value changes
     if (new_data !== current_data) {
+      default_data = new_data[1];
       current_data = new_data[1];
     }
   }
 
-  function handleClose() {
+  function handle_refresh() {
     //reset data on details close
     if (current_data_string == "birth") {
       current_data = birth_data;
+      default_data = birth_data;
     } else if (current_data_string == "floruit") {
       current_data = floruit_data;
+      default_data = floruit_data;
     }
     d3.select("#all").style("background-color", "white");
     d3.selectAll("#male, #female").style("background-color", "#808080");
@@ -235,7 +233,7 @@
   }
 
   //set variables based on selection (birth or floruit)
-  function change_data(selected_data) {
+  function handle_birth_floruit(selected_data) {
     d3.select("#all").style("background-color", "white");
     d3.selectAll("#male, #female").style("background-color", "#808080");
     if (selected_data == "birth") {
@@ -243,47 +241,55 @@
       d3.select("#floruit").style("background-color", "#808080");
       d3.select("#birth").style("background-color", "white");
       current_data = birth_data;
+      default_data = birth_data;
       current_data_string = selected_data;
     } else if (selected_data == "floruit") {
       d3.select("#header").text("Student Careers in the Colonies (1700-1897)");
       d3.select("#floruit").style("background-color", "white");
       d3.select("#birth").style("background-color", "#808080");
       current_data = floruit_data;
+      default_data = floruit_data;
       current_data_string = selected_data;
     }
   }
 
-  function change_gender(gender) {
+  function handle_gender(gender) {
     if (current_data_string == "birth") {
+      let m_birth = default_data.filter((d) => d.gender === "M");
+      let f_birth = default_data.filter((d) => d.gender === "F");
       if (gender == "male") {
-        current_data = birth_male;
+        current_data = m_birth;
         d3.select("#male").style("background-color", "white");
         d3.selectAll("#female, #all").style("background-color", "#808080");
       } else if (gender == "female") {
-        current_data = birth_female;
+        current_data = f_birth;
         d3.select("#female").style("background-color", "white");
         d3.selectAll("#male, #all").style("background-color", "#808080");
       } else if (gender == "all") {
-        current_data = birth_data;
+        current_data = default_data;
         d3.select("#all").style("background-color", "white");
         d3.selectAll("#male, #female").style("background-color", "#808080");
       }
     } else if (current_data_string == "floruit") {
+      let m_floruit = default_data.filter((d) => d.gender === "M");
+      let f_floruit = default_data.filter((d) => d.gender === "F");
       if (gender == "male") {
-        current_data = floruit_male;
+        current_data = m_floruit;
         d3.select("#male").style("background-color", "white");
         d3.selectAll("#female, #all").style("background-color", "#808080");
       } else if (gender == "female") {
-        current_data = floruit_female;
+        current_data = f_floruit;
         d3.select("#female").style("background-color", "white");
         d3.selectAll("#male, #all").style("background-color", "#808080");
       } else if (gender == "all") {
-        current_data = floruit_data;
+        current_data = default_data;
         d3.select("#all").style("background-color", "white");
         d3.selectAll("#male, #female").style("background-color", "#808080");
       }
     }
   }
+
+  // $: console.log(current_data);
 </script>
 
 <main bind:clientWidth={width}>
@@ -317,13 +323,13 @@
         <button
           id="birth"
           on:click={() => {
-            change_data("birth");
+            handle_birth_floruit("birth");
           }}>Birth</button
         >
         <button
           id="floruit"
           on:click={() => {
-            change_data("floruit");
+            handle_birth_floruit("floruit");
           }}
         >
           Career
@@ -333,22 +339,25 @@
         <button
           id="male"
           on:click={() => {
-            change_gender("male");
+            handle_gender("male");
           }}
         >
           Male</button
         ><button
           id="female"
           on:click={() => {
-            change_gender("female");
+            handle_gender("female");
           }}>Female</button
         ><button
           id="all"
           on:click={() => {
-            change_gender("all");
+            handle_gender("all");
           }}>All</button
         >
       </div>
+      <button class="btn refresh" on:click={handle_refresh}
+        >Refresh <i class="fa fa-refresh"></i>
+      </button>
       <div id="time_description">Students Entering University</div>
       <!-- Navigation Menu -->
       <Timeline {current_data} {selected_country} />
@@ -358,7 +367,6 @@
         {floruit_per_colony}
         {selected_country}
         {current_data_string}
-        on:close={handleClose}
       />
     {/if}
     {#if isOverlayVisible}
@@ -432,6 +440,27 @@
     padding: 0px;
     margin: 0px;
     transition: top 0.3s ease;
+    margin: 2px;
+  }
+
+  .btn.refresh {
+    position: absolute;
+    top: 66px;
+    left: 7px;
+    color: black;
+    background-color: steelblue;
+    border: none;
+    padding: 2px 10px;
+    border-radius: 2px;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: "Montserrat";
+    font-weight: 450;
+    transition: border 0.3s ease;
+  }
+
+  .btn.refresh:hover {
+    color: white;
   }
 
   #gender {
