@@ -151,14 +151,15 @@
   let colonies_1820;
   let colonies_1885;
   let suez;
+  let all;
   const json_paths = [
     "./data/colony_divisions.json",
-    "./data/test.json",
+    "./data/shit.json",
     "./data/colonies_1680.json",
     "./data/colonies_1750.json",
     "./data/colonies_1820.json",
     "./data/colonies_1885.json",
-    "./data/test1.json",
+    "./data/shit_2.json",
   ];
   getGeo(json_paths).then((geo) => {
     countries_json = geo[0];

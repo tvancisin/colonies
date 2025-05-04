@@ -128,21 +128,38 @@
     //     );
     // };
 
+    function curvedPath([x1, y1], [x2, y2]) {
+        const dx = (x2 - x1) / 3;
+        return `M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+    }
+
     $: car_line = function path(d) {
-        return d3.line()(
-            withoutCareerDimensions.map(function (p) {
-                return [x_scale(p), y[p](d[p])];
-            }),
-        );
+        const p1 = [x_scale("college"), y["college"](d["college"])];
+        const p2 = [x_scale("degree"), y["degree"](d["degree"])];
+        return curvedPath(p1, p2);
     };
 
     $: col_line = function path(d) {
-        return d3.line()(
-            withoutCollegeDimensions.map(function (p) {
-                return [x_scale(p), y[p](d[p])];
-            }),
-        );
+        const p1 = [x_scale("degree"), y["degree"](d["degree"])];
+        const p2 = [x_scale("career"), y["career"](d["career"])];
+        return curvedPath(p1, p2);
     };
+
+    // $: car_line = function path(d) {
+    //     return d3.line()(
+    //         withoutCareerDimensions.map(function (p) {
+    //             return [x_scale(p), y[p](d[p])];
+    //         }),
+    //     );
+    // };
+
+    // $: col_line = function path(d) {
+    //     return d3.line()(
+    //         withoutCollegeDimensions.map(function (p) {
+    //             return [x_scale(p), y[p](d[p])];
+    //         }),
+    //     );
+    // };
 
     function college_click(college) {
         console.log(college);
@@ -156,7 +173,7 @@
 
     function career_click(career) {
         console.log(career);
-        
+
         selectedCareerStore.set(career);
     }
 
@@ -176,7 +193,7 @@
 <svg {width} {height}>
     {#if parallel_data}
         {#each withoutCareer as data}
-        <!-- {console.log(data, car_line(data))} -->
+            <!-- {console.log(data, car_line(data))} -->
             <path
                 fill="none"
                 stroke="orange"
@@ -331,6 +348,3 @@
         {/each}
     {/if}
 </svg>
-
-<style>
-</style>

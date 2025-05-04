@@ -96,13 +96,19 @@
 
     //// CAREER FILTER
     $: if (selectedCareer.length != 0) {
+        console.log(selectedCareer);
+
         // career groups
         let career_groups = career(data);
+
         // only selected career
         let fin_career = career_groups[selectedCareer].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
+
+        console.log(fin_career);
+
         // update data
         data = fin_career;
         // update map locations
@@ -261,6 +267,8 @@
     $: width_mapbox_expression_after1869 = getWidthExpression(
         filtered_width_after1869,
     );
+
+    
     $: countryNames = filtered_width_before1869
         .filter((item) => item[0] !== undefined) // Ignore undefined values
         .map((item) => item[0]); // Extract the country names
@@ -336,7 +344,7 @@
         markerElement.style.backgroundImage = `url(${imageURL})`; // Initial image
 
         logoElement = document.createElement("div");
-        logoElement.className = "logo"; 
+        logoElement.className = "logo";
         logoElement.style.width = `100px`;
         logoElement.style.height = `28px`;
         logoElement.style.backgroundSize = "100%";
@@ -506,6 +514,33 @@
                     generateId: true, // Ensures all features have unique IDs
                 });
 
+                // suez lines
+                map.addLayer({
+                    id: "shipline_after1869",
+                    type: "line",
+                    source: "shipping_after1869",
+                    paint: {
+                        "line-color": "#666666",
+                        "line-width": [
+                            "match",
+                            ["get", "ADMIN"],
+                            "India",
+                            0.271,
+                            "Australia",
+                            0.2,
+                            "Asia",
+                            0.042,
+                            "Africa",
+                            0.614,
+                            "Caribbean",
+                            0.114,
+                            "America",
+                            0.328,
+                            0,
+                        ],
+                    },
+                });
+
                 // pre suez lines
                 map.addLayer({
                     id: "shipline_before1869",
@@ -528,33 +563,6 @@
                             0.271,
                             "America",
                             0.385,
-                            0,
-                        ],
-                    },
-                });
-
-                // suez lines
-                map.addLayer({
-                    id: "shipline_after1869",
-                    type: "line",
-                    source: "shipping_after1869",
-                    paint: {
-                        "line-color": "white",
-                        "line-width": [
-                            "match",
-                            ["get", "ADMIN"],
-                            "India",
-                            0.271,
-                            "Australia",
-                            0.2,
-                            "Asia",
-                            0.042,
-                            "Africa",
-                            0.614,
-                            "Caribbean",
-                            0.114,
-                            "America",
-                            0.328,
                             0,
                         ],
                     },
@@ -697,6 +705,8 @@
             type: "FeatureCollection",
             features: local_conflict_geojson,
         };
+
+        console.log("geojson_data", geojson_data);
 
         // if source exists, update it
         if (map.getSource("locations")) {

@@ -6,7 +6,13 @@
         selectedDegreeStore,
         selectedCollegeStore,
     } from "../years";
-    import { year_filter, career, degree, college } from "../utils";
+    import {
+        year_filter,
+        career,
+        degree,
+        college,
+        all_students,
+    } from "../utils";
 
     export let current_data;
     export let selected_country;
@@ -23,6 +29,8 @@
     let svg;
     let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900];
     let y_ticks = [5, 15];
+    let y_ticks_top = [5, 15];
+    let y_ticks_all = [200, 400, 600];
     let selectedLineStart = null,
         selectedLineEnd = null,
         selectedYearStart = null,
@@ -83,7 +91,7 @@
         // construct college groups
         let college_groups = college(current_data);
 
-        // only selected college 
+        // only selected college
         data_to_draw = college_groups[selected_college].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
@@ -140,13 +148,26 @@
         .range([margin.left, width - margin.right])
         .padding(0.2);
 
-    // Create the Y scale for the counts (vertical axis)
+    let yMax = 20;
+    let heightUpdated = false;
+
+    // Create the initial scale
     $: yScale = d3
         .scaleLinear()
-        .domain([0, 20]) // The max number of elements
-        .nice() // Adds some padding to the top of the Y axis
+        .domain([0, yMax])
+        .nice()
         .range([height - margin.bottom, margin.top]);
 
+    function updateYScale() {
+        if (yMax === 20) {
+            yMax = 670;
+            y_ticks = y_ticks_all;
+        } else {
+            yMax = 20;
+            y_ticks = y_ticks_top;
+        }
+        heightUpdated = !heightUpdated;
+    }
     //BRUSHING
     $: brush = d3
         .brushX()
@@ -251,7 +272,8 @@
                 .select(".x-axis")
                 .call(xAxis)
                 .select(".domain")
-                .style("stroke", "gray");
+                .style("stroke", "gray")
+                .style("stroke-opacity", 0);
 
             d3.select(svg)
                 .select(".x-axis")
@@ -405,8 +427,27 @@
     {/if}
 </div> -->
 <div id="timeline" bind:clientWidth={containerWidth} bind:clientHeight={height}>
+    <button id="switch" on:click={updateYScale}>
+        {#if yMax === 20}
+            <i class="fa fa-toggle-off" aria-hidden="true"></i>
+        {:else}
+            <i class="fa fa-toggle-on" aria-hidden="true"></i>
+        {/if}
+    </button>
     <svg {width} {height} bind:this={svg}>
         <!-- Bars -->
+        {#each all_students as d}
+            <rect
+                x={xScale(d.year)}
+                rx="1"
+                y={heightUpdated ? yScale(d.number) : yScale(0)}
+                width={xScale.bandwidth()}
+                height={heightUpdated ? yScale(0) - yScale(d.number) : 0}
+                fill="black"
+                class="bar"
+            />
+        {/each}
+
         {#each completeGrouped as d}
             <rect
                 x={xScale(d[0])}
@@ -490,11 +531,26 @@
         fill-opacity: 0.2;
     }
 
+    rect.bar {
+        transition:
+            y 0.5s ease,
+            height 0.5s ease;
+    }
+
     #year_detail {
         position: absolute;
         visibility: hidden;
         width: 95%;
         height: 110px;
         bottom: 160px;
+    }
+
+    #switch {
+        position: absolute;
+        color: gray;
+        top: 0px;
+        background: none;
+        border: none;
+        cursor: pointer;
     }
 </style>
