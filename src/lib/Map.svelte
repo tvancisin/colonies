@@ -63,11 +63,6 @@
 
     // redrawing locations if current_data changes [used on exit also]
     $: if (data && map && map.getSource("locations")) {
-        // map.removeLayer("population");
-        // map.removeSource("locations");
-        // map.off("click", "population");
-        // map.off("mousemove", "population");
-        // map.off("mouseleave", "population");
         drawLocations(
             data,
             current_data_string,
@@ -137,16 +132,6 @@
         // data = def_data;
         // console.log("degree filter log");
     }
-
-    // $: if (
-    //     selectedCareer.length == 0 &&
-    //     selectedDegree.length == 0 &&
-    //     selectedCollege.length == 0 &&
-    //     selected_country !== null
-    // ) {
-    //     drawLocations(def_data, current_data_string, "all filters are zero");
-    //     data = def_data;
-    // }
 
     //// COLLEGE FILTER
     $: if (selectedCollege.length != 0) {
@@ -292,17 +277,17 @@
     function adjustMapForWindowSize() {
         if (window.innerWidth <= 1000) {
             map.flyTo({
-                center: [20, 0],
+                center: [20, 5],
                 zoom: 0.8,
             });
         } else if (window.innerWidth <= 1200) {
             map.flyTo({
-                center: [20, 0],
+                center: [20, 5],
                 zoom: 0.9,
             });
         } else if (window.innerWidth >= 1200) {
             map.flyTo({
-                center: [20, 0],
+                center: [20, 5],
                 zoom: 1.4,
             });
         }
@@ -328,7 +313,6 @@
             attributionControl: false,
             container: "map",
             style: "mapbox://styles/tomasvancisin/cm63qqxy1004j01s7bp770wpf",
-            // style: "mapbox://styles/tomasvancisin/cm0i5fpy4004b01qodg9g2awr",
             maxZoom: 8,
             projection: "naturalEarth",
             logoPosition: "top-right",
@@ -353,7 +337,7 @@
         new mapboxgl.Marker(markerElement, {
             offset: [width / 3, 0],
         })
-            .setLngLat([-18.378063, 43.546441])
+            .setLngLat([-24.378063, 43.546441])
             .addTo(map);
 
         new mapboxgl.Marker(logoElement, {
@@ -393,7 +377,7 @@
                             ["get", "ADMIN"],
                             "Britain",
                             "#F17822",
-                            "#00b4e6",
+                            "white",
                         ],
                         "fill-opacity": [
                             "match",
@@ -569,19 +553,19 @@
                 });
 
                 //// historical map layer
-                map.addSource("portland", {
-                    type: "raster",
-                    url: "mapbox://tomasvancisin.30mip8ve",
-                });
+                // map.addSource("portland", {
+                //     type: "raster",
+                //     url: "mapbox://tomasvancisin.30mip8ve",
+                // });
 
-                map.addLayer({
-                    id: "portland",
-                    source: "portland",
-                    type: "raster",
-                    layout: {
-                        visibility: "none", // Set the initial visibility explicitly
-                    },
-                });
+                // map.addLayer({
+                //     id: "portland",
+                //     source: "portland",
+                //     type: "raster",
+                //     layout: {
+                //         visibility: "none", // Set the initial visibility explicitly
+                //     },
+                // });
 
                 //// draw clusters
                 drawLocations(data, current_data_string, "initial draw");
@@ -943,7 +927,7 @@
 
     //RESET DEFAULT ZOOM AND FLY TO INITIAL COORDINATES
     function flyToInitialPosition() {
-        map.flyTo({ center: [20, 0], zoom: 1.2 });
+        map.flyTo({ center: [20, 5], zoom: 1.2 });
     }
 
     export { flyToInitialPosition };

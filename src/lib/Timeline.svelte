@@ -443,7 +443,8 @@
                 y={heightUpdated ? yScale(d.number) : yScale(0)}
                 width={xScale.bandwidth()}
                 height={heightUpdated ? yScale(0) - yScale(d.number) : 0}
-                fill="black"
+                fill="gray"
+                fill-opacity=0.5
                 class="bar"
             />
         {/each}

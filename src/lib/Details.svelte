@@ -143,13 +143,6 @@
         check = false;
     }
 
-    function refresh() {
-        check = true;
-        selectedCareerStore.set([]);
-        selectedDegreeStore.set([]);
-        selectedCollegeStore.set([]);
-    }
-
     //data for network
     // $: node_link = constructNodesAndLinks(data);
     // data for parallel
@@ -164,14 +157,6 @@
     bind:clientHeight={details_height}
 >
     <div id="peace_title_div">
-        <!-- <button class="btn close" on:click={closeDetails}
-            ><i class="fa fa-close"></i></button
-        >
-        {#if selected_country !== null && selected_country !== undefined}
-            <button class="btn refresh" on:click={refresh}>
-                <i class="fa fa-refresh"></i>
-            </button>
-        {/if} -->
         {#if selected_country == "America"}
             <h3>North America</h3>
         {:else if selected_country == "India"}
@@ -316,7 +301,7 @@
         width: 35%;
         height: 100%;
         transition: right 0.3s ease;
-        background-color: #003847;
+        background-color: #252529;
         overflow: hidden;
         z-index: 5;
         font-family: "Montserrat", sans-serif;
@@ -326,10 +311,13 @@
         display: flex;
         flex-direction: column;
         z-index: 11;
-        box-shadow: 0 0 10px #000000;
+        box-shadow: -2px 0 8px -4px #000000;
     }
     hr {
-        border: 1px solid rgb(72, 72, 72);
+        width: 80%;
+        color: rgb(66, 66, 66);
+        border: none;
+        border-top: 1px solid;
     }
 
     strong {
@@ -375,51 +363,13 @@
         }
     }
 
-    /* .btn.close {
-        position: absolute;
-        right: 4px;
-        background: none;
-        color: white;
-        border: none;
-        padding: 2px 10px;
-        border-radius: 2px;
-        cursor: pointer;
-        font-size: 1.5em;
-        font-family: "Montserrat";
-        transition: border 0.3s ease;
-    } */
-
-    /* .btn.refresh {
-        position: absolute;
-        left: 5px;
-        background: none;
-        color: white;
-        border: none;
-        padding: 3px 10px;
-        border-radius: 2px;
-        font-size: 1.4em;
-        cursor: pointer;
-        font-family: "Montserrat";
-        transition: border 0.3s ease;
-    }
-
-    .btn.close:hover,
-    .btn.refresh:hover {
-        color: red;
-    } */
-
     #peace_title_div {
         display: flex;
-        align-items: stretch; /* Ensures all children take full height */
+        align-items: stretch;
     }
 
-    /* #peace_title_div .btn {
-        flex-grow: 1; 
-        height: 100%;
-    } */
-
     #peace_content {
-        height: 100%; /* Ensure that #peace_content takes full available height */
+        height: 100%;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
@@ -427,10 +377,6 @@
         position: relative;
         overflow-y: auto;
         font-size: 0.8em;
-        margin-top: 0px;
-        margin-right: 5px;
-        margin-left: 5px;
-        margin-bottom: 5px;
         border-radius: 2px;
         gap: 6px;
     }
@@ -467,7 +413,7 @@
         display: flex;
         flex-direction: column;
         line-height: 1.5;
-        background: #001c23;
+        background: #181818;
         font-size: 12px;
         color: white;
         border-radius: 2px;

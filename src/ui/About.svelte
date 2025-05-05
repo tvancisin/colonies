@@ -90,6 +90,12 @@
   }
 
   @media (max-width: 768px) {
+    #about {
+      width: 90%; /* Full width for smaller screens */
+    }
+  }
+
+  @media (max-width: 768px) {
     .float-image {
       width: 100%; /* Full width for smaller screens */
     }

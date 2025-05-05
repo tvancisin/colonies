@@ -22,7 +22,6 @@
     selectedCareerStore,
     selectedDegreeStore,
     selectedCollegeStore,
-    selectedGenderStore,
   } from "./years";
   import Home from "./ui/Home.svelte";
   import About from "./ui/About.svelte";
@@ -428,7 +427,7 @@
     position: absolute;
     color: white;
     left: 45px;
-    bottom: 110px;
+    bottom: 120px;
     font-weight: 400;
     font-size: 14px;
     padding: 5px;

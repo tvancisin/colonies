@@ -33,7 +33,7 @@
     <img id="uni_logo" src="uni_white.png" alt="St Andrews University Logo" />
     <h1>University of St Andrews in the Colonies</h1>
     <h3>
-        Exploring connections between the University of St Andrews' students and
+        Exploring connections between St Andrews students and
         the British Empire.
     </h3>
 </div>
@@ -42,10 +42,10 @@
     #home {
         position: relative;
         width: 100%;
-        height: 300px;
         align-content: center;
         text-align: center;
-        background-color: #001c23;
+        background-color: #18181B;
+        padding-bottom: 40px;
     }
     h1 {
         color: white;
@@ -66,7 +66,7 @@
         z-index: 10;
     }
     #navigation .fa-bars {
-        font-size: 24px;
+        font-size: 30px;
         color: white;
         cursor: pointer;
     }
@@ -97,9 +97,7 @@
     }
 
     #uni_logo {
-        position: absolute;
-        top: 2px;
-        right: 5px;
-        height: 50px;
+        padding-top: 70px;
+        height: 80px;
     }
 </style>
