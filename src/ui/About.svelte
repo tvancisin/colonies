@@ -17,12 +17,9 @@
         individuals and focus predominantly on the Transatlantic trade.
       </p>
       <figure class="image-container">
-        <img src="./colonies.png" alt="Report Image" class="float-image" />
+        <img src="./colonies_black.png" alt="Report Image" class="float-image" />
         <figcaption class="image-caption">
-          UK universities studying their colonial past. White font
-          and a page icon indicate published reports. Visualization
-          icon indicates using information visulization techniques as a research method.
-        </figcaption>
+          UK universities studying their colonial past. White font indicates published reports. 
       </figure>
       <p>
         In St Andrews, we tried a different and much broader approach. We looked
@@ -41,7 +38,7 @@
 <style>
   #people {
     position: relative;
-    background-color: #003847;
+    background-color: #242429;
     width: 100%;
   }
 
@@ -56,20 +53,20 @@
   }
 
   .image-container {
-    width: 70%; /* Match the image width */
-    margin: 50px auto; /* Center the figure element */
-    text-align: center; /* Center the caption */
+    width: 70%; 
+    margin: 50px auto;
+    text-align: center; 
   }
 
   .float-image {
-    width: 100%; /* Make image fill the container */
+    width: 100%; 
     display: block;
     border-radius: 2px;
   }
 
   .image-caption {
-    font-size: 13px;
-    color: gray;
+    font-size: 14px;
+    color: rgb(164, 164, 164);
     margin-top: 8px;
     line-height: 1;
     font-style: italic;
@@ -82,28 +79,28 @@
     padding-bottom: 50px;
     width: 75%;
     margin: auto;
-    display: flex; /* Enable flexbox for centering */
-    flex-direction: column; /* Ensure content stacks vertically */
-    align-items: center; /* Center horizontally */
-    justify-content: center; /* Center vertically */
-    min-height: 100vh; /* Optional: Ensure the container fills the viewport */
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    min-height: 100vh;
   }
 
   @media (max-width: 768px) {
     #about {
-      width: 90%; /* Full width for smaller screens */
+      width: 90%; 
     }
   }
 
   @media (max-width: 768px) {
     .float-image {
-      width: 100%; /* Full width for smaller screens */
+      width: 100%; 
     }
   }
 
   p {
     text-indent: 20px;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.3;
   }
 </style>

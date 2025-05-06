@@ -288,7 +288,7 @@
         } else if (window.innerWidth >= 1200) {
             map.flyTo({
                 center: [20, 5],
-                zoom: 1.4,
+                zoom: 1.2,
             });
         }
     }

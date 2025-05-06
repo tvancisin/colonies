@@ -181,16 +181,15 @@
         font-weight: 700;
     }
 
-    /* Parent container for all timeline events */
     .timeline-container {
         position: relative;
-        width: 100%; /* Full screen width */
+        width: 100%;
         display: flex;
-        flex-direction: column; /* Stack events vertically */
-        gap: 20px; /* Add vertical spacing between events */
-        padding: 20px 0; /* Add padding to the top and bottom */
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px 0;
         padding-top: 100px;
-        background-color: #001c23;
+        background-color: #18181b;
         z-index: 11;
     }
 
@@ -225,7 +224,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow: hidden; /* Ensures enlarged images don't overflow the container */
+        overflow: hidden;
     }
 
     .event-image img {
@@ -257,11 +256,11 @@
     /* Responsive Design */
     @media (max-width: 750px) {
         .timeline-container {
-            gap: 1px; /* Increase gap between events on smaller screens */
+            gap: 1px;
         }
 
         .event-content {
-            flex-direction: column; /* Stack image and text vertically */
+            flex-direction: column;
             align-items: center;
         }
 
