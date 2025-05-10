@@ -58,6 +58,9 @@
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
+
+        //update current data so filter can be combined
+        current_data = data_to_draw;
     } else if (selected_career.length == 0) {
         data_to_draw = current_data;
     }
@@ -77,6 +80,9 @@
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
+
+        //update current data so filter can be combined
+        current_data = data_to_draw;
     } else if (selected_degree.length == 0) {
         data_to_draw = current_data;
     }
@@ -96,6 +102,8 @@
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
+        //update current data so filter can be combined
+        current_data = data_to_draw;
     } else if (selected_college.length == 0) {
         data_to_draw = current_data;
     }
@@ -444,7 +452,7 @@
                 width={xScale.bandwidth()}
                 height={heightUpdated ? yScale(0) - yScale(d.number) : 0}
                 fill="gray"
-                fill-opacity=0.5
+                fill-opacity="0.5"
                 class="bar"
             />
         {/each}

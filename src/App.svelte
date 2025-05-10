@@ -45,6 +45,7 @@
   let current_data_string;
   let selected_country = null;
   let isOverlayVisible = true; // Controls the visibility of the overlay
+  let selected_gender = "all";
 
   //load biographical data
   let path = ["./data/birth_colonies.json", "./data/floruit_colonies.json"];
@@ -172,19 +173,37 @@
 
   function handlePolygonClick(event) {
     selected_country = event.detail;
+    let overall_data;
     let new_data;
     if (current_data_string == "birth") {
-      new_data = births_per_colony.find(
+      // new_data = births_per_colony.find(
+      //   (item) => item[0] === selected_country,
+      // )?.[1];
+
+      overall_data = births_per_colony.find(
         (item) => item[0] === selected_country,
       )?.[1];
+
+      new_data = current_data.filter(
+        (person) => person.birth_location?.colony === selected_country,
+      );
     } else if (current_data_string == "floruit") {
-      new_data = floruit_per_colony.find(
+      // new_data = floruit_per_colony.find(
+      //   (item) => item[0] === selected_country,
+      // )?.[1];
+      overall_data = floruit_per_colony.find(
         (item) => item[0] === selected_country,
       )?.[1];
+
+      new_data = current_data.filter(
+        (person) =>
+          Array.isArray(person.floruit) &&
+          person.floruit.some((f) => f.location?.colony === selected_country),
+      );
     }
     if (new_data !== current_data) {
       // Only update if value changes
-      default_data = new_data;
+      default_data = overall_data;
       current_data = new_data;
     }
   }
@@ -214,6 +233,8 @@
   }
 
   function handle_refresh() {
+    d3.select("#all").style("background-color", "white");
+    d3.selectAll("#male, #female").style("background-color", "#808080");
     //reset data on details close
     if (current_data_string == "birth") {
       current_data = birth_data;
@@ -222,8 +243,6 @@
       current_data = floruit_data;
       default_data = floruit_data;
     }
-    d3.select("#all").style("background-color", "white");
-    d3.selectAll("#male, #female").style("background-color", "#808080");
     selected_country = null;
     selectedCareerStore.set([]);
     selectedYearsStore.set([]);
@@ -254,6 +273,7 @@
   }
 
   function handle_gender(gender) {
+    selected_gender = gender;
     if (current_data_string == "birth") {
       let m_birth = default_data.filter((d) => d.gender === "M");
       let f_birth = default_data.filter((d) => d.gender === "F");

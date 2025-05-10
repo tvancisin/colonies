@@ -87,19 +87,19 @@
         data = filter_years;
     }
 
-    //// CAREER FILTER
-    $: if (selectedCareer.length != 0) {
-        // construct career groups
-        let career_groups = career(data);
+    //// COLLEGE FILTER
+    $: if (selectedCollege.length != 0) {
+        // college groups
+        let college_groups = college(data);
 
-        // only selected career
-        let fin_career = career_groups[selectedCareer].filter(
+        // only selected college
+        let fin_college = college_groups[selectedCollege].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
 
         // update data
-        data = fin_career;
+        data = fin_college;
     }
 
     //// DEGREE FILTER
@@ -117,19 +117,19 @@
         data = fin_degree;
     }
 
-    //// COLLEGE FILTER
-    $: if (selectedCollege.length != 0) {
-        // college groups
-        let college_groups = college(data);
+    //// CAREER FILTER
+    $: if (selectedCareer.length != 0) {
+        // construct career groups
+        let career_groups = career(data);
 
-        // only selected college
-        let fin_college = college_groups[selectedCollege].filter(
+        // only selected career
+        let fin_career = career_groups[selectedCareer].filter(
             (item, index, self) =>
                 index === self.findIndex((t) => t.id === item.id),
         );
 
         // update data
-        data = fin_college;
+        data = fin_career;
     }
 
     // function closeDetails() {
@@ -137,14 +137,15 @@
     // }
 
     // if refreshed, reset to filteredCountry data
-    let check = false;
-    $: if (check) {
-        data = filteredCountry;
-        check = false;
-    }
+    // let check = false;
+    // $: if (check) {
+    //     data = filteredCountry;
+    //     check = false;
+    // }
 
     //data for network
     // $: node_link = constructNodesAndLinks(data);
+
     // data for parallel
     $: if (data) {
         parallel_data = constructParallelData(data);
@@ -186,7 +187,7 @@
                 {/if}
             </div>
         </div>
-        <div id="peace_process">
+        <div id="people_details">
             <div class="scrollable-content">
                 {#if data}
                     {#each data as d}
@@ -406,7 +407,7 @@
     }
 
     #general,
-    #peace_process {
+    #people_details {
         flex-basis: 0;
         width: 100%;
         overflow-y: auto;
