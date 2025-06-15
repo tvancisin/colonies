@@ -359,6 +359,17 @@ export function constructParallelData(data) {
 }
 
 //LOADING DATA FUNCTIONS
+export async function getIndividualCSV(path) {
+    let loadedData = await d3.csv(path);
+    return loadedData;
+}
+
+export async function getCSV(paths) {
+    const promises = paths.map(path => getIndividualCSV(path));
+    const results = await Promise.all(promises);
+    return results;
+}
+
 export async function getJson(path) {
     let loadedData = await d3.json(path);
     return loadedData;

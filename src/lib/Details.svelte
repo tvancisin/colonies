@@ -63,9 +63,9 @@
 
         // data to operate with
         data = filteredCountry;
-        console.log("one");
+        // console.log("one");
     } else {
-        console.log("three");
+        // console.log("three");
         data = current_data;
     }
 
@@ -146,8 +146,33 @@
     //data for network
     // $: node_link = constructNodesAndLinks(data);
 
+    // sort by years of study
+    function extractYear(entry) {
+        // Try to get year from colleges[0].from
+        if (entry.study?.colleges?.length > 0 && entry.study.colleges[0].from) {
+            return parseInt(entry.study.colleges[0].from);
+        }
+
+        // Else try to get year from degrees[0].date
+        if (entry.study?.degrees?.length > 0 && entry.study.degrees[0].date) {
+            return parseInt(entry.study.degrees[0].date.slice(0, 4));
+        }
+
+        // Default fallback if neither exists
+        return Infinity; // Places this item at the end
+    }
+
     // data for parallel
     $: if (data) {
+        data.sort((a, b) => extractYear(a) - extractYear(b));
+        console.log(data);
+        const withColony = data.filter(
+            (person) => person.birth_location?.colony !== undefined,
+        );
+        console.log(withColony);
+
+        // const idArray = data.map(obj => obj.id);
+        // console.log(idArray);
         parallel_data = constructParallelData(data);
     }
 </script>
@@ -192,40 +217,24 @@
                 {#if data}
                     {#each data as d}
                         <p><strong>Name:</strong> {d.forename} {d.surname}</p>
-
                         <p>
                             <strong>Birth Location:</strong>
                             {d.birth_location?.original_name || "Unknown"}
                         </p>
-
                         <p>
                             <strong>Birth Date:</strong>
                             {d.birth_date || "Unknown"}
                         </p>
-
-                        <p>
-                            <strong>Death Date:</strong>
-                            {d.death_date || "Unknown"}
-                        </p>
-
-                        <p>
-                            <strong>Death Location:</strong>
-                            {d.death_location?.original_name || "Unknown"}
-                        </p>
-
                         <p>
                             <strong>Father:</strong>
                             {d.father?.forename || ""}
                             {d.father?.surname || "Unknown"}
                         </p>
-
                         <p>
                             <strong>Mother:</strong>
                             {d.mother?.forename || ""}
                             {d.mother?.surname || "Unknown"}
                         </p>
-
-                        <!-- Colleges -->
                         <p>
                             <strong>Colleges:</strong>
                             {#if d.study?.colleges?.length > 0}
@@ -238,8 +247,6 @@
                                 None
                             {/if}
                         </p>
-
-                        <!-- Degrees -->
                         <p>
                             <strong>Degrees:</strong>
                             {#if d.study?.degrees?.length > 0}
@@ -252,8 +259,6 @@
                                 None
                             {/if}
                         </p>
-
-                        <!-- Floruit -->
                         <p>
                             <strong>Career:</strong>
                             {#if d.floruit?.length > 0}
@@ -269,8 +274,14 @@
                                 None
                             {/if}
                         </p>
-
-                        <!-- References -->
+                        <p>
+                            <strong>Death Location:</strong>
+                            {d.death_location?.original_name || "Unknown"}
+                        </p>
+                        <p>
+                            <strong>Death Date:</strong>
+                            {d.death_date || "Unknown"}
+                        </p>
                         <p>
                             <strong>References:</strong>
                             {#if d.references?.length > 0}
@@ -282,9 +293,25 @@
                                 None
                             {/if}
                         </p>
-
-                        <p><strong>ID:</strong> {d.id || "Unknown"}</p>
-
+                        <p>
+                            <strong>Online Register:</strong>
+                            {#if d.new_id}
+                                <a
+                                    href={`https://arts.st-andrews.ac.uk/biographical-register/data/documents/${d.new_id}`}
+                                    target="_blank"
+                                >
+                                    Link
+                                </a>
+                            {:else}
+                                <a
+                                    href={`https://arts.st-andrews.ac.uk/biographical-register/data/documents/${d.id}`}
+                                    target="_blank"
+                                >
+                                    Link
+                                </a>
+                            {/if}
+                        </p>
+                        <!-- <p><strong>ID:</strong> {d.id || "Unknown"}</p> -->
                         <hr />
                     {/each}
                 {/if}
@@ -302,7 +329,8 @@
         width: 35%;
         height: 100%;
         transition: right 0.3s ease;
-        background-color: #252529;
+        /* background-color: #003847; */
+        background-color: #242429;
         overflow: hidden;
         z-index: 5;
         font-family: "Montserrat", sans-serif;
@@ -322,8 +350,8 @@
     }
 
     strong {
-        font-weight: 450;
-        color: #a6a6a6;
+        font-weight: 600;
+        color: #000000;
     }
     @media (max-width: 768px) {
         #details {
@@ -342,7 +370,7 @@
         color: white;
         margin: auto;
         font-size: 1.3redem;
-        padding: 5px;
+        padding: 3px;
         font-weight: 500;
     }
 
@@ -414,9 +442,9 @@
         display: flex;
         flex-direction: column;
         line-height: 1.5;
-        background: #181818;
+        background: #ffffff;
         font-size: 12px;
-        color: white;
+        color: rgb(0, 0, 0);
         border-radius: 2px;
         flex-shrink: 0; /* Prevent shrinking of these elements */
         flex-grow: 1; /* Takes one unit of the available space */
@@ -448,7 +476,7 @@
     }
 
     :global(a) {
-        color: rgb(110, 122, 177);
+        color: rgb(87, 87, 87);
         cursor: pointer;
     }
 

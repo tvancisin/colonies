@@ -100,7 +100,7 @@
     $: x_scale = d3
         .scalePoint()
         .domain(dimensions)
-        .range([margin.left + 15, width - margin.right - 15]);
+        .range([margin.left + 5, width - margin.right - 20]);
 
     $: x_bar_scale = d3.scaleLinear().domain([0, 400]).range([2, 40]);
 
@@ -108,17 +108,17 @@
         .call(d3.axisLeft(y["college"]))
         .selectAll("text")
         .style("font-family", "Montserrat")
-        .style("font-weight", 300);
+        .style("font-weight", 500);
     $: d3.select(gy_degree)
         .call(d3.axisLeft(y["degree"]))
         .selectAll("text")
         .style("font-family", "Montserrat")
-        .style("font-weight", 300);
+        .style("font-weight", 500);
     $: d3.select(gy_career)
         .call(d3.axisLeft(y["career"]))
         .selectAll("text")
         .style("font-family", "Montserrat")
-        .style("font-weight", 300);
+        .style("font-weight", 500);
 
     // $: line = function path(d) {
     //     return d3.line()(
@@ -129,7 +129,7 @@
     // };
 
     function curvedPath([x1, y1], [x2, y2]) {
-        const dx = (x2 - x1) / 3;
+        const dx = (x2 - x1) / 2;
         return `M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
     }
 
@@ -180,26 +180,65 @@
     $: {
         d3.select(gy_college)
             .selectAll("path, .tick>line")
-            .style("opacity", 0.5);
+            .style("opacity", 0.4);
         d3.select(gy_degree)
             .selectAll("path, .tick>line")
-            .style("opacity", 0.5);
+            .style("opacity", 0.4);
         d3.select(gy_career)
             .selectAll("path, .tick>line")
-            .style("opacity", 0.5);
+            .style("opacity", 0.4);
     }
+
+    $: d3.select(gy_degree)
+        .call(d3.axisLeft(y["degree"]))
+        .selectAll(".tick")
+        .each(function () {
+            const tick = d3.select(this);
+            const text = tick.select("text");
+            const bbox = text.node().getBBox();
+
+            tick.insert("rect", "text")
+                .attr("x", bbox.x - 2)
+                .attr("y", bbox.y - 2)
+                .attr("width", bbox.width + 4)
+                .attr("height", bbox.height + 4)
+                .attr("fill", "white")
+                .attr("fill-opacity", 0.4)
+                .attr("rx", 2)
+                .attr("ry", 2);
+        })
+        .selectAll("text")
+        .style("font-family", "Montserrat")
+        .style("font-weight", 500);
+
+    $: d3.select(gy_career)
+        .call(d3.axisLeft(y["career"]))
+        .selectAll(".tick")
+        .each(function () {
+            const tick = d3.select(this);
+            const text = tick.select("text");
+            const bbox = text.node().getBBox();
+
+            tick.insert("rect", "text")
+                .attr("x", bbox.x - 2)
+                .attr("y", bbox.y - 2)
+                .attr("width", bbox.width + 4)
+                .attr("height", bbox.height + 4)
+                .attr("fill", "white")
+                .attr("fill-opacity", 0.4)
+                .attr("rx", 2)
+                .attr("ry", 2);
+        })
+        .selectAll("text")
+        .style("font-family", "Montserrat")
+        .style("font-weight", 500);
 </script>
 
 <svg {width} {height}>
     {#if parallel_data}
         {#each withoutCareer as data}
             <!-- {console.log(data, car_line(data))} -->
-            <path
-                fill="none"
-                stroke="orange"
-                opacity="0.1"
-                d={car_line(data)}
-            />
+            <path fill="none" stroke="gray" opacity="0.2" d={car_line(data)} />
         {/each}
         {#each withoutCollege as data}
             <path fill="none" stroke="gray" opacity="0.1" d={col_line(data)} />
@@ -212,9 +251,9 @@
         <text
             x={x_scale(d)}
             text-anchor="middle"
-            font-weight="400"
+            font-weight="500"
             font-size="13"
-            fill="white"
+            fill="black"
             y={15}>{d.toUpperCase()}</text
         >
     {/each}
@@ -226,7 +265,7 @@
                 y={y["college"](college) - 5}
                 width={x_bar_scale(count)}
                 height="10"
-                fill="#F17822"
+                fill="black"
                 class="bar"
                 role="button"
                 tabindex="0"
@@ -249,7 +288,7 @@
                       ? 20
                       : 22}
                 height="14"
-                fill="black"
+                fill="white"
                 opacity="0.5"
                 rx="2"
             />
@@ -257,8 +296,8 @@
                 x={x_scale("college") + x_bar_scale(count) + 5}
                 y={y["college"](college) + 3}
                 stroke="none"
-                fill="white"
-                font-size="10"
+                fill="black"
+                font-size="11"
                 font-weight="500">{count}</text
             >
         {/each}
@@ -269,7 +308,7 @@
                 y={y["degree"](degree) - 5}
                 width={x_bar_scale(count)}
                 height="10"
-                fill="#F17822"
+                fill="black"
                 class="bar"
                 role="button"
                 tabindex="0"
@@ -289,9 +328,9 @@
                     ? 14
                     : count.toString().length === 2
                       ? 20
-                      : 22}
+                      : 24}
                 height="14"
-                fill="black"
+                fill="white"
                 opacity="0.5"
                 rx="2"
             />
@@ -299,8 +338,8 @@
                 x={x_scale("degree") + x_bar_scale(count) + 5}
                 y={y["degree"](degree) + 3}
                 stroke="none"
-                fill="white"
-                font-size="10"
+                fill="black"
+                font-size="11"
                 font-weight="500">{count}</text
             >
         {/each}
@@ -311,7 +350,7 @@
                 y={y["career"](career) - 5}
                 width={x_bar_scale(count)}
                 height="10"
-                fill="white"
+                fill="black"
                 class="bar"
                 role="button"
                 tabindex="0"
@@ -331,9 +370,9 @@
                     ? 14
                     : count.toString().length === 2
                       ? 20
-                      : 22}
+                      : 24}
                 height="14"
-                fill="black"
+                fill="white"
                 opacity="0.5"
                 rx="2"
             />
@@ -341,8 +380,8 @@
                 x={x_scale("career") + x_bar_scale(count) + 5}
                 y={y["career"](career) + 3}
                 stroke="none"
-                fill="white"
-                font-size="10"
+                fill="black"
+                font-size="11"
                 font-weight="500">{count}</text
             >
         {/each}

@@ -16,8 +16,9 @@
 
     export let current_data;
     export let selected_country;
+    export let refresh;
 
-    let selected_years = [1700, 1900];
+    let selected_years = [1625, 1925];
     let selected_career;
     let selected_degree;
     let selected_college;
@@ -27,7 +28,9 @@
     let containerWidth = 800;
     let margin = { top: 20, right: 30, bottom: 20, left: 40 };
     let svg;
-    let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900];
+    let x_ticks = [
+        1625, 1650, 1675, 1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900,
+    ];
     let y_ticks = [5, 15];
     let y_ticks_top = [5, 15];
     let y_ticks_all = [200, 400, 600];
@@ -36,7 +39,7 @@
         selectedYearStart = null,
         selectedYearEnd = null;
     //create array with all years. some may be empty
-    let allYears = Array.from({ length: 1900 - 1700 + 1 }, (_, i) => 1700 + i);
+    let allYears = Array.from({ length: 1900 - 1625 + 1 }, (_, i) => 1625 + i);
 
     // assign clicked country data to data_to_draw
     $: if (current_data) {
@@ -176,7 +179,8 @@
         }
         heightUpdated = !heightUpdated;
     }
-    //BRUSHING
+
+    // brushing
     $: brush = d3
         .brushX()
         .handleSize(10)
@@ -269,41 +273,72 @@
         }
     }
 
-    // Create X axis with custom ticks
-    $: xAxis = d3.axisBottom(xScale).tickValues(x_ticks);
-    $: yAxis = d3.axisLeft(yScale).tickValues(y_ticks);
+    // axes for scatterplot
+    let x_axis_grp;
+    let y_axis_grp;
 
-    // Append axes to the SVG
-    $: {
-        if (svg) {
-            d3.select(svg)
-                .select(".x-axis")
-                .call(xAxis)
-                .select(".domain")
-                .style("stroke", "gray")
-                .style("stroke-opacity", 0);
+    $: if (x_axis_grp && y_axis_grp) {
+        const xAxis = d3.axisBottom(xScale).tickValues(x_ticks);
+        const yAxis = d3.axisLeft(yScale).tickValues(y_ticks);
 
-            d3.select(svg)
-                .select(".x-axis")
-                .selectAll("text")
-                .style("font-family", "Montserrat")
-                .style("font-weight", 300)
-                .style("font-size", 13)
-                .style("fill", "white");
+        // Draw x-axis and style text
+        const xTicks = d3.select(x_axis_grp).call(xAxis).selectAll(".tick");
+        xTicks
+            .select("text")
+            .style("font-family", "Montserrat")
+            .style("font-size", "10px")
+            .style("font-weight", "400")
+            .style("fill", "black");
 
-            d3.select(svg)
-                .select(".y-axis")
-                .call(yAxis)
-                .select(".domain")
-                .style("stroke", "gray");
+        // Add background to x-axis tick labels
+        xTicks.each(function () {
+            const tick = d3.select(this);
+            const text = tick.select("text");
+            const bbox = text.node().getBBox();
 
+            // Insert rect behind text
+            tick.insert("rect", "text")
+                .attr("x", bbox.x - 2)
+                .attr("y", bbox.y - 2)
+                .attr("width", bbox.width + 4)
+                .attr("height", bbox.height + 3)
+                .attr("fill", "white")
+                .attr("rx", 2)
+                .attr("ry", 2);
+        });
+
+        // Draw y-axis and style text
+        const yTicks = d3.select(y_axis_grp).call(yAxis).selectAll(".tick");
+        yTicks
+            .select("text")
+            .style("font-family", "Montserrat")
+            .style("font-size", "10px")
+            .style("font-weight", "400")
+            .style("fill", "black");
+
+        // Add background to y-axis tick labels
+        yTicks.each(function () {
+            const tick = d3.select(this);
+            const text = tick.select("text");
+            const bbox = text.node().getBBox();
+
+            tick.insert("rect", "text")
+                .attr("x", bbox.x - 2)
+                .attr("y", bbox.y - 2)
+                .attr("width", bbox.width + 4)
+                .attr("height", bbox.height + 3)
+                .attr("fill", "white")
+                .attr("rx", 2)
+                .attr("ry", 2);
+        });
+    }
+
+    // reset timeline
+    $: if (refresh) {
+        if (svg && brush) {
             d3.select(svg)
-                .select(".y-axis")
-                .selectAll("text")
-                .style("font-family", "Montserrat")
-                .style("font-weight", 300)
-                .style("font-size", 13)
-                .style("fill", "white");
+                .select(".brush")
+                .call(brush.move, [margin.left, width - margin.right]);
         }
     }
 
@@ -434,15 +469,35 @@
         </svg>
     {/if}
 </div> -->
+<button id="switch" on:click={updateYScale}>
+    {#if yMax === 20}
+        <i class="fa fa-toggle-off" aria-hidden="true" title="all students"></i>
+    {:else}
+        <i
+            class="fa fa-toggle-on"
+            aria-hidden="true"
+            title="only colony connections"
+        ></i>
+    {/if}
+</button>
+
 <div id="timeline" bind:clientWidth={containerWidth} bind:clientHeight={height}>
-    <button id="switch" on:click={updateYScale}>
-        {#if yMax === 20}
-            <i class="fa fa-toggle-off" aria-hidden="true"></i>
-        {:else}
-            <i class="fa fa-toggle-on" aria-hidden="true"></i>
-        {/if}
-    </button>
     <svg {width} {height} bind:this={svg}>
+        <g
+            bind:this={x_axis_grp}
+            transform={`translate(0, ${height - margin.bottom})`}
+        />
+        <g bind:this={y_axis_grp} transform={`translate(${margin.left},0)`} />
+        <!-- Append Axes -->
+        <!-- <g
+            class="x-axis"
+            transform={`translate(0,${height - margin.bottom})`}
+        />
+        <g class="y-axis" transform={`translate(${margin.left},0)`} /> -->
+
+        <!-- Brush -->
+        <g class="brush"></g>
+
         <!-- Bars -->
         {#each all_students as d}
             <rect
@@ -452,7 +507,7 @@
                 width={xScale.bandwidth()}
                 height={heightUpdated ? yScale(0) - yScale(d.number) : 0}
                 fill="gray"
-                fill-opacity="0.5"
+                fill-opacity="0.7"
                 class="bar"
             />
         {/each}
@@ -464,20 +519,13 @@
                 y={yScale(d[1])}
                 width={xScale.bandwidth()}
                 height={yScale(0) - yScale(d[1])}
-                fill=" #F17822"
+                fill={selected_years.length === 2 &&
+                (d[0] < selected_years[0] || d[0] > selected_years[1])
+                    ? "lightgray"
+                    : "black"}
                 class="bar"
             />
         {/each}
-
-        <!-- Append Axes -->
-        <g
-            class="x-axis"
-            transform={`translate(0,${height - margin.bottom})`}
-        />
-        <g class="y-axis" transform={`translate(${margin.left},0)`} />
-
-        <!-- Brush -->
-        <g class="brush"></g>
 
         <!-- Period lines and year labels -->
         {#if selectedLineStart && selectedLineEnd}
@@ -487,40 +535,65 @@
                 y1={margin.top - 5}
                 x2={selectedLineStart}
                 y2={height - margin.bottom}
-                stroke="white"
+                stroke="black"
                 stroke-width="2"
             />
-            <text
-                x={selectedLineStart}
-                y={margin.top - 8}
-                text-anchor="middle"
-                font-size="14px"
-                font-weight="300"
-                fill="white"
-            >
-                {selectedYearStart}
-            </text>
+            <!-- Start label background and text -->
+            <g>
+                <rect
+                    x={selectedLineStart - 15}
+                    y={margin.top - 19}
+                    width="30"
+                    height="15"
+                    fill="white"
+                    rx="3"
+                    ry="3"
+                />
+                <text
+                    x={selectedLineStart}
+                    y={margin.top - 7}
+                    text-anchor="middle"
+                    font-size="12px"
+                    font-weight="500"
+                    fill="black"
+                >
+                    {selectedYearStart}
+                </text>
+            </g>
+
             <!-- End line -->
             <line
                 x1={selectedLineEnd}
                 y1={margin.top - 5}
                 x2={selectedLineEnd}
                 y2={height - margin.bottom}
-                stroke="white"
+                stroke="black"
                 stroke-width="2"
             />
-            <!-- Only show the end label if more than one year is selected -->
+
             {#if selectedYearStart !== selectedYearEnd}
-                <text
-                    x={selectedLineEnd}
-                    y={margin.top - 8}
-                    text-anchor="middle"
-                    font-size="14px"
-                    font-weight="300"
-                    fill="white"
-                >
-                    {selectedYearEnd}
-                </text>
+                <!-- End label background and text -->
+                <g>
+                    <rect
+                        x={selectedLineEnd - 15}
+                        y={margin.top - 19}
+                        width="30"
+                        height="15"
+                        fill="white"
+                        rx="3"
+                        ry="3"
+                    />
+                    <text
+                        x={selectedLineEnd}
+                        y={margin.top - 7}
+                        text-anchor="middle"
+                        font-size="12px"
+                        font-weight="500"
+                        fill="black"
+                    >
+                        {selectedYearEnd}
+                    </text>
+                </g>
             {/if}
         {/if}
     </svg>
@@ -529,15 +602,16 @@
 <style>
     #timeline {
         position: absolute;
-        border-radius: 5px;
-        bottom: 0px;
+        bottom: 5px;
         width: 65%;
         height: 165px;
+        /* background-color: rgba(255, 255, 255, 0.786); */
     }
 
     :global(.brush .selection) {
         stroke: none;
-        fill-opacity: 0.2;
+        fill-opacity: 0.6;
+        fill: white;
     }
 
     rect.bar {
@@ -556,10 +630,14 @@
 
     #switch {
         position: absolute;
-        color: gray;
-        top: 0px;
+        color: rgb(0, 0, 0);
+        bottom: 170px;
+        left: 5px;
         background: none;
         border: none;
         cursor: pointer;
+    }
+    .fa {
+        font-size: 18px;
     }
 </style>

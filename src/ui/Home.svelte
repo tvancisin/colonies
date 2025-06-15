@@ -3,7 +3,7 @@
     let sections = [
         { id: "home", name: "Home" },
         { id: "people", name: "About" },
-        { id: "provenance", name: "Provenance" },
+        // { id: "provenance", name: "Provenance" },
         { id: "vis", name: "Visualization" },
     ];
 
@@ -30,7 +30,7 @@
             </ul>
         {/if}
     </div>
-    <img id="uni_logo" src="uni_white.png" alt="St Andrews University Logo" />
+    <img id="uni_logo" src="uni_black.png" alt="St Andrews University Logo" />
     <h1>University of St Andrews in the Colonies</h1>
     <h3>
         Exploring connections between St Andrews students and
@@ -44,11 +44,12 @@
         width: 100%;
         align-content: center;
         text-align: center;
-        background-color: #18181B;
+        /* background-color: #18181B; */
+        background-color: white;
         padding-bottom: 40px;
     }
     h1 {
-        color: white;
+        color: black;
         margin-bottom: 5px;
         font-family: "Montserrat", sans-serif;
         font-optical-sizing: auto;
@@ -56,8 +57,8 @@
         font-style: normal;
     }
     h3 {
-        color: white;
-        font-weight: 500;
+        color: black;
+        /* font-weight: 500; */
     }
     #navigation {
         position: absolute;
@@ -67,7 +68,7 @@
     }
     #navigation .fa-bars {
         font-size: 30px;
-        color: white;
+        color: black;
         cursor: pointer;
     }
     .dropdown {

@@ -12,7 +12,6 @@
     } from "../utils";
     import {
         selectedYearsStore,
-        selectedGenderStore,
         selectedCareerStore,
         selectedDegreeStore,
         selectedCollegeStore,
@@ -196,7 +195,7 @@
                 }
             } else {
                 // If no year is found, optionally handle it (e.g., log it or put it in a separate array)
-                console.warn("No valid year found for:", person);
+                // console.warn("No valid year found for:", person);
             }
         });
     }
@@ -253,7 +252,6 @@
         filtered_width_after1869,
     );
 
-    
     $: countryNames = filtered_width_before1869
         .filter((item) => item[0] !== undefined) // Ignore undefined values
         .map((item) => item[0]); // Extract the country names
@@ -296,12 +294,14 @@
     // Reactive declaration for image URL
     $: imageURL =
         current_data_string === "birth"
-            ? new URL("/birth.png", import.meta.url).href
-            : new URL("/floruit.png", import.meta.url).href;
+            ? new URL("/up.png", import.meta.url).href
+            : new URL("/down.png", import.meta.url).href;
+
     let markerElement;
     let logoElement;
+    let img;
 
-    $: logoURL = new URL("/uni_logo.PNG", import.meta.url).href;
+    $: logoURL = new URL("/st_andrews.png", import.meta.url).href;
 
     //// INIT
     onMount(() => {
@@ -318,36 +318,43 @@
             logoPosition: "top-right",
         });
 
+        // add direction indicator
         markerElement = document.createElement("div");
-        const height = 20;
-        const width = 20;
         markerElement.className = "marker";
-        markerElement.style.width = `${width}px`;
-        markerElement.style.height = `${height}px`;
-        markerElement.style.backgroundSize = "100%";
-        markerElement.style.backgroundImage = `url(${imageURL})`; // Initial image
 
-        logoElement = document.createElement("div");
-        logoElement.className = "logo";
-        logoElement.style.width = `100px`;
-        logoElement.style.height = `28px`;
-        logoElement.style.backgroundSize = "100%";
-        logoElement.style.backgroundImage = `url(${logoURL})`; // Initial image
+        img = document.createElement("img");
+        img.src = imageURL;
+        img.style.height = "20px"; // Set desired height
+        img.style.width = "auto"; // Maintain natural aspect ratio
+        img.style.display = "block"; // Removes inline gap
 
+        markerElement.appendChild(img);
         new mapboxgl.Marker(markerElement, {
-            offset: [width / 3, 0],
+            offset: [0, 0], // Optional: adjust if needed
         })
             .setLngLat([-24.378063, 43.546441])
             .addTo(map);
 
+        // add uni logo
+        logoElement = document.createElement("div");
+        logoElement.className = "logo";
+
+        const logoImg = document.createElement("img");
+        logoImg.src = logoURL;
+        logoImg.style.height = "20px"; // Set desired height
+        logoImg.style.width = "auto"; // Preserve aspect ratio
+        logoImg.style.display = "block"; // Eliminate inline spacing
+
+        logoElement.appendChild(logoImg);
         new mapboxgl.Marker(logoElement, {
-            offset: [60, 0],
+            offset: [45, -10], // Adjust as needed
         })
             .setLngLat([-2.8063431, 56.335054])
             .addTo(map);
     });
+
     $: if (markerElement) {
-        markerElement.style.backgroundImage = `url(${imageURL})`;
+        img.src = imageURL;
     }
 
     //// DRAW POLYGONS, SHIPPPING LINES, INDIVIDUAL LOCATIONS
@@ -356,6 +363,15 @@
         map.on("load", () => {
             // Check if the source already exists
             if (!map.getSource("countries")) {
+                // Find the first symbol layer (typically a label layer)
+                const labelLayerId = map
+                    .getStyle()
+                    .layers.find(
+                        (layer) =>
+                            layer.type === "symbol" &&
+                            layer.layout?.["text-field"],
+                    )?.id;
+
                 //add UK
                 countryNames.push("Britain");
 
@@ -367,29 +383,35 @@
                 });
 
                 // polygon fills
-                map.addLayer({
-                    id: "countries_fill",
-                    type: "fill",
-                    source: "countries",
-                    paint: {
-                        "fill-color": [
-                            "match",
+                map.addLayer(
+                    {
+                        id: "countries_fill",
+                        type: "fill",
+                        source: "countries",
+                        paint: {
+                            "fill-color": [
+                                "match",
+                                ["get", "ADMIN"],
+                                "Britain",
+                                "black",
+                                "black",
+                            ],
+                            "fill-opacity": [
+                                "match",
+                                ["get", "ADMIN"],
+                                "Britain",
+                                0.8,
+                                0.7,
+                            ],
+                        },
+                        filter: [
+                            "in",
                             ["get", "ADMIN"],
-                            "Britain",
-                            "#F17822",
-                            "white",
+                            ["literal", countryNames],
                         ],
-                        "fill-opacity": [
-                            "match",
-                            ["get", "ADMIN"],
-                            "Britain",
-                            0.8,
-                            0.4,
-                        ],
-                        // "fill-opacity": 0.4,
                     },
-                    filter: ["in", ["get", "ADMIN"], ["literal", countryNames]],
-                });
+                    labelLayerId,
+                );
 
                 // polygon outlines
                 map.addLayer({
@@ -504,7 +526,7 @@
                     type: "line",
                     source: "shipping_after1869",
                     paint: {
-                        "line-color": "#666666",
+                        "line-color": "black",
                         "line-width": [
                             "match",
                             ["get", "ADMIN"],
@@ -531,7 +553,7 @@
                     type: "line",
                     source: "shipping_before1869",
                     paint: {
-                        "line-color": "white",
+                        "line-color": "black",
                         "line-width": [
                             "match",
                             ["get", "ADMIN"],
@@ -636,7 +658,7 @@
 
     //DRAW INDIVIDUAL LOCATIONS WHEN COLONY CLICKED
     function drawLocations(data, which, reason) {
-        console.log("🔄 drawLocations called", reason);
+        // console.log("🔄 drawLocations called", reason);
 
         // construct geojson of locations
         let local_conflict_geojson = [];
@@ -690,7 +712,7 @@
             features: local_conflict_geojson,
         };
 
-        console.log("geojson_data", geojson_data);
+        // console.log("geojson_data", geojson_data);
 
         // if source exists, update it
         if (map.getSource("locations")) {
@@ -728,14 +750,14 @@
                         100,
                         35,
                     ],
-                    "circle-opacity": 0.6,
+                    "circle-opacity": 0.7,
                     "circle-stroke-width": [
                         "case",
                         ["boolean", ["feature-state", "hover"], false],
                         2, // Stroke width when hovered
-                        0, // Default stroke width
+                        1, // Default stroke width
                     ],
-                    "circle-stroke-color": "white",
+                    "circle-stroke-color": "black",
                 },
             });
 
@@ -748,7 +770,10 @@
                 layout: {
                     "text-field": "{total_people}", // Show the sum of 'no_of_ppl' instead of the number of points
                     "text-font": ["Open Sans Bold"],
-                    "text-size": 12,
+                    "text-size": 14,
+                },
+                paint: {
+                    "text-color": "black",
                 },
             });
 
@@ -848,9 +873,9 @@
                         "case",
                         ["boolean", ["feature-state", "hover"], false],
                         2, // Stroke width when hovered
-                        0, // Default stroke width
+                        1, // Default stroke width
                     ],
-                    "circle-stroke-color": "white",
+                    "circle-stroke-color": "black",
                 },
             });
 

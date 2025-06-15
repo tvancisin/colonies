@@ -1,6 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import {
+    getCSV,
     getJSON,
     getGeo,
     india_colonies,
@@ -11,7 +12,6 @@
     caribbean_colonies,
     groupByColony,
     groupByCity,
-    career,
   } from "./utils.js";
   import * as d3 from "d3";
   import Map from "./lib/Map.svelte";
@@ -49,6 +49,7 @@
 
   //load biographical data
   let path = ["./data/birth_colonies.json", "./data/floruit_colonies.json"];
+  let csv_path = ["./data/ids.csv"];
   let birth_data;
   let floruit_data;
   let births_per_colony;
@@ -65,9 +66,24 @@
     isOverlayVisible = false;
   }
 
-  getJSON(path).then((json) => {
+  Promise.all([getJSON(path), getCSV(csv_path)]).then(([json, csv]) => {
+    let ids = csv[0];
     birth_data = json[0];
     floruit_data = json[1];
+
+    let mapByOld = Object.fromEntries(ids.map((d) => [d.old, d.new]));
+    // Then, enrich the people array
+    birth_data.forEach((person) => {
+      if (mapByOld[person.id]) {
+        person.new_id = mapByOld[person.id];
+      }
+    });
+
+    floruit_data.forEach((person) => {
+      if (mapByOld[person.id]) {
+        person.new_id = mapByOld[person.id];
+      }
+    });
 
     let birth_gender = d3.groups(birth_data, (d) => d.gender === "M");
     birth_male = birth_gender[0][1];
@@ -91,7 +107,12 @@
         item.birth_location.colony = "Asia";
       } else if (african_colonies.includes(item.birth_location.country)) {
         item.birth_location.colony = "Africa";
+      } else if (item.birth_location.original_name == "West Indies") {
+        item.birth_location.colony = "Caribbean";
+      } else if (item.birth_location.original_name == "East Indies") {
+        item.birth_location.colony = "Asia";
       }
+
       return item;
     });
 
@@ -130,9 +151,40 @@
             floruitItem.location.colony = "Australia";
           } else if (asian_colonies.includes(country)) {
             floruitItem.location.colony = "Asia";
+          } else if (floruitItem.location.original_name == "West Indies") {
+            floruitItem.location.colony = "Caribbean";
+          } else if (floruitItem.location.original_name == "East Indies") {
+            floruitItem.location.colony = "Asia";
           }
         });
       }
+    });
+
+    //add colonies field to bio location data
+    floruit_data.map((item) => {
+      const loc = item.birth_location;
+
+      if (loc) {
+        if (india_colonies.includes(loc.country)) {
+          loc.colony = "India";
+        } else if (america_colonies.includes(loc.country)) {
+          loc.colony = "America";
+        } else if (australia_colonies.includes(loc.country)) {
+          loc.colony = "Australia";
+        } else if (caribbean_colonies.includes(loc.country)) {
+          loc.colony = "Caribbean";
+        } else if (asian_colonies.includes(loc.country)) {
+          loc.colony = "Asia";
+        } else if (african_colonies.includes(loc.country)) {
+          loc.colony = "Africa";
+        } else if (loc.original_name === "West Indies") {
+          loc.colony = "Caribbean";
+        } else if (loc.original_name === "East Indies") {
+          loc.colony = "Asia";
+        }
+      }
+
+      return item;
     });
 
     floruit_per_colony = groupByColony(floruit_data);
@@ -154,12 +206,12 @@
   let all;
   const json_paths = [
     "./data/colony_divisions.json",
-    "./data/shit.json",
+    "./data/ship_routes.json",
     "./data/colonies_1680.json",
     "./data/colonies_1750.json",
     "./data/colonies_1820.json",
     "./data/colonies_1885.json",
-    "./data/shit_2.json",
+    "./data/suez_routes.json",
   ];
   getGeo(json_paths).then((geo) => {
     countries_json = geo[0];
@@ -232,9 +284,12 @@
     }
   }
 
+  let refresh = 0;
   function handle_refresh() {
-    d3.select("#all").style("background-color", "white");
-    d3.selectAll("#male, #female").style("background-color", "#808080");
+    d3.select("#all").style("background-color", "#003847");
+    d3.select("#all").style("color", "white");
+    d3.selectAll("#male, #female").style("background-color", "white");
+    d3.selectAll("#male, #female").style("color", "black");
     //reset data on details close
     if (current_data_string == "birth") {
       current_data = birth_data;
@@ -249,64 +304,63 @@
     selectedDegreeStore.set([]);
     selectedCollegeStore.set([]);
     mapRef.flyToInitialPosition();
+    refresh += 1;
   }
 
   //set variables based on selection (birth or floruit)
   function handle_birth_floruit(selected_data) {
-    d3.select("#all").style("background-color", "white");
-    d3.selectAll("#male, #female").style("background-color", "#808080");
-    if (selected_data == "birth") {
-      d3.select("#header").text("Student Births in the Colonies (1700-1897)");
-      d3.select("#floruit").style("background-color", "#808080");
-      d3.select("#birth").style("background-color", "white");
-      current_data = birth_data;
-      default_data = birth_data;
-      current_data_string = selected_data;
-    } else if (selected_data == "floruit") {
-      d3.select("#header").text("Student Careers in the Colonies (1700-1897)");
-      d3.select("#floruit").style("background-color", "white");
-      d3.select("#birth").style("background-color", "#808080");
-      current_data = floruit_data;
-      default_data = floruit_data;
-      current_data_string = selected_data;
-    }
+    // Always reset gender button styles
+    updateGenderButtons("all");
+
+    // Update data and styles for birth/floruit selection
+    const isBirth = selected_data === "birth";
+    const activeTab = isBirth ? "birth" : "floruit";
+    const inactiveTab = isBirth ? "floruit" : "birth";
+
+    // Update active/inactive tab styles
+    setButtonStyle(activeTab, true);
+    setButtonStyle(inactiveTab, false);
+
+    // Set current data and state
+    current_data = isBirth ? birth_data : floruit_data;
+    default_data = current_data;
+    current_data_string = selected_data;
+  }
+
+  function setButtonStyle(id, isActive) {
+    d3.select(`#${id}`)
+      .style("background-color", isActive ? "#003847" : "white")
+      .style("color", isActive ? "white" : "black");
   }
 
   function handle_gender(gender) {
     selected_gender = gender;
-    if (current_data_string == "birth") {
-      let m_birth = default_data.filter((d) => d.gender === "M");
-      let f_birth = default_data.filter((d) => d.gender === "F");
-      if (gender == "male") {
-        current_data = m_birth;
-        d3.select("#male").style("background-color", "white");
-        d3.selectAll("#female, #all").style("background-color", "#808080");
-      } else if (gender == "female") {
-        current_data = f_birth;
-        d3.select("#female").style("background-color", "white");
-        d3.selectAll("#male, #all").style("background-color", "#808080");
-      } else if (gender == "all") {
+    // Filter data only if "birth" or "floruit"
+    if (current_data_string === "birth" || current_data_string === "floruit") {
+      const maleData = default_data.filter((d) => d.gender === "M");
+      const femaleData = default_data.filter((d) => d.gender === "F");
+      if (gender === "male") {
+        current_data = maleData;
+      } else if (gender === "female") {
+        current_data = femaleData;
+      } else {
         current_data = default_data;
-        d3.select("#all").style("background-color", "white");
-        d3.selectAll("#male, #female").style("background-color", "#808080");
       }
-    } else if (current_data_string == "floruit") {
-      let m_floruit = default_data.filter((d) => d.gender === "M");
-      let f_floruit = default_data.filter((d) => d.gender === "F");
-      if (gender == "male") {
-        current_data = m_floruit;
-        d3.select("#male").style("background-color", "white");
-        d3.selectAll("#female, #all").style("background-color", "#808080");
-      } else if (gender == "female") {
-        current_data = f_floruit;
-        d3.select("#female").style("background-color", "white");
-        d3.selectAll("#male, #all").style("background-color", "#808080");
-      } else if (gender == "all") {
-        current_data = default_data;
-        d3.select("#all").style("background-color", "white");
-        d3.selectAll("#male, #female").style("background-color", "#808080");
-      }
+      // Update UI styles
+      updateGenderButtons(gender);
     }
+  }
+
+  function updateGenderButtons(selected) {
+    const allButtons = ["male", "female", "all"];
+    allButtons.forEach((id) => {
+      const isSelected = id === selected;
+      d3.select(`#${id}`).style(
+        "background-color",
+        isSelected ? "#003847" : "white",
+      );
+      d3.select(`#${id}`).style("color", isSelected ? "white" : "black");
+    });
   }
 
   // $: console.log(current_data);
@@ -315,7 +369,7 @@
 <main bind:clientWidth={width}>
   <Home />
   <About />
-  <Provenance />
+  <!-- <Provenance /> -->
   <!-- visualization -->
   <div
     id="vis"
@@ -344,7 +398,7 @@
           id="birth"
           on:click={() => {
             handle_birth_floruit("birth");
-          }}>Birth</button
+          }}>Origin</button
         >
         <button
           id="floruit"
@@ -378,9 +432,9 @@
       <button class="btn refresh" on:click={handle_refresh}
         >Refresh <i class="fa fa-refresh"></i>
       </button>
-      <div id="time_description">Students Entering University</div>
+      <!-- <div id="time_description">Students Entering University</div> -->
       <!-- Navigation Menu -->
-      <Timeline {current_data} {selected_country} />
+      <Timeline {current_data} {selected_country} {refresh} />
       <Details
         {current_data}
         {births_per_colony}
@@ -445,7 +499,7 @@
   #time_description {
     border-radius: 2px;
     position: absolute;
-    color: white;
+    color: rgb(0, 0, 0);
     left: 45px;
     bottom: 120px;
     font-weight: 400;
@@ -467,9 +521,9 @@
     position: absolute;
     top: 66px;
     left: 7px;
-    color: black;
+    color: white;
     background-color: steelblue;
-    border: none;
+    border: 1px solid black;
     padding: 2px 10px;
     border-radius: 2px;
     font-size: 16px;
@@ -479,9 +533,9 @@
     transition: border 0.3s ease;
   }
 
-  .btn.refresh:hover {
+  /* .btn.refresh:hover {
     color: white;
-  }
+  } */
 
   #gender {
     z-index: 80;
@@ -495,8 +549,7 @@
 
   #gender button {
     margin: 2px;
-    color: black;
-    border: none;
+    border: 1px solid black;
     border-radius: 2px;
     font-family: "Montserrat", sans-serif;
     font-weight: 450;
@@ -506,7 +559,7 @@
 
   #birth,
   #floruit {
-    border: none;
+    border: 1px solid black;
     border-radius: 2px;
     color: black;
     padding: 3px 8px;
@@ -524,19 +577,22 @@
 
   /* Button background colors */
   #birth {
-    background-color: white;
+    background-color: #003847;
+    color: white;
   }
 
   #floruit {
-    background-color: #808080;
+    background-color: white;
   }
 
   #male,
   #female {
-    background-color: #808080;
+    background-color: white;
+    color: black;
   }
 
   #all {
-    background-color: white;
+    background-color: #003847;
+    color: white;
   }
 </style>
