@@ -53,6 +53,216 @@
   },
   {
     "_id": {
+      "$oid": "66e2bc5c20327edee0c0dbe1"
+    },
+    "id": "idp1363419764",
+    "elements": 29,
+    "gender": "M",
+    "forename": "John",
+    "surname": "Allan",
+    "birth_date": "1815-10-10",
+    "death_date": "1891-03-02",
+    "birth_location": {
+      "original_name": "West Indies",
+      "official_name": null,
+      "county": null,
+      "country": null,
+      "latitude": 18.2345027,
+      "longitude": -66.4108475
+    },
+    "death_location": null,
+    "mother": null,
+    "father": null,
+    "references": [
+      "Lancet 1891 i p633"
+    ],
+    "study": {
+      "colleges": null,
+      "degrees": [
+        {
+          "name": "M.D.",
+          "date": "1837-08-01"
+        }
+      ]
+    },
+    "floruit": [
+      {
+        "occupation": "Medical student",
+        "location": {
+          "original_name": "Edinburgh University",
+          "official_name": "Edinburgh",
+          "county": "Edinburgh",
+          "country": "GB",
+          "latitude": 55.9445158,
+          "longitude": -3.1892413
+        },
+        "from": "1834",
+        "to": "1836"
+      }
+    ],
+    "other_universities": null,
+    "raw_data": "\n        Allan, John \n      M.D. 1.8.1837 by examination.\n      \n        Born 10.10.1815 in the West Indies of Scottish parentage. \n      \n      Medical student Edinburgh University 1834-1836.\n      L.R.C.S.E. 1836 (from Antigua) M.R.C.P.L. 1860.\n      Practised Islington. [Doctor] \n      \n      Died 2.3.1891.\n\n      Lancet 1891 i p633\n\n      "
+  },
+  {
+    "_id": {
+      "$oid": "66e2bc5820327edee0c0cfb4"
+    },
+    "id": "idp1377624364",
+    "elements": 26,
+    "gender": "M",
+    "forename": "William Nelson",
+    "surname": "Duggan",
+    "birth_date": "1838-02-17",
+    "death_date": "1876-10-22",
+    "birth_location": {
+      "original_name": "East Indies",
+      "official_name": null,
+      "county": null,
+      "country": null,
+      "latitude": -2.2179704,
+      "longitude": 115.66283
+    },
+    "death_location": {
+      "original_name": "London",
+      "official_name": "London",
+      "county": "Greater London",
+      "country": "GB",
+      "latitude": 51.5072178,
+      "longitude": -0.1275862
+    },
+    "mother": null,
+    "father": null,
+    "references": [
+      "W. Johnston, Roll of Commissioned Officers in the Medical Service of the British Army 1727-1898 (Aberdeen, 1917) 6010"
+    ],
+    "study": {
+      "colleges": null,
+      "degrees": [
+        {
+          "name": "M.D.",
+          "date": "1861-10-04"
+        }
+      ]
+    },
+    "floruit": null,
+    "other_universities": null,
+    "raw_data": "\n      Duggan, William Nelson \n      M.D. 4.10.1861 by examination.\n      Born 17.2.1838 in the East Indies.\n      L.R.C.S.E. 1861.\n      Assistant surgeon Army Medical Service 1862 etc. Retired on half pay 1874. [Doctor]\n      Died 22.10.1876 in London.\n      \n      W. Johnston, Roll of Commissioned Officers in the Medical Service of the British Army 1727-1898 (Aberdeen, 1917) 6010\n      \n      "
+  },
+  {
+    "_id": {
+      "$oid": "66e2bc5920327edee0c0d0f4"
+    },
+    "id": "idp1404587380",
+    "elements": 38,
+    "gender": "M",
+    "forename": "Henry Pemberton",
+    "surname": "Ponsonby",
+    "birth_date": "1876",
+    "death_date": null,
+    "birth_location": {
+      "original_name": "East Indies",
+      "official_name": null,
+      "county": null,
+      "country": null,
+      "latitude": -2.2179704,
+      "longitude": 115.66283
+    },
+    "death_location": null,
+    "mother": {
+      "forename": "Isabella Marshall",
+      "surname": "Hogg"
+    },
+    "father": null,
+    "references": [
+      "UYUC400:8 & 14.10.1895",
+      "M310p185",
+      "David Munro, Autobiog. p51f"
+    ],
+    "study": {
+      "colleges": [
+        {
+          "name": "United College",
+          "from": "1895",
+          "to": "1897"
+        }
+      ],
+      "degrees": null
+    },
+    "floruit": null,
+    "other_universities": null,
+    "raw_data": "\n      Ponsonby, Henry Pemberton \n\n        Student United College 1895-1896 Eng. Lit.; Gk.; Math. 1896-1897 Eng. Lit.; Hon. Gk.\n\n        Born c. 1876 at East Indiesson of Colonel Charles Ponsonby  and Isabella Marshall Hogg. [Soldier]\n      Attended Westminster School and Sedbergh School.\n\n        Lieutenant in First World War. [Soldier]\n      Married and eldest son born 1920.\n\n      UYUC400:8 & 14.10.1895M310p185David Munro, Autobiog. p51f\n\n      "
+  },
+  {
+    "_id": {
+      "$oid": "66e2bc6620327edee0c0fc82"
+    },
+    "id": "idp1406384892",
+    "elements": 34,
+    "gender": "M",
+    "forename": "Robert A[ngus] C[ampbell]",
+    "surname": "Richard",
+    "birth_date": "1840",
+    "death_date": "1864-02-29",
+    "birth_location": {
+      "original_name": "East Indies",
+      "official_name": null,
+      "county": null,
+      "country": null,
+      "latitude": -2.2179704,
+      "longitude": 115.66283
+    },
+    "death_location": {
+      "original_name": "New South Wales, Australia",
+      "official_name": null,
+      "county": null,
+      "country": "AU",
+      "latitude": -31.2532183,
+      "longitude": 146.921099
+    },
+    "mother": {
+      "forename": "Elizabeth",
+      "surname": "Angus"
+    },
+    "father": null,
+    "references": [
+      "UYUC310",
+      "St Andrews Gazette 21.5.1864",
+      "Monumental inscription St Andrews Cathedral burial ground"
+    ],
+    "study": {
+      "colleges": [
+        {
+          "name": "United College",
+          "from": "1857",
+          "to": "1858"
+        }
+      ],
+      "degrees": null
+    },
+    "floruit": null,
+    "other_universities": [
+      {
+        "location": {
+          "original_name": "Edinburgh University",
+          "official_name": "Edinburgh",
+          "county": "Edinburgh",
+          "country": "GB",
+          "latitude": 55.9445158,
+          "longitude": -3.1892413
+        },
+        "from": "1863",
+        "to": null,
+        "degrees": [
+          {
+            "name": "M.D."
+          }
+        ]
+      }
+    ],
+    "raw_data": "\n      Richard, Robert A[ngus] C[ampbell] \n\n        Student United College 1857-1858 Lat. 1; Math. 1; Chem.; Camp. Anat. & Physiol. Madras bursar. Attended Established Church while a student.\n      Born 1840 in the East Indies son of Captain James Richard, St Andrews and Elizabeth Angus.\n      Also at Edinburgh University - M.D. 1863.\n      Died at sea on board New South Wales, Australia on passage to New South Wales 29.2.1864 aged 23 yrs , 3 months.\n\n      UYUC310St Andrews Gazette 21.5.1864Monumental inscription St Andrews Cathedral burial ground\n\n      "
+  },
+  {
+    "_id": {
       "$oid": "66e2bc5820327edee0c0ce7b"
     },
     "id": "idp1397131060",
@@ -10911,84 +11121,6 @@
     "floruit": null,
     "other_universities": null,
     "raw_data": "\n  \n    Hamilton, Archibald\n    M.A. and M.D. 22.2.1746.\n    ‘Of Antigua,\n     formerly student of philosophy here’.\n     \n\t    UY452:22.2.1746.\n    \n     No other record found unless the Dr Archibald H. physician in Edinburgh.\n     Died Edinburgh 5.3.1761.\n     ( \n\t    SM1761 p112)\n    \n  \n"
-  },
-  {
-    "_id": {
-      "$oid": "66e2e020c97b155e3ffcc0d9"
-    },
-    "id": "D_0413_Dunbar_David.xml",
-    "elements": 31,
-    "gender": "M",
-    "forename": "David",
-    "surname": "Dunbar",
-    "birth_date": "1615",
-    "death_date": "1660-02-21",
-    "birth_location": {
-      "original_name": "Boath",
-      "official_name": "Boath Buzurg",
-      "county": "Adilabad",
-      "country": "IN",
-      "latitude": 19.3399205,
-      "longitude": 78.3216329
-    },
-    "death_location": null,
-    "mother": null,
-    "father": {
-      "forename": "James",
-      "surname": "Dunbar"
-    },
-    "references": [
-      "FES"
-    ],
-    "study": null,
-    "floruit": [
-      {
-        "occupation": "Minister",
-        "location": {
-          "original_name": "Edinkillie",
-          "official_name": "Edinburgh",
-          "county": "Edinburgh",
-          "country": "GB",
-          "latitude": 55.9585766,
-          "longitude": -3.1982333
-        },
-        "from": "1637",
-        "to": "1638"
-      },
-      {
-        "occupation": "Minister",
-        "location": {
-          "original_name": "Nairn",
-          "official_name": "Nairn",
-          "county": "Highland Council",
-          "country": "GB",
-          "latitude": 57.58642200000001,
-          "longitude": -3.868475
-        },
-        "from": "1638",
-        "to": "1660-02-21"
-      }
-    ],
-    "other_universities": [
-      {
-        "location": {
-          "original_name": "King’s College, Aberdeen",
-          "official_name": "Aberdeen",
-          "county": "Aberdeen City",
-          "country": "GB",
-          "latitude": 57.1644073,
-          "longitude": -2.1021664
-        },
-        "from": "1631",
-        "to": null,
-        "degrees": [
-          {
-            "name": "M.A."
-          }
-        ]
-      }
-    ],
-    "raw_data": "\n  \n    Dunbar, David\n    Divinity student 1632/33.\n    ‘ex diocesi Moravi:’.\n    Born 1615 2nd son of James Dunbar of Boath.\n    Also at King’s College, Aberdeen – M.A. 1631.\n    Minister Edinkillie 1637 – 38. Nairn 1638 – 21.2.1660 (died).\n    \n    \n      FES\n    \n  \n"
   },
   {
     "_id": {
