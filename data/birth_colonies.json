@@ -13177,6 +13177,75 @@
   },
   {
     "_id": {
+      "$oid": "66e2bc6520327edee0c0fa78"
+    },
+    "id": "idp1375949244",
+    "elements": {
+      "$numberInt": "28"
+    },
+    "gender": "M",
+    "forename": "William Broughton",
+    "surname": "Davies",
+    "birth_date": "1833-10-25",
+    "death_date": "1906-01-13",
+    "birth_location": {
+      "original_name": "Sierra Leone",
+      "official_name": null,
+      "county": null,
+      "country": "SL",
+      "latitude": 8.460555,
+      "longitude": -11.779889
+    },
+    "death_location": {
+      "original_name": "West Coast of Africa",
+      "official_name": null,
+      "county": "West Coast District Municipality",
+      "country": "ZA",
+      "latitude": {
+        "$numberDouble": "-32.2129777"
+      },
+      "longitude": {
+        "$numberDouble": "18.6175626"
+      }
+    },
+    "mother": null,
+    "father": null,
+    "references": [
+      "W. Johnston, Roll of Commissioned Officers in the Medical Service of the British Army 1727-1898 (Aberdeen, 1917) 5904"
+    ],
+    "study": {
+      "colleges": null,
+      "degrees": [
+        {
+          "name": "M.D.",
+          "date": "1858-10-22"
+        }
+      ]
+    },
+    "floruit": [
+      {
+        "occupation": "Assistant surgeon",
+        "location": {
+          "original_name": "West Coast of Africa",
+          "official_name": null,
+          "county": "West Coast District Municipality",
+          "country": "ZA",
+          "latitude": {
+            "$numberDouble": "-32.2129777"
+          },
+          "longitude": {
+            "$numberDouble": "18.6175626"
+          }
+        },
+        "from": "1859",
+        "to": null
+      }
+    ],
+    "other_universities": null,
+    "raw_data": "\n      Davies, William Broughton \n      M.D. 22.10.1858 by examination.\n      Born 25.10.1833 in Sierra Leone.\n      M.R.C.S.Eng. 1858. L.M. 1858.\n      Assistant surgeon Army Medical Service, West Coast of Africa 1859. Retired pay 1881. [Doctor]\n      Died 13.1.1906, West Coast of Africa.\n      \n      W. Johnston, Roll of Commissioned Officers in the Medical Service of the British Army 1727-1898 (Aberdeen, 1917) 5904\n      \n      "
+  },
+  {
+    "_id": {
       "$oid": "66e3515fd083a01c2dfab88e"
     },
     "id": "3686_Crosbie_Violet_Mrs_Harvey",
