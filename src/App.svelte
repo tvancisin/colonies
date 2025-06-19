@@ -72,6 +72,7 @@
     floruit_data = json[1];
 
     let mapByOld = Object.fromEntries(ids.map((d) => [d.old, d.new]));
+
     // Then, enrich the people array
     birth_data.forEach((person) => {
       if (mapByOld[person.id]) {
@@ -79,9 +80,21 @@
       }
     });
 
+    birth_data.forEach((person) => {
+      if (person.id && person.id.startsWith("idp")) {
+        person.id = person.id.slice(3); // remove first 3 characters
+      }
+    });
+
     floruit_data.forEach((person) => {
       if (mapByOld[person.id]) {
         person.new_id = mapByOld[person.id];
+      }
+    });
+
+    floruit_data.forEach((person) => {
+      if (person.id && person.id.startsWith("idp")) {
+        person.id = person.id.slice(3); // remove first 3 characters
       }
     });
 
