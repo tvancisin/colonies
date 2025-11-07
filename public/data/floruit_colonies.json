@@ -24892,11 +24892,11 @@
     },
     "death_location": {
       "original_name": "Lovedale",
-      "official_name": "Ooty",
-      "county": "Nilgiris",
-      "country": "IN",
-      "latitude": 11.3818254,
-      "longitude": 76.7019038
+      "official_name": "Lovedale",
+      "county": "Dikeni",
+      "country": "ZA",
+      "latitude": -32.778089,
+      "longitude": 26.837054
     },
     "mother": {
       "forename": "Jane",
@@ -24942,11 +24942,11 @@
         "occupation": "Free Church and U.F. missionary",
         "location": {
           "original_name": "Lovedale",
-          "official_name": "Ooty",
-          "county": "Nilgiris",
-          "country": "IN",
-          "latitude": 11.3818254,
-          "longitude": 76.7019038
+          "official_name": "Lovedale",
+          "county": "Dikeni",
+          "country": "ZA",
+          "latitude": -32.778089,
+          "longitude": 26.837054
         },
         "from": "1865",
         "to": null
@@ -61018,11 +61018,11 @@
     "birth_location": null,
     "death_location": {
       "original_name": "West Coast of Africa",
-      "official_name": null,
-      "county": "West Coast District Municipality",
-      "country": "ZA",
-      "latitude": -32.2129777,
-      "longitude": 18.6175626
+      "official_name": "Sierra Leone",
+      "county": null,
+      "country": "SL",
+      "latitude": 8.460555,
+      "longitude": -11.779889
     },
     "mother": null,
     "father": null,
@@ -61043,11 +61043,11 @@
         "occupation": "Assistant surgeon",
         "location": {
           "original_name": "West Coast of Africa",
-          "official_name": null,
-          "county": "West Coast District Municipality",
-          "country": "ZA",
-          "latitude": -32.2129777,
-          "longitude": 18.6175626
+          "official_name": "Sierra Leone",
+          "county": null,
+          "country": "SL",
+          "latitude": 8.460555,
+          "longitude": -11.779889
         },
         "from": "1859",
         "to": null
@@ -61055,6 +61055,51 @@
     ],
     "other_universities": null,
     "raw_data": "\n      Davies, William Broughton \n      M.D. 22.10.1858 by examination.\n      Born 25.10.1833 in Sierra Leone.\n      M.R.C.S.Eng. 1858. L.M. 1858.\n      Assistant surgeon Army Medical Service, West Coast of Africa 1859. Retired pay 1881. [Doctor]\n      Died 13.1.1906, West Coast of Africa.\n      \n      W. Johnston, Roll of Commissioned Officers in the Medical Service of the British Army 1727-1898 (Aberdeen, 1917) 5904\n      \n      "
+  },
+  {
+    "_id": {
+      "$oid": "66e2bc6320327edee0c0f44b"
+    },
+    "id": "idp1414452500",
+    "elements": {
+      "$numberInt": "15"
+    },
+    "gender": "M",
+    "forename": "Peter",
+    "surname": "Terrick",
+    "birth_date": null,
+    "death_date": null,
+    "birth_location": null,
+    "death_location": null,
+    "mother": null,
+    "father": null,
+    "references": null,
+    "study": {
+      "colleges": null,
+      "degrees": [
+        {
+          "name": "M.D.",
+          "date": "1786-04-22"
+        }
+      ]
+    },
+    "floruit": [
+      {
+        "occupation": "surgeon general",
+        "location": {
+          "original_name": "Coast of Africa",
+          "official_name": null,
+          "county": null,
+          "country": "SL",
+          "latitude": 8.460555,
+          "longitude": -11.779889
+        },
+        "from": "1783",
+        "to": null
+      }
+    ],
+    "other_universities": null,
+    "raw_data": "\n      Terrick, Peter \n      \n        M.D. 22.4.1786 on testimonials signed by Andrew Duncan M.D. and Charles Webster M.D., Edinburgh.\n      \n        At graduation, had been surgeon general on the coast of Africa in the last war, but not in W. Johnston, Roll of commissioned officers in the Medical Service of the British Army 1727-1898 (Aberdeen, 1917) unless his name is not Terrick - he is not in P.J. Wallis and R.V. Wallis, Eighteenth Century Medics (Newcastle, 1988) or Med. Reg. 1783. [Doctor]\n\n      "
   },
   {
     "_id": {

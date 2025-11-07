@@ -144,7 +144,12 @@
     // }
 
     //data for network
-    // $: node_link = constructNodesAndLinks(data);
+    $: console.log(data);
+    
+    $: node_link = constructNodesAndLinks(data);
+
+    $: console.log(node_link);
+    
 
     // sort by years of study
     function extractYear(entry) {
@@ -171,8 +176,8 @@
         );
         console.log(withColony);
 
-        // const idArray = data.map(obj => obj.id);
-        // console.log(idArray);
+        const idArray = withColony.map(obj => obj.id);
+        console.log(idArray);
         parallel_data = constructParallelData(data);
     }
 </script>
