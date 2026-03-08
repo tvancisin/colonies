@@ -99,5 +99,24 @@
     #uni_logo {
         padding-top: 70px;
         height: 100px;
+        max-width: 90%;
+        width: auto;
+        object-fit: contain;
+    }
+
+    @media (max-width: 768px) {
+        #uni_logo {
+            padding-top: 50px;
+            height: 70px;
+            max-width: 80%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        #uni_logo {
+            padding-top: 40px;
+            height: 50px;
+            max-width: 70%;
+        }
     }
 </style>
