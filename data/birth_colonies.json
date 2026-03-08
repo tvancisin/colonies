@@ -12258,49 +12258,6 @@
   },
   {
     "_id": {
-      "$oid": "66e3515ed083a01c2dfab54b"
-    },
-    "id": "2850_Robinson_Mrs_Emily_Venis",
-    "elements": 7,
-    "gender": "F",
-    "forename": "Mrs Emily Venis",
-    "surname": "Robinson",
-    "birth_date": null,
-    "death_date": null,
-    "birth_location": {
-      "original_name": "Seampore, Boscombe Hants.",
-      "official_name": null,
-      "county": "Hooghly",
-      "country": "IN",
-      "latitude": 22.7505213,
-      "longitude": 88.3405772
-    },
-    "death_location": null,
-    "mother": null,
-    "father": null,
-    "references": [
-      "UYUY376/3/5"
-    ],
-    "study": {
-      "colleges": [
-        {
-          "name": null,
-          "from": "1893"
-        }
-      ],
-      "degrees": [
-        {
-          "name": "LLA",
-          "date": "1896"
-        }
-      ]
-    },
-    "floruit": null,
-    "other_universities": null,
-    "raw_data": null
-  },
-  {
-    "_id": {
       "$oid": "66e3515fd083a01c2dfab5b7"
     },
     "id": "2958_Boyes_Kate_Grayson",
