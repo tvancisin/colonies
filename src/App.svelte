@@ -46,6 +46,8 @@
   let selected_country = null;
   let isOverlayVisible = true; // Controls the visibility of the overlay
   let selected_gender = "all";
+  let walkthroughStep = 0;
+  const walkthroughSteps = 4;
 
   //load biographical data
   let path = ["./data/birth_colonies.json", "./data/floruit_colonies.json"];
@@ -64,6 +66,14 @@
   // remove initial div
   function removeOverlay() {
     isOverlayVisible = false;
+  }
+
+  function advanceWalkthrough() {
+    if (walkthroughStep < walkthroughSteps - 1) {
+      walkthroughStep += 1;
+      return;
+    }
+    removeOverlay();
   }
 
   Promise.all([getJSON(path), getCSV(csv_path)]).then(([json, csv]) => {
@@ -458,9 +468,59 @@
     {/if}
     {#if isOverlayVisible}
       <div class="overlay">
-        <button class="remove-overlay" on:click={removeOverlay}
-          >Click to Explore</button
-        >
+        {#if walkthroughStep === 0}
+          <div class="explain-buttons"></div>
+          <div class="explain-buttons-text">
+            Filter the data by Origin and Career in the colonies, Gender, or
+            Reset the visualization to its default state.
+            <button class="walkthrough-next" on:click={advanceWalkthrough}>
+              {walkthroughStep < walkthroughSteps - 1
+                ? "Next"
+                : "Start Exploring"}
+            </button>
+          </div>
+        {/if}
+
+        {#if walkthroughStep === 1}
+          <div class="explain-india"></div>
+          <div class="explain-india-text">
+            Select locations of interest by clicking on the circular markers on
+            the map as well as on the polygons representing different parts of
+            the British Empire.
+            <button class="walkthrough-next" on:click={advanceWalkthrough}>
+              {walkthroughStep < walkthroughSteps - 1
+                ? "Next"
+                : "Start Exploring"}
+            </button>
+          </div>
+        {/if}
+
+        {#if walkthroughStep === 2}
+          <div class="explain-timeline"></div>
+          <div class="explain-timeline-text">
+            Select time period of interest by moving the vertical black lines with years
+            above (currently selected peroid: 1625 - 1900).
+            <button class="walkthrough-next" on:click={advanceWalkthrough}>
+              {walkthroughStep < walkthroughSteps - 1
+                ? "Next"
+                : "Start Exploring"}
+            </button>
+          </div>
+        {/if}
+
+        {#if walkthroughStep === 3}
+          <div class="explain-details-top"></div>
+          <div class="explain-details-top-text">
+            Filter the data further by clicking on black rectangles that
+            indicate the number of people in different colleges, with different
+            degrees and in different carrers.
+            <button class="walkthrough-next" on:click={advanceWalkthrough}>
+              {walkthroughStep < walkthroughSteps - 1
+                ? "Next"
+                : "Start Exploring"}
+            </button>
+          </div>
+        {/if}
       </div>
     {/if}
   </div>
@@ -480,24 +540,133 @@
     z-index: 100;
   }
 
-  .remove-overlay {
-    color: black;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: none;
-    background-color: rgba(255, 255, 255, 0.8);
-    font-family: "Montserrat", sans-serif;
-    font-size: 20px;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
+  .explain-buttons {
+    position: absolute;
+    top: 5px;
+    left: 3px;
+    width: 160px;
+    height: 95px;
+    border: 3px solid white;
+    background-color: transparent;
+    border-radius: 4px;
+    pointer-events: none;
   }
 
-  .remove-overlay:hover {
-    cursor: pointer;
-    background-color: red;
+  .explain-buttons-text {
+    position: absolute;
+    top: 5px;
+    left: 175px;
     color: white;
+    font-size: 14px;
+    line-height: 1.6;
+    pointer-events: auto;
+    font-weight: 400;
+    padding: 5px;
+    border-radius: 4px;
+    width: 200px;
+    background-color: #003847cc;
+  }
+
+  .explain-timeline {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 65%;
+    height: 165px;
+    border: 3px solid white;
+    background-color: transparent;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .explain-timeline-text {
+    position: absolute;
+    bottom: 175px;
+    left: 5px;
+    color: white;
+    font-size: 14px;
+    line-height: 1.6;
+    pointer-events: auto;
+    font-weight: 400;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: #003847cc;
+    max-width: 400px;
+  }
+
+  .explain-india {
+    position: absolute;
+    top: 30%;
+    left: calc(46.5% - 90px);
+    width: 180px;
+    height: 180px;
+    border: 3px solid white;
+    background-color: transparent;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .explain-india-text {
+    position: absolute;
+    top: 30%;
+    left: calc(46.5% - 90px);
+    transform: translateX(calc(-100% - 4px));
+    color: white;
+    font-size: 14px;
+    line-height: 1.6;
+    pointer-events: auto;
+    font-weight: 400;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: #003847cc;
+    max-width: 360px;
+  }
+
+  .explain-details-top {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 35%;
+    height: 50%;
+    border: 3px solid white;
+    background-color: transparent;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .explain-details-top-text {
+    position: absolute;
+    top: 8%;
+    left: 65%;
+    transform: translateX(calc(-100% - 12px));
+    color: white;
+    font-size: 14px;
+    line-height: 1.6;
+    pointer-events: auto;
+    font-weight: 400;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: #003847cc;
+    max-width: 380px;
+  }
+
+  .walkthrough-next {
+    display: block;
+    margin-top: 6px;
+    margin-left: auto;
+    border: 1px solid rgb(125, 125, 125);
+    background-color: #003847;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: "Montserrat", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .walkthrough-next:hover {
+    background-color: #325d81;
   }
 
   main {

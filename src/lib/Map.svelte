@@ -1018,7 +1018,7 @@
     }
 
     :global(.mapboxgl-ctrl-top-left) {
-        top: 85px;
+        top: 95px;
     }
 
     :global(.mapboxgl-popup-content) {
