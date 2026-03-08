@@ -47,7 +47,7 @@
   let isOverlayVisible = true; // Controls the visibility of the overlay
   let selected_gender = "all";
   let walkthroughStep = 0;
-  const walkthroughSteps = 4;
+  const walkthroughSteps = 7;
 
   //load biographical data
   let path = ["./data/birth_colonies.json", "./data/floruit_colonies.json"];
@@ -397,7 +397,7 @@
   <div
     id="vis"
     bind:clientWidth={width}
-    style="height: calc(var(--vh, 1vh) * 100);"
+    style="height: calc(var(--vh, 1vh) * 100); overflow: hidden;"
   >
     {#if countries_json && shipping_json && current_data && births_per_colony && floruit_per_colony}
       <Map
@@ -455,7 +455,7 @@
       <button class="btn refresh" on:click={handle_refresh}
         >Reset <i class="fa fa-refresh"></i>
       </button>
-      <div id="time_description">Students Entering University</div>
+      <!-- <div id="time_description">Students Entering University</div> -->
       <!-- Navigation Menu -->
       <Timeline {current_data} {selected_country} {refresh} />
       <Details
@@ -469,10 +469,13 @@
     {#if isOverlayVisible}
       <div class="overlay">
         {#if walkthroughStep === 0}
-          <div class="explain-buttons"></div>
-          <div class="explain-buttons-text">
-            Filter the data by Origin and Career in the colonies, Gender, or
-            Reset the visualization to its default state.
+          <div class="explain-map-overview"></div>
+          <div class="explain-map-overview-text">
+            The map view shows locations in the colonies that are associated
+            with St Andrews students. The bigger the circle, the higher the
+            number of students associated with that part of the world. The
+            thickness of the black lines connecting the location to St Andrews
+            reflects the number of students who travelled that route.
             <button class="walkthrough-next" on:click={advanceWalkthrough}>
               {walkthroughStep < walkthroughSteps - 1
                 ? "Next"
@@ -482,11 +485,12 @@
         {/if}
 
         {#if walkthroughStep === 1}
-          <div class="explain-india"></div>
-          <div class="explain-india-text">
-            Select locations of interest by clicking on the circular markers on
-            the map as well as on the polygons representing different parts of
-            the British Empire.
+          <div class="explain-timeline-overview"></div>
+          <div class="explain-timeline-overview-text">
+            The timeline view shows the number of students (according to
+            user-selected criteria) entering the University of St Andrews in the
+            given year. The taller the black bar, the more students began their
+            studies (or other association) that year.
             <button class="walkthrough-next" on:click={advanceWalkthrough}>
               {walkthroughStep < walkthroughSteps - 1
                 ? "Next"
@@ -496,10 +500,20 @@
         {/if}
 
         {#if walkthroughStep === 2}
-          <div class="explain-timeline"></div>
-          <div class="explain-timeline-text">
-            Select time period of interest by moving the vertical black lines with years
-            above (currently selected peroid: 1625 - 1900).
+          <div class="explain-details-overview"></div>
+          <div class="explain-details-overview-text">
+            The top of the detail view shows connections between the St Andrews
+            college(s) attended by the student (if any), the degrees they
+            obtained (if any) and the field of work they subsequently went into
+            (if known). The width of the bars (and the corresponding number)
+            indicates the number of students in each group.
+            <br />
+            <br />
+            The bottom of the detail view displays a list of individuals – according
+            to the selected filters for chronology, geography, college affiliation,
+            degree outcome and professional career – with basic information about
+            them. Fuller information (with sources) is available via hyperlinks to
+            the online BRUSA
             <button class="walkthrough-next" on:click={advanceWalkthrough}>
               {walkthroughStep < walkthroughSteps - 1
                 ? "Next"
@@ -509,11 +523,50 @@
         {/if}
 
         {#if walkthroughStep === 3}
+          <div class="explain-buttons"></div>
+          <div class="explain-buttons-text">
+            Filter the data by origin and career in the colonies, gender, or
+            reset the visualization to its default state.
+            <button class="walkthrough-next" on:click={advanceWalkthrough}>
+              {walkthroughStep < walkthroughSteps - 1
+                ? "Next"
+                : "Start Exploring"}
+            </button>
+          </div>
+        {/if}
+
+        {#if walkthroughStep === 4}
+          <div class="explain-india"></div>
+          <div class="explain-india-text">
+            Select locations of interest by clicking on the circular markers on
+            the map or on the polygons representing different parts of the
+            British Empire.
+            <button class="walkthrough-next" on:click={advanceWalkthrough}>
+              {walkthroughStep < walkthroughSteps - 1
+                ? "Next"
+                : "Start Exploring"}
+            </button>
+          </div>
+        {/if}
+
+        {#if walkthroughStep === 5}
+          <div class="explain-timeline"></div>
+          <div class="explain-timeline-text">
+            Select time period of interest by moving the vertical lines with
+            years above (currently selected peroid: 1625 - 1900).
+            <button class="walkthrough-next" on:click={advanceWalkthrough}>
+              {walkthroughStep < walkthroughSteps - 1
+                ? "Next"
+                : "Start Exploring"}
+            </button>
+          </div>
+        {/if}
+
+        {#if walkthroughStep === 6}
           <div class="explain-details-top"></div>
           <div class="explain-details-top-text">
             Filter the data further by clicking on black rectangles that
-            indicate the number of people in different colleges, with different
-            degrees and in different carrers.
+            indicate the number of students in each group.
             <button class="walkthrough-next" on:click={advanceWalkthrough}>
               {walkthroughStep < walkthroughSteps - 1
                 ? "Next"
@@ -540,13 +593,95 @@
     z-index: 100;
   }
 
+  .explain-map-overview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 65%;
+    height: calc(100% - 170px);
+    border: 3px solid yellow;
+    background-color: transparent;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .explain-map-overview-text {
+    position: absolute;
+    top: 5px;
+    left: calc(65% + 10px);
+    color: white;
+    font-size: 14px;
+    line-height: 1.6;
+    pointer-events: auto;
+    font-weight: 400;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #003847;
+    max-width: 350px;
+  }
+
+  .explain-timeline-overview {
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    width: 65%;
+    height: 165px;
+    border: 3px solid yellow;
+    background-color: transparent;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .explain-timeline-overview-text {
+    position: absolute;
+    bottom: 175px;
+    left: 5px;
+    color: white;
+    font-size: 14px;
+    line-height: 1.6;
+    pointer-events: auto;
+    font-weight: 400;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #003847;
+    max-width: 400px;
+  }
+
+  .explain-details-overview {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 35%;
+    border: 3px solid yellow;
+    background-color: transparent;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .explain-details-overview-text {
+    position: absolute;
+    top: 5px;
+    left: calc(65% - 10px);
+    transform: translateX(-100%);
+    color: white;
+    font-size: 14px;
+    line-height: 1.6;
+    pointer-events: auto;
+    font-weight: 400;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #003847;
+    max-width: 350px;
+  }
+
   .explain-buttons {
     position: absolute;
     top: 5px;
     left: 3px;
     width: 160px;
     height: 95px;
-    border: 3px solid white;
+    border: 3px solid yellow;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -564,34 +699,7 @@
     padding: 5px;
     border-radius: 4px;
     width: 200px;
-    background-color: #003847cc;
-  }
-
-  .explain-timeline {
-    position: absolute;
-    bottom: 5px;
-    left: 0;
-    width: 65%;
-    height: 165px;
-    border: 3px solid white;
-    background-color: transparent;
-    border-radius: 4px;
-    pointer-events: none;
-  }
-
-  .explain-timeline-text {
-    position: absolute;
-    bottom: 175px;
-    left: 5px;
-    color: white;
-    font-size: 14px;
-    line-height: 1.6;
-    pointer-events: auto;
-    font-weight: 400;
-    padding: 5px;
-    border-radius: 4px;
-    background-color: #003847cc;
-    max-width: 400px;
+    background-color: #003847;
   }
 
   .explain-india {
@@ -600,7 +708,7 @@
     left: calc(46.5% - 90px);
     width: 180px;
     height: 180px;
-    border: 3px solid white;
+    border: 3px solid yellow;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -618,8 +726,35 @@
     font-weight: 400;
     padding: 5px;
     border-radius: 4px;
-    background-color: #003847cc;
+    background-color: #003847;
     max-width: 360px;
+  }
+
+  .explain-timeline {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 65%;
+    height: 165px;
+    border: 3px solid yellow;
+    background-color: transparent;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .explain-timeline-text {
+    position: absolute;
+    bottom: 180px;
+    left: 5px;
+    color: white;
+    font-size: 14px;
+    line-height: 1.6;
+    pointer-events: auto;
+    font-weight: 400;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: #003847;
+    max-width: 400px;
   }
 
   .explain-details-top {
@@ -628,7 +763,7 @@
     right: 0;
     width: 35%;
     height: 50%;
-    border: 3px solid white;
+    border: 3px solid yellow;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -636,7 +771,7 @@
 
   .explain-details-top-text {
     position: absolute;
-    top: 8%;
+    top: 5px;
     left: 65%;
     transform: translateX(calc(-100% - 12px));
     color: white;
@@ -646,7 +781,7 @@
     font-weight: 400;
     padding: 5px;
     border-radius: 4px;
-    background-color: #003847cc;
+    background-color: #003847;
     max-width: 380px;
   }
 
@@ -676,6 +811,8 @@
     font-optical-sizing: auto;
     font-weight: 300;
     font-style: normal;
+    height: 100%;
+    width: 100%;
   }
 
   #time_description {
