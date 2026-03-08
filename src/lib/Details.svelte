@@ -144,12 +144,8 @@
     // }
 
     //data for network
-    $: console.log(data);
-    
+    // $: console.log(data);
     $: node_link = constructNodesAndLinks(data);
-
-    $: console.log(node_link);
-    
 
     // sort by years of study
     function extractYear(entry) {
@@ -170,14 +166,14 @@
     // data for parallel
     $: if (data) {
         data.sort((a, b) => extractYear(a) - extractYear(b));
-        console.log(data);
+        // console.log(data);
         const withColony = data.filter(
             (person) => person.birth_location?.colony !== undefined,
         );
-        console.log(withColony);
+        // console.log(withColony);
 
         const idArray = withColony.map(obj => obj.id);
-        console.log(idArray);
+        // console.log(idArray);
         parallel_data = constructParallelData(data);
     }
 </script>

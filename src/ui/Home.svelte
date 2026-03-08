@@ -33,8 +33,8 @@
     <img id="uni_logo" src="uni_black.png" alt="St Andrews University Logo" />
     <h1>University of St Andrews in the Colonies</h1>
     <h3>
-        Exploring connections between St Andrews students and
-        the British Empire.
+        Exploring connections between St Andrews students and the British
+        Empire.
     </h3>
 </div>
 
@@ -44,7 +44,6 @@
         width: 100%;
         align-content: center;
         text-align: center;
-        /* background-color: #18181B; */
         background-color: white;
         padding-bottom: 40px;
     }
@@ -99,6 +98,6 @@
 
     #uni_logo {
         padding-top: 70px;
-        height: 80px;
+        height: 100px;
     }
 </style>

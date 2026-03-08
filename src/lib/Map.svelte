@@ -305,8 +305,7 @@
 
     //// INIT
     onMount(() => {
-        mapboxgl.accessToken =
-            "pk.eyJ1IjoidG9tYXN2YW5jaXNpbiIsImEiOiJjbTN1OXUzODUwZTEwMnFxdHd5NzA3cmNuIn0.vz2M0cTMfPvLAQ-wKMKbQA";
+        mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
         // Initialize the Mapbox map
         map = new mapboxgl.Map({
@@ -317,6 +316,11 @@
             projection: "naturalEarth",
             logoPosition: "top-right",
         });
+
+        map.addControl(
+            new mapboxgl.NavigationControl({ showCompass: false }),
+            "top-left",
+        );
 
         // add direction indicator
         markerElement = document.createElement("div");
@@ -1013,70 +1017,10 @@
         height: 100%;
     }
 
-    .toggle-container {
-        display: flex;
-        position: absolute;
-        top: 40px;
-        right: 10px;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px; /* Space between the toggle and the text */
-        font-family: Arial, sans-serif;
-        text-align: center;
+    :global(.mapboxgl-ctrl-top-left) {
+        top: 85px;
     }
 
-    .toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 50px;
-        height: 25px;
-    }
-
-    .toggle-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #7d7d7d;
-        transition: 0.4s;
-        border-radius: 25px;
-    }
-
-    .slider:before {
-        position: absolute;
-        content: "";
-        height: 21px;
-        width: 21px;
-        left: 2px;
-        bottom: 2px;
-        background-color: white;
-        transition: 0.4s;
-        border-radius: 50%;
-    }
-
-    input:checked + .slider {
-        background-color: #2196f3;
-    }
-
-    input:checked + .slider:before {
-        transform: translateX(25px);
-    }
-
-    .toggle-text {
-        margin: 0;
-        font-size: 12px;
-        font-family: "Montserrat";
-        font-weight: 400;
-        color: #ffffff;
-    }
     :global(.mapboxgl-popup-content) {
         padding: 5px;
     }

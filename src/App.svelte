@@ -443,9 +443,9 @@
         >
       </div>
       <button class="btn refresh" on:click={handle_refresh}
-        >Refresh <i class="fa fa-refresh"></i>
+        >Reset <i class="fa fa-refresh"></i>
       </button>
-      <!-- <div id="time_description">Students Entering University</div> -->
+      <div id="time_description">Students Entering University</div>
       <!-- Navigation Menu -->
       <Timeline {current_data} {selected_country} {refresh} />
       <Details
@@ -512,12 +512,14 @@
   #time_description {
     border-radius: 2px;
     position: absolute;
-    color: rgb(0, 0, 0);
+    color: rgb(99, 99, 99);
     left: 45px;
     bottom: 120px;
-    font-weight: 400;
-    font-size: 14px;
+    font-weight: 500;
+    font-size: 12px;
     padding: 5px;
+    z-index: 80;
+    pointer-events: none;
   }
 
   #buttons {
@@ -543,12 +545,15 @@
     cursor: pointer;
     font-family: "Montserrat";
     font-weight: 450;
-    transition: border 0.3s ease;
+    transition:
+      border 0.3s ease,
+      transform 0.15s ease;
   }
 
-  /* .btn.refresh:hover {
-    color: white;
-  } */
+  .btn.refresh:hover {
+    background-color: #325d81;
+    transform: translateY(-1px);
+  }
 
   #gender {
     z-index: 80;
@@ -568,6 +573,11 @@
     font-weight: 450;
     font-size: 14px;
     cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  #gender button:hover {
+    transform: translateY(-1px);
   }
 
   #birth,
@@ -584,8 +594,15 @@
     text-decoration: none;
     display: inline-block;
     margin: 0px;
-    transition: box-shadow 0.2s ease-in-out; /* Smooth transition */
+    transition:
+      box-shadow 0.2s ease-in-out,
+      transform 0.15s ease;
     cursor: pointer;
+  }
+
+  #birth:hover,
+  #floruit:hover {
+    transform: translateY(-1px);
   }
 
   /* Button background colors */
