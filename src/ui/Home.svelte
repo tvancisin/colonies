@@ -36,6 +36,19 @@
         Exploring connections between St Andrews students and the British
         Empire.
     </h3>
+    <h4>
+        <a
+            href="https://tomasvancisin.co.uk/"
+            target="_blank"
+            style="color: black;">Tomas Vancisin</a
+        >
+        (University of Edinburgh),
+        <a
+            href="https://www.st-andrews.ac.uk/history/people/akf/"
+            target="_blank"
+            style="color: black;">Aileen Fyfe</a
+        >, (University of St Andrews)
+    </h4>
 </div>
 
 <style>

@@ -18,7 +18,7 @@
     export let selected_country;
     export let refresh;
 
-    let selected_years = [1625, 1925];
+    let selected_years = [1700, 1925];
     let selected_career;
     let selected_degree;
     let selected_college;
@@ -28,8 +28,7 @@
     let containerWidth = 800;
     let margin = { top: 20, right: 30, bottom: 20, left: 40 };
     let svg;
-    let x_ticks = [
-        1625, 1650, 1675, 1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900,
+    let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900,
     ];
     let y_ticks = [5, 15];
     let y_ticks_top = [5, 15];
@@ -39,7 +38,7 @@
         selectedYearStart = null,
         selectedYearEnd = null;
     //create array with all years. some may be empty
-    let allYears = Array.from({ length: 1900 - 1625 + 1 }, (_, i) => 1625 + i);
+    let allYears = Array.from({ length: 1900 - 1700 + 1 }, (_, i) => 1700 + i);
 
     // assign clicked country data to data_to_draw
     $: if (current_data) {

@@ -471,11 +471,12 @@
         {#if walkthroughStep === 0}
           <div class="explain-map-overview"></div>
           <div class="explain-map-overview-text">
-            The map view shows locations in the colonies that are associated
-            with St Andrews students. The bigger the circle, the higher the
-            number of students associated with that part of the world. The
-            thickness of the black lines connecting the location to St Andrews
-            reflects the number of students who travelled that route.
+            The <strong>map view</strong> shows locations in the colonies that
+            are associated with St Andrews students. The bigger the circle, the
+            higher the number of students associated with that part of the
+            world. The black shading represents the extent of the formal British
+            Empire. The thickness of the black lines connecting the location to
+            St Andrews reflects the number of students who travelled that route.
             <button class="walkthrough-next" on:click={advanceWalkthrough}>
               {walkthroughStep < walkthroughSteps - 1
                 ? "Next"
@@ -487,10 +488,10 @@
         {#if walkthroughStep === 1}
           <div class="explain-timeline-overview"></div>
           <div class="explain-timeline-overview-text">
-            The timeline view shows the number of students (according to
-            user-selected criteria) entering the University of St Andrews in the
-            given year. The taller the black bar, the more students began their
-            studies (or other association) that year.
+            The <strong>timeline view</strong> shows the number of students
+            (according to user-selected criteria) entering the University of St
+            Andrews in the given year. The taller the black bar, the more
+            students began their studies (or other association) that year.
             <button class="walkthrough-next" on:click={advanceWalkthrough}>
               {walkthroughStep < walkthroughSteps - 1
                 ? "Next"
@@ -502,18 +503,19 @@
         {#if walkthroughStep === 2}
           <div class="explain-details-overview"></div>
           <div class="explain-details-overview-text">
-            The top of the detail view shows connections between the St Andrews
-            college(s) attended by the student (if any), the degrees they
-            obtained (if any) and the field of work they subsequently went into
-            (if known). The width of the bars (and the corresponding number)
-            indicates the number of students in each group.
+            The top of the <strong>detail view</strong> shows connections
+            between the St Andrews college(s) attended by the student (if any),
+            the degrees they obtained (if any) and the field of work they
+            subsequently went into (if known). The width of the bars (and the
+            corresponding number) indicates the number of students in each
+            group.
             <br />
             <br />
-            The bottom of the detail view displays a list of individuals – according
-            to the selected filters for chronology, geography, college affiliation,
-            degree outcome and professional career – with basic information about
-            them. Fuller information (with sources) is available via hyperlinks to
-            the online BRUSA
+            The bottom of the <strong>detail view</strong> displays a list of
+            individuals – according to the selected filters for chronology,
+            geography, college affiliation, degree outcome and professional
+            career – with basic information about them. Fuller information (with
+            sources) is available via hyperlinks to the online BRUSA
             <button class="walkthrough-next" on:click={advanceWalkthrough}>
               {walkthroughStep < walkthroughSteps - 1
                 ? "Next"
@@ -553,7 +555,7 @@
           <div class="explain-timeline"></div>
           <div class="explain-timeline-text">
             Select time period of interest by moving the vertical lines with
-            years above (currently selected peroid: 1625 - 1900).
+            years above (currently selected period: 1700 - 1900).
             <button class="walkthrough-next" on:click={advanceWalkthrough}>
               {walkthroughStep < walkthroughSteps - 1
                 ? "Next"
@@ -599,7 +601,7 @@
     left: 0;
     width: 65%;
     height: calc(100% - 170px);
-    border: 3px solid yellow;
+    border: 3px solid white;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -626,7 +628,7 @@
     left: 0;
     width: 65%;
     height: 165px;
-    border: 3px solid yellow;
+    border: 3px solid white;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -653,7 +655,7 @@
     bottom: 0;
     right: 0;
     width: 35%;
-    border: 3px solid yellow;
+    border: 3px solid white;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -681,7 +683,7 @@
     left: 3px;
     width: 160px;
     height: 95px;
-    border: 3px solid yellow;
+    border: 3px solid white;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -708,7 +710,7 @@
     left: calc(46.5% - 90px);
     width: 180px;
     height: 180px;
-    border: 3px solid yellow;
+    border: 3px solid white;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -736,7 +738,7 @@
     left: 0;
     width: 65%;
     height: 165px;
-    border: 3px solid yellow;
+    border: 3px solid white;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -763,7 +765,7 @@
     right: 0;
     width: 35%;
     height: 50%;
-    border: 3px solid yellow;
+    border: 3px solid white;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
