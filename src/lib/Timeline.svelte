@@ -18,6 +18,8 @@
     export let selected_country;
     export let refresh;
 
+    $: console.log(selected_country);
+
     let selected_years = [1700, 1925];
     let selected_career;
     let selected_degree;
@@ -28,8 +30,7 @@
     let containerWidth = 800;
     let margin = { top: 20, right: 30, bottom: 20, left: 40 };
     let svg;
-    let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900,
-    ];
+    let x_ticks = [1700, 1725, 1750, 1775, 1800, 1825, 1850, 1875, 1900];
     let y_ticks = [5, 15];
     let y_ticks_top = [5, 15];
     let y_ticks_all = [200, 400, 600];
@@ -135,27 +136,12 @@
         groupedDataMap.get(year) || 0,
     ]); // Default value is 0 if year is not found
 
-    // Reactive block to update width when selected_country changes
-    $: {
-        if (selected_country) {
-            // width = containerWidth - innerWidth * 0.4;
-            // d3.selectAll("#timeline, #year_detail")
-            //     .style("width", "100%")
-            //     .style("left", "0%");
-        } else {
-            width = containerWidth; // Full width when selected_country is null
-            d3.selectAll("#timeline, #year_detail")
-                .style("width", "65%")
-                .style("left", "0%");
-        }
-    }
-
     //SCALES FOR TIMELINE
     // Create the X scale for the years (horizontal axis)
     $: xScale = d3
         .scaleBand()
         .domain(allYears) // Use all years
-        .range([margin.left, width - margin.right])
+        .range([margin.left, containerWidth - margin.right])
         .padding(0.2);
 
     let yMax = 20;
@@ -185,7 +171,7 @@
         .handleSize(10)
         .extent([
             [margin.left, margin.top],
-            [width - margin.right, height - margin.bottom],
+            [containerWidth - margin.right, height - margin.bottom],
         ])
         .on("start brush end", brushed);
 
@@ -268,7 +254,7 @@
             d3.select(svg)
                 .select(".brush")
                 .call(brush)
-                .call(brush.move, [margin.left, width - margin.right]);
+                .call(brush.move, [margin.left, containerWidth - margin.right]);
         }
     }
 
@@ -337,7 +323,8 @@
         if (svg && brush) {
             d3.select(svg)
                 .select(".brush")
-                .call(brush.move, [margin.left, width - margin.right]);
+                .call(brush.move, [margin.left, containerWidth - margin.right]);
+
         }
     }
 
@@ -481,7 +468,7 @@
 </button>
 
 <div id="timeline" bind:clientWidth={containerWidth} bind:clientHeight={height}>
-    <svg {width} {height} bind:this={svg}>
+    <svg width={containerWidth} {height} bind:this={svg}>
         <g
             bind:this={x_axis_grp}
             transform={`translate(0, ${height - margin.bottom})`}
@@ -604,7 +591,12 @@
         bottom: 5px;
         width: 65%;
         height: 165px;
-        /* background-color: rgba(255, 255, 255, 0.786); */
+    }
+
+    @media (max-width: 768px) {
+        #timeline {
+            width: 100%;
+        }
     }
 
     :global(.brush .selection) {

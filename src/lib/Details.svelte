@@ -34,6 +34,16 @@
     let selectedCareer;
     let selectedDegree;
     let selectedCollege;
+    export let forceVisible = false;
+    export let forceHidden = false;
+
+    let innerWidth = 0;
+    let isMobile = false;
+    let isDetailsVisible = true;
+    let wasMobile = false;
+
+    $: if (isMobile && forceVisible) isDetailsVisible = true;
+    $: if (isMobile && forceHidden) isDetailsVisible = false;
 
     // selected years from store
     const unsubscribe = selectedYearsStore.subscribe((value) => {
@@ -51,6 +61,13 @@
     const college_unsubscribe = selectedCollegeStore.subscribe((value) => {
         selectedCollege = value;
     });
+
+    $: isMobile = innerWidth <= 768;
+
+    $: if (isMobile !== wasMobile) {
+        isDetailsVisible = !isMobile;
+        wasMobile = isMobile;
+    }
 
     //// COLONY FILTER
     $: if (selected_country != null) {
@@ -172,18 +189,39 @@
         );
         // console.log(withColony);
 
-        const idArray = withColony.map(obj => obj.id);
+        const idArray = withColony.map((obj) => obj.id);
         // console.log(idArray);
         parallel_data = constructParallelData(data);
     }
 </script>
 
+<svelte:window bind:innerWidth />
+
+{#if isMobile && !isDetailsVisible}
+    <button
+        id="details_toggle_button"
+        on:click={() => (isDetailsVisible = true)}
+    >
+        Details
+    </button>
+{/if}
+
 <div
     id="details"
+    class:mobile-visible={isMobile && isDetailsVisible}
+    class:mobile-hidden={isMobile && !isDetailsVisible}
     bind:clientWidth={details_width}
     bind:clientHeight={details_height}
 >
-    <div id="peace_title_div">
+    <div id="title_div">
+        {#if isMobile}
+            <button
+                id="details_close_button"
+                on:click={() => (isDetailsVisible = false)}
+            >
+                Close
+            </button>
+        {/if}
         {#if selected_country == "America"}
             <h3>North America</h3>
         {:else if selected_country == "India"}
@@ -325,6 +363,7 @@
     #details {
         color: black;
         position: absolute;
+        top: 0px;
         right: 0px;
         bottom: 0px;
         width: 35%;
@@ -340,9 +379,77 @@
         font-style: normal;
         display: flex;
         flex-direction: column;
-        z-index: 11;
+        z-index: 100;
         box-shadow: -2px 0 8px -4px #000000;
     }
+
+    #details_toggle_button {
+        display: none;
+    }
+
+    #details_close_button {
+        display: none;
+    }
+
+    #details_toggle_button:hover {
+        background-color: #325d81;
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 768px) {
+        #details_toggle_button {
+            display: block;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 20;
+            border: 1px solid black;
+            border-radius: 2px;
+            background-color: #4682b4;
+            color: white;
+            font-family: "Montserrat", sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+        #details_close_button {
+            display: inline-block;
+            position: absolute;
+            right: 6px;
+            z-index: 12;
+            border: 1px solid rgb(66, 66, 66);
+            border-radius: 2px;
+            background-color: white;
+            color: black;
+            font-family: "Montserrat", sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 2px 8px;
+            cursor: pointer;
+        }
+
+        #details {
+            width: 100%;
+            height: 100%;
+            right: 0;
+            top: auto;
+            bottom: 0;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        #details.mobile-visible {
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        #details.mobile-hidden {
+            pointer-events: none;
+        }
+    }
+
     hr {
         width: 80%;
         color: rgb(66, 66, 66);
@@ -354,14 +461,8 @@
         font-weight: 600;
         color: #000000;
     }
-    @media (max-width: 768px) {
-        #details {
-            width: 100%;
-            height: 50%;
-        }
-    }
 
-    #peace_title_div {
+    #title_div {
         text-align: center;
         position: relative;
         margin: 1px;
@@ -393,9 +494,9 @@
         }
     }
 
-    #peace_title_div {
+    #title_div {
         display: flex;
-        align-items: stretch;
+        align-items: center;
     }
 
     #peace_content {
@@ -470,7 +571,7 @@
         font-weight: 300;
     }
 
-    #peace_title_div {
+    #title_div {
         text-align: center;
         position: relative;
         margin: 2px;

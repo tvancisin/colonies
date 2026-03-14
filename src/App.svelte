@@ -464,6 +464,8 @@
         {floruit_per_colony}
         {selected_country}
         {current_data_string}
+        forceVisible={walkthroughStep === 2 || walkthroughStep === 6}
+        forceHidden={walkthroughStep === 3 || !isOverlayVisible}
       />
     {/if}
     {#if isOverlayVisible}
@@ -504,18 +506,17 @@
           <div class="explain-details-overview"></div>
           <div class="explain-details-overview-text">
             The top of the <strong>detail view</strong> shows connections
-            between the St Andrews college(s) attended by the student (if any),
-            the degrees they obtained (if any) and the field of work they
-            subsequently went into (if known). The width of the bars (and the
-            corresponding number) indicates the number of students in each
-            group.
+            between the St Andrews college(s) attended by the student, the
+            degrees they obtained and the field of work they subsequently went
+            into. The width of the bars (and the corresponding number) indicates
+            the number of students in each group.
             <br />
             <br />
             The bottom of the <strong>detail view</strong> displays a list of
             individuals – according to the selected filters for chronology,
-            geography, college affiliation, degree outcome and professional
-            career – with basic information about them. Fuller information (with
-            sources) is available via hyperlinks to the online BRUSA
+            geography, college affiliation, degree outcome and career – with
+            basic information about them. Fuller information is available via
+            hyperlinks to the online BRUSA
             <button class="walkthrough-next" on:click={advanceWalkthrough}>
               {walkthroughStep < walkthroughSteps - 1
                 ? "Next"
@@ -602,6 +603,7 @@
     width: 65%;
     height: calc(100% - 170px);
     border: 3px solid white;
+    box-sizing: border-box;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -622,13 +624,31 @@
     max-width: 350px;
   }
 
+  @media (max-width: 768px) {
+    .explain-map-overview {
+      left: 3px;
+      right: 3px;
+      width: auto;
+      height: calc(100% - 220px);
+    }
+
+    .explain-map-overview-text {
+      top: calc(100% - 215px);
+      font-size: 12px;
+      left: 5px;
+      right: 5px;
+      max-width: none;
+    }
+  }
+
   .explain-timeline-overview {
     position: absolute;
     bottom: 0px;
     left: 0;
     width: 65%;
-    height: 165px;
+    height: 170px;
     border: 3px solid white;
+    box-sizing: border-box;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -649,6 +669,21 @@
     max-width: 400px;
   }
 
+  @media (max-width: 768px) {
+    .explain-timeline-overview {
+      left: 3px;
+      right: 3px;
+      width: auto;
+    }
+
+    .explain-timeline-overview-text {
+      left: 5px;
+      right: 5px;
+      font-size: 12px;
+      max-width: none;
+    }
+  }
+
   .explain-details-overview {
     position: absolute;
     top: 0;
@@ -656,6 +691,7 @@
     right: 0;
     width: 35%;
     border: 3px solid white;
+    box-sizing: border-box;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -675,6 +711,27 @@
     border-radius: 4px;
     background-color: #003847;
     max-width: 350px;
+  }
+
+  @media (max-width: 768px) {
+    .explain-details-overview {
+      top: auto;
+      bottom: 0;
+      left: 3px;
+      right: 3px;
+      width: auto;
+      height: 100%;
+    }
+
+    .explain-details-overview-text {
+      top: auto;
+      bottom: 5px;
+      left: 5px;
+      right: 5px;
+      font-size: 12px;
+      transform: none;
+      max-width: none;
+    }
   }
 
   .explain-buttons {
@@ -702,6 +759,13 @@
     border-radius: 4px;
     width: 200px;
     background-color: #003847;
+  }
+
+  @media (max-width: 768px) {
+    .explain-buttons-text{
+      font-size: 12px
+
+    }
   }
 
   .explain-india {
@@ -732,6 +796,22 @@
     max-width: 360px;
   }
 
+  @media (max-width: 768px) {
+    .explain-india-text {
+      top: auto;
+      bottom: calc(70% + 4px);
+      left: 5px;
+      right: 5px;
+      font-size: 12px;
+      transform: none;
+      max-width: none;
+    }
+
+    .explain-india{
+      height:240px
+    }
+  }
+
   .explain-timeline {
     position: absolute;
     bottom: 5px;
@@ -739,6 +819,7 @@
     width: 65%;
     height: 165px;
     border: 3px solid white;
+    box-sizing: border-box;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -759,6 +840,21 @@
     max-width: 400px;
   }
 
+  @media (max-width: 768px) {
+    .explain-timeline {
+      left: 3px;
+      right: 3px;
+      width: auto;
+    }
+
+    .explain-timeline-text {
+      left: 5px;
+      right: 5px;
+      max-width: none;
+      font-size: 12px;
+    }
+  }
+
   .explain-details-top {
     position: absolute;
     top: 0;
@@ -766,6 +862,7 @@
     width: 35%;
     height: 50%;
     border: 3px solid white;
+    box-sizing: border-box;
     background-color: transparent;
     border-radius: 4px;
     pointer-events: none;
@@ -785,6 +882,23 @@
     border-radius: 4px;
     background-color: #003847;
     max-width: 380px;
+  }
+
+  @media (max-width: 768px) {
+    .explain-details-top {
+      left: 3px;
+      right: 3px;
+      width: auto;
+    }
+
+    .explain-details-top-text {
+      top: calc(50% + 5px);
+      left: 5px;
+      right: 5px;
+      transform: none;
+      max-width: none;
+      font-size:12px;
+    }
   }
 
   .walkthrough-next {

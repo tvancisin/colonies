@@ -273,7 +273,12 @@
 
     //// ZOOM ADJUSTMENT
     function adjustMapForWindowSize() {
-        if (window.innerWidth <= 1000) {
+        if (window.innerWidth <= 600) {
+            map.flyTo({
+                center: [20, 5],
+                zoom: 0,
+            });
+        } else if (window.innerWidth <= 1000) {
             map.flyTo({
                 center: [20, 5],
                 zoom: 0.8,
@@ -1008,7 +1013,6 @@
     @media (max-width: 768px) {
         .map-container {
             width: 100%;
-            height: 50%;
         }
     }
 
